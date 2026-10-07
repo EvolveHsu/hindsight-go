@@ -1,0 +1,10 @@
+.env.local
+e2e_output.txt
+bin/
+deploy/runtime/
+tools/out/
+*.exe
+*.test
+.env
+.env.*
+!.env.example

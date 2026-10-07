@@ -1,0 +1,40 @@
+services:
+  hindsight-embedding:
+    image: ghcr.io/huggingface/text-embeddings-inference:cpu-1.8.3
+    container_name: hindsight-embedding
+    command:
+      - --model-id
+      - BAAI/bge-small-en-v1.5
+      - --port
+      - "80"
+    volumes:
+      - ./data/tei:/data
+    networks:
+      - ${HINDSIGHT_LLM_NETWORK:-hindsight-go-llm}
+    restart: unless-stopped
+
+  hindsight-go:
+    container_name: hindsight-go
+    build: .
+    ports:
+      - "8890:8890"
+    environment:
+      - HINDSIGHT_GO_UPSTREAM_SCHEMA=1
+      - HINDSIGHT_GO_DATABASE_URL=${HINDSIGHT_GO_DATABASE_URL}
+      - HINDSIGHT_GO_LLM_BASE_URL=${HINDSIGHT_GO_LLM_BASE_URL}
+      - HINDSIGHT_GO_LLM_API_KEY=${HINDSIGHT_GO_LLM_API_KEY}
+      - HINDSIGHT_GO_LLM_MODEL=${HINDSIGHT_GO_LLM_MODEL}
+      - HINDSIGHT_GO_EMBEDDINGS_BASE_URL=http://hindsight-embedding:80/v1
+      - HINDSIGHT_GO_EMBEDDINGS_MODEL=BAAI/bge-small-en-v1.5
+      - HINDSIGHT_GO_EMBEDDINGS_DIMENSIONS=384
+      - HINDSIGHT_GO_EMBEDDINGS_BATCH_SIZE=64
+    depends_on:
+      - hindsight-embedding
+    networks:
+      - ${HINDSIGHT_LLM_NETWORK:-hindsight-go-llm}
+    restart: unless-stopped
+
+networks:
+  default:
+    name: ${HINDSIGHT_LLM_NETWORK:-hindsight-go-llm}
+    external: true

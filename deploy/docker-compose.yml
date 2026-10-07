@@ -1,0 +1,94 @@
+name: hindsight-go
+
+services:
+  hindsight-postgres:
+    image: pgvector/pgvector:pg18
+    container_name: hindsight-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: hindsight
+      POSTGRES_PASSWORD: ${HINDSIGHT_DB_PASSWORD}
+      POSTGRES_DB: hindsight
+      PGDATA: /var/lib/postgresql/data
+    volumes:
+      - ./data/pg:/var/lib/postgresql/data
+    networks:
+      - hindsight-internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hindsight -d hindsight"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  hindsight-embedding:
+    image: ghcr.io/huggingface/text-embeddings-inference:cpu-1.8.3
+    container_name: hindsight-embedding
+    restart: unless-stopped
+    command:
+      - --model-id
+      - BAAI/bge-small-en-v1.5
+      - --port
+      - "80"
+    volumes:
+      - ./data/tei:/data
+    networks:
+      - hindsight-internal
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 180s
+
+  hindsight-go:
+    build:
+      context: .
+      dockerfile: Dockerfile.runtime
+    image: hindsight-go:local
+    container_name: hindsight-go
+    restart: unless-stopped
+    ports:
+      - "${HINDSIGHT_GO_PORT:-8890}:8890"
+    environment:
+      HINDSIGHT_GO_UPSTREAM_SCHEMA: "1"
+      HINDSIGHT_GO_DATABASE_URL: postgres://hindsight:${HINDSIGHT_DB_PASSWORD}@hindsight-postgres:5432/hindsight?sslmode=disable
+      HINDSIGHT_GO_LLM_BASE_URL: ${HINDSIGHT_GO_LLM_BASE_URL}
+      HINDSIGHT_GO_LLM_API_KEY: ${HINDSIGHT_GO_LLM_API_KEY}
+      HINDSIGHT_GO_LLM_MODEL: ${HINDSIGHT_GO_LLM_MODEL}
+      HINDSIGHT_GO_EMBEDDINGS_BASE_URL: http://hindsight-embedding:80/v1
+      HINDSIGHT_GO_EMBEDDINGS_MODEL: BAAI/bge-small-en-v1.5
+      HINDSIGHT_GO_EMBEDDINGS_DIMENSIONS: "384"
+      HINDSIGHT_GO_EMBEDDINGS_BATCH_SIZE: "64"
+      HINDSIGHT_GO_FILE_ROOT: /data/files
+    depends_on:
+      hindsight-postgres:
+        condition: service_healthy
+      hindsight-embedding:
+        condition: service_healthy
+    volumes:
+      - ./data/files:/data/files
+    networks:
+      - hindsight-internal
+      - hindsight-llm
+
+  hindsight-control-plane:
+    image: ghcr.io/vectorize-io/hindsight-control-plane:0.10.2
+    container_name: hindsight-control-plane
+    restart: unless-stopped
+    ports:
+      - "${HINDSIGHT_CP_PORT:-9999}:9999"
+    environment:
+      PORT: "9999"
+      HOSTNAME: "0.0.0.0"
+      HINDSIGHT_CP_DATAPLANE_API_URL: http://hindsight-go:8890
+    depends_on:
+      - hindsight-go
+    networks:
+      - hindsight-internal
+
+networks:
+  hindsight-internal:
+    name: hindsight-go-internal
+  hindsight-llm:
+    name: ${HINDSIGHT_LLM_NETWORK:-hindsight-go-llm}

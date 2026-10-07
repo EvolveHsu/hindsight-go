@@ -1,0 +1,5 @@
+FROM alpine:3.20
+RUN apk add --no-cache ca-certificates
+COPY runtime/hindsight-go /bin/hindsight-go
+EXPOSE 8890
+ENTRYPOINT ["/bin/hindsight-go"]

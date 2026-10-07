@@ -1,0 +1,7 @@
+generator:
+  ignore_not_implemented: ["object defaults"]
+  # The Hindsight spec contains one recursive union (TagGroup) and one
+  # string-or-array union (Content) that ogen cannot express. openapi.go.json is
+  # produced by scripts/prepare.ps1 via normalize2.py, which collapses those to
+  # codegen-friendly shapes. Anything else that ogen cannot implement should
+  # surface as an error, not be silently skipped.
