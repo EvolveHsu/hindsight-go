@@ -100,12 +100,12 @@ P0 - 立即修（影响正确性）【2026-10-16 已完成并部署 NAS】
 - [x] retain 不跨文档合并无 document_id 的 item（已有实现，代码审查确认）
 - [ ] 503 + Retry-After 代替 500（低风险，后续迭代）
 
-P1 - 稳定性
+P1 - 稳定性【2026-10-17 已完成并部署 NAS】
 
-- retain 客户端断开取消
-- chunked retain 子批取消
-- consolidation 单响应事务化
-- recall 链接去重保留最强
+- [x] retain 客户端断开取消（两个存储后端 retain 循环加 ctx.Err() 检查）
+- [x] chunked retain 子批取消（同一守卫覆盖，每个文档迭代前检查）
+- [x] consolidation 单响应事务化（审查确认已有实现）
+- [x] recall 链接去重保留最强（审查确认 FuseArms 已按 Unit.ID 去重）
 
 P2 - 新功能
 

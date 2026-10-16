@@ -140,6 +140,9 @@ func (s *Store) Retain(ctx context.Context, bankID string, items []model.RetainI
 
 	usage := 0
 	for _, docID := range order {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
 		idxs := groups[docID]
 		its := make([]model.RetainItem, len(idxs))
 		docVectors := make([][]float32, len(idxs))

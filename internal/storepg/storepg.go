@@ -310,6 +310,9 @@ func (s *Store) Retain(ctx context.Context, bankID string, items []model.RetainI
 	}
 
 	for _, docID := range order {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
 		its := groups[docID]
 		var b strings.Builder
 		for _, it := range its {
