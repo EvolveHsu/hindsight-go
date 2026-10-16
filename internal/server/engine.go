@@ -199,7 +199,14 @@ func (e *Engine) RecallMemories(ctx context.Context, req *api.RecallRequest, par
 		return nil, notFound("bank %q does not exist", params.BankID)
 	}
 
-	opt := model.RecallOptions{Query: req.Query}
+	query := req.Query
+	// Upstream cuts an over-cap query rather than rejecting the request; match
+	// that behaviour so a very long recall still returns results.
+	if n := model.TokenCount(query); n > 512 {
+		words := strings.Fields(query)
+		query = strings.Join(words[:512], " ")
+	}
+	opt := model.RecallOptions{Query: query}
 	if req.Budget.Set {
 		switch req.Budget.Value {
 		case api.BudgetLow:

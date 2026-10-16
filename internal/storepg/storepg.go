@@ -432,6 +432,17 @@ func (s *Store) Retain(ctx context.Context, bankID string, items []model.RetainI
 	return res, nil
 }
 
+// truncateQuery keeps recall queries inside the embedding model's input window;
+// upstream cuts an over-cap query rather than rejecting the request.
+func truncateQuery(q string) string {
+	const maxRunes = 2048
+	runes := []rune(q)
+	if len(runes) <= maxRunes {
+		return q
+	}
+	return string(runes[:maxRunes])
+}
+
 func (s *Store) Recall(ctx context.Context, bankID string, opt model.RecallOptions) ([]model.RecallHit, error) {
 	if b, err := s.GetBank(ctx, bankID); err != nil {
 		return nil, err
@@ -459,7 +470,7 @@ func (s *Store) Recall(ctx context.Context, bankID string, opt model.RecallOptio
 
 	var queryVector []float32
 	if s.embedder != nil {
-		vectors, err := s.embedder.Embed(ctx, []string{opt.Query}, embeddings.InputQuery)
+		vectors, err := s.embedder.Embed(ctx, []string{truncateQuery(opt.Query)}, embeddings.InputQuery)
 		if err != nil {
 			return nil, fmt.Errorf("embed recall query: %w", err)
 		}

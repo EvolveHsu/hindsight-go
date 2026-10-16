@@ -46,18 +46,17 @@ func applyRecallRequestFilters(hits []model.RecallHit, req *api.RecallRequest) (
 		}
 	}
 	if req.MinScores.Set {
+		if req.MinScores.Value.Reranker.Set {
+			return nil, badRequest("min_scores.reranker is not supported: this build has no reranker, so no reranker score is ever published")
+		}
 		finalFloor := 0.0
-		rerankFloor := 0.0
 		if req.MinScores.Value.Final.Set {
 			finalFloor = req.MinScores.Value.Final.Value
 		}
-		if req.MinScores.Value.Reranker.Set {
-			rerankFloor = req.MinScores.Value.Reranker.Value
-		}
-		if finalFloor > 0 || rerankFloor > 0 {
+		if finalFloor > 0 {
 			filtered := hits[:0]
 			for _, hit := range hits {
-				if hit.FusedScore < finalFloor || hit.FusedScore < rerankFloor {
+				if hit.FusedScore < finalFloor {
 					continue
 				}
 				filtered = append(filtered, hit)

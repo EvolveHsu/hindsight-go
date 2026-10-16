@@ -213,13 +213,24 @@ func (s *Store) DeleteDocument(ctx context.Context, bankID, docID string) (bool,
 }
 
 // Recall runs the two lite arms and fuses them with RRF.
+// truncateQuery keeps recall queries inside the embedding model's input window;
+// upstream cuts an over-cap query rather than rejecting the request.
+func truncateQuery(q string) string {
+	const maxRunes = 2048
+	runes := []rune(q)
+	if len(runes) <= maxRunes {
+		return q
+	}
+	return string(runes[:maxRunes])
+}
+
 func (s *Store) Recall(ctx context.Context, bankID string, opt model.RecallOptions) ([]model.RecallHit, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
 	var queryVector []float32
 	if s.embedder != nil {
-		vectors, err := s.embedder.Embed(ctx, []string{opt.Query}, embeddings.InputQuery)
+		vectors, err := s.embedder.Embed(ctx, []string{truncateQuery(opt.Query)}, embeddings.InputQuery)
 		if err != nil {
 			return nil, err
 		}

@@ -92,13 +92,13 @@
 
 按风险从低到高排序：
 
-P0 - 立即修（影响正确性）
+P0 - 立即修（影响正确性）【2026-10-16 已完成并部署 NAS】
 
-- retain 不跨文档合并无 document_id 的 item
-- recall query 超长裁剪而非 400
-- recall min_scores.reranker 明确拒绝
-- bank 不存在删除返回 200/no-op
-- 503 + Retry-After 代替 500
+- [x] recall query 超长裁剪而非 400（ embedding 层 2048 rune 截断 + RecallOptions 512 token 裁剪）
+- [x] recall min_scores.reranker 明确拒绝 400
+- [x] bank 不存在删除返回 200/no-op（已有实现，实测确认）
+- [x] retain 不跨文档合并无 document_id 的 item（已有实现，代码审查确认）
+- [ ] 503 + Retry-After 代替 500（低风险，后续迭代）
 
 P1 - 稳定性
 
