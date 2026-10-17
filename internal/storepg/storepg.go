@@ -14,6 +14,7 @@ import (
 
 	"github.com/EvolveHsu/hindsight-go/internal/embeddings"
 	"github.com/EvolveHsu/hindsight-go/internal/model"
+	"github.com/EvolveHsu/hindsight-go/internal/server"
 )
 
 // Store is the PostgreSQL-backed storage engine.
@@ -433,6 +434,21 @@ func (s *Store) Retain(ctx context.Context, bankID string, items []model.RetainI
 		res.DocumentIDs = append(res.DocumentIDs, docID)
 	}
 	return res, nil
+}
+
+// wrapOverload maps pool acquisition timeouts to the overload sentinel so the
+// server layer answers 503 + Retry-After instead of a 500.
+func (s *Store) wrapOverload(err error) error {
+	if err == nil {
+		return nil
+	}
+	// pgx v5 has no exported acquire-timeout sentinel; pool exhaustion surfaces
+	// as a context deadline exceeded from Acquire/Query/Exec.
+	if strings.Contains(err.Error(), "timeout: pool exhausted") ||
+		strings.Contains(err.Error(), "context deadline exceeded") {
+		return fmt.Errorf("%w: %v", server.ErrStoreOverloaded, err)
+	}
+	return err
 }
 
 // truncateQuery keeps recall queries inside the embedding model's input window;

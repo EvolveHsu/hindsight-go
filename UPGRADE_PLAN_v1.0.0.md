@@ -98,7 +98,7 @@ P0 - 立即修（影响正确性）【2026-10-16 已完成并部署 NAS】
 - [x] recall min_scores.reranker 明确拒绝 400
 - [x] bank 不存在删除返回 200/no-op（已有实现，实测确认）
 - [x] retain 不跨文档合并无 document_id 的 item（已有实现，代码审查确认）
-- [ ] 503 + Retry-After 代替 500（低风险，后续迭代）
+- [x] 503 + Retry-After 代替 500（ErrStoreOverloaded 哨兵 + pgx 连接池耗尽检测 + statusError 支持 Retry-After header，2026-10-17 完成）
 
 P1 - 稳定性【2026-10-17 已完成并部署 NAS】
 

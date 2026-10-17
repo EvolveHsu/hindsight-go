@@ -1,6 +1,7 @@
 package server
 
 import (
+	"strconv"
 	"context"
 	"errors"
 	"fmt"
@@ -49,15 +50,34 @@ func internal(err error) error {
 	return &statusError{status: http.StatusInternalServerError, body: map[string]any{"detail": err.Error()}}
 }
 
+// overloaded answers 503 + Retry-After the way upstream does when the store
+// sheds a request instead of failing it with a 500.
+func overloaded(retryAfterSeconds int) error {
+	if retryAfterSeconds <= 0 {
+		retryAfterSeconds = 5
+	}
+	return &statusError{
+		status: http.StatusServiceUnavailable,
+		body:   map[string]any{"detail": "store overloaded; retry later"},
+		headers: http.Header{"Retry-After": []string{strconv.Itoa(retryAfterSeconds)}},
+	}
+}
+
 // mapStoreErr maps seam errors onto HTTP responses.
 func mapStoreErr(err error) error {
 	switch {
 	case errors.Is(err, model.ErrBankNotFound), errors.Is(err, memoryErrBankNotFound):
 		return notFound("bank does not exist")
+	case errors.Is(err, ErrStoreOverloaded):
+		return overloaded(5)
 	default:
 		return internal(err)
 	}
 }
+
+// ErrStoreOverloaded is returned by a store when it sheds load (pool timeout,
+// write backpressure). mapStoreErr turns it into 503 + Retry-After, never 500.
+var ErrStoreOverloaded = errors.New("store overloaded")
 
 // memoryErrBankNotFound lets the in-memory backend error (defined in
 // internal/memory) participate in the same mapping without importing it here.

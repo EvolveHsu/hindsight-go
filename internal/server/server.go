@@ -45,10 +45,18 @@ func SetReady(v bool) { readiness.Store(v) }
 type statusCarrier interface {
 	StatusCode() int
 	Body() map[string]any
+	// ExtraHeaders returns optional response headers (e.g. Retry-After on 503).
+	ExtraHeaders() http.Header
 }
 
 func (e *statusError) StatusCode() int      { return e.status }
 func (e *statusError) Body() map[string]any { return e.body }
+func (e *statusError) ExtraHeaders() http.Header {
+	if e.headers == nil {
+		return http.Header{}
+	}
+	return e.headers
+}
 
 // ErrorHandler maps handler errors to responses. Passed to api.NewServer via
 // api.WithErrorHandler in main.go and tests: status carriers keep their status,
@@ -57,6 +65,11 @@ func ErrorHandler(ctx context.Context, w http.ResponseWriter, _ *http.Request, e
 	var sc statusCarrier
 	if errors.As(err, &sc) {
 		w.Header().Set("Content-Type", "application/json")
+		for key, vals := range sc.ExtraHeaders() {
+			for _, v := range vals {
+				w.Header().Add(key, v)
+			}
+		}
 		w.WriteHeader(sc.StatusCode())
 		_ = json.NewEncoder(w).Encode(sc.Body())
 		return
@@ -75,8 +88,9 @@ var _ api.Handler = (*Server)(nil)
 // statusError carries an HTTP status + JSON body through ogen's error path. The
 // server wires ErrorHandler to honor it (see ErrorHandlerOption in main.go).
 type statusError struct {
-	status int
-	body   map[string]any
+	status  int
+	body    map[string]any
+	headers http.Header
 }
 
 func (e *statusError) Error() string {
