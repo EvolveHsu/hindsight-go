@@ -93,8 +93,9 @@ func TestAgentCallsRecallThenDone(t *testing.T) {
 	if res.Text != "Alice lives in Berlin." {
 		t.Errorf("text = %q", res.Text)
 	}
-	if len(res.Evidence.Memories) != 2 {
-		t.Errorf("evidence memories = %d, want 2", len(res.Evidence.Memories))
+	// The done call cites u1 only, so the citation filter keeps that one.
+	if len(res.Evidence.Memories) != 1 || res.Evidence.Memories[0].ID != "u1" {
+		t.Errorf("evidence memories = %v, want [u1]", res.Evidence.Memories)
 	}
 	if res.Turns != 2 {
 		t.Errorf("turns = %d, want 2", res.Turns)

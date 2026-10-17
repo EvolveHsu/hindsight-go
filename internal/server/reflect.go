@@ -1,6 +1,7 @@
 package server
 
 import (
+	"os"
 	"context"
 	"net/http"
 	"strings"
@@ -67,7 +68,9 @@ func (e *Engine) Reflect(ctx context.Context, req *api.ReflectRequest, params ap
 		}
 	}
 
-	agent := &reflect.Agent{Provider: e.provider, Cfg: reflect.DefaultConfig()}
+	cfg := reflect.DefaultConfig()
+	cfg.Model = os.Getenv("HINDSIGHT_GO_LLM_MODEL")
+	agent := &reflect.Agent{Provider: e.provider, Cfg: cfg}
 	if req.MaxTokens.Set && req.MaxTokens.Value > 0 {
 		agent.Cfg.MaxTokens = req.MaxTokens.Value
 	}

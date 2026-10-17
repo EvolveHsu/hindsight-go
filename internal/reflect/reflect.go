@@ -201,10 +201,35 @@ func (a *Agent) Run(ctx context.Context, src MemorySource, bankID, query string)
 			})
 			if done {
 				var doneOut struct {
-					Answer string `json:"answer"`
+					Answer         string   `json:"answer"`
+					MemoryIDs      []string `json:"memory_ids"`
+					ObservationIDs []string `json:"observation_ids"`
 				}
 				if err := json.Unmarshal([]byte(tc.Function.Arguments), &doneOut); err == nil {
 					out.Text = strings.TrimSpace(doneOut.Answer)
+					// Upstream: answers cite real ids, not per-run aliases.
+					// Keep only evidence units the model actually cited.
+					cited := map[string]bool{}
+					for _, id := range doneOut.MemoryIDs {
+						cited[id] = true
+					}
+					for _, id := range doneOut.ObservationIDs {
+						cited[id] = true
+					}
+					if len(cited) > 0 {
+						keep := Evidence{Directives: ev.Directives}
+						for _, m := range ev.Memories {
+							if cited[m.ID] {
+								keep.Memories = append(keep.Memories, m)
+							}
+						}
+						for _, m := range ev.MentalModels {
+							if cited[m.ID] {
+								keep.MentalModels = append(keep.MentalModels, m)
+							}
+						}
+						ev = keep
+					}
 				}
 				if out.Text == "" {
 					out.Text = payload

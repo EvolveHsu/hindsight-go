@@ -1,6 +1,7 @@
 package server
 
 import (
+	"os"
 	"context"
 	"encoding/json"
 	"net/http"
@@ -184,7 +185,9 @@ func (e *Engine) DryRunRefreshMentalModel(ctx context.Context, params api.DryRun
 	}
 	candidate := model.Content
 	if e.provider != nil {
-		agent := &reflect.Agent{Provider: e.provider, Cfg: reflect.DefaultConfig()}
+		cfg := reflect.DefaultConfig()
+		cfg.Model = os.Getenv("HINDSIGHT_GO_LLM_MODEL")
+		agent := &reflect.Agent{Provider: e.provider, Cfg: cfg}
 		res, runErr := agent.Run(ctx, &reflectSource{store: e.store.(DirectiveSource)}, params.BankID, model.SourceQuery)
 		if runErr == nil && res != nil && res.Text != "" {
 			candidate = res.Text

@@ -115,13 +115,13 @@ P2 - 新功能【2026-10-17 已完成并部署 NAS】
 
 每项修完后跑全量 go test ./... -count=1 加 scripts/coverage_assert.py。
 
-### 阶段 3：MCP 对齐（0.5 天）
+### 阶段 3：MCP 对齐（0.5 天）【2026-10-17 已完成】
 
 按 B 组：
 
-1. MCP bank alias 查找支持转发 header
-2. trigger.tag_groups 作为普通 JSON，避免 schema 递归
-3. reflect 输出真实 id
+1. [x] MCP bank alias 查找支持转发 header —— 架构性免疫：Go MCP 是进程内 REST 桥接，bank 由 URL path 提供，不经过 HTTP 分离部署的 alias 查找
+2. [x] trigger.tag_groups 作为普通 JSON，避免 schema 递归 —— 已免疫：catalog 里 tag_groups 是普通 object JSON schema
+3. [x] reflect 输出真实 id —— 已实现引用过滤：done 调用里 memory_ids/observation_ids 引用之外的证据被剔除，reflect handler/mental_models/parity_misc 补上 HINDSIGHT_GO_LLM_MODEL 环境变量读取（顺带修了 reflect 返回 model name empty 的回归）
 
 ### 阶段 4：可选优化（按需）
 

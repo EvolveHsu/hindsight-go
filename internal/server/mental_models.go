@@ -1,6 +1,7 @@
 package server
 
 import (
+	"os"
 	"context"
 	"net/http"
 	"strings"
@@ -204,7 +205,9 @@ func (e *Engine) RefreshMentalModel(ctx context.Context, params api.RefreshMenta
 // and stamps the result. The reflect loop already enforces the hierarchical
 // retrieval and evidence discipline; a mental model is its durable artifact.
 func (e *Engine) refreshMentalModelNow(ctx context.Context, mms MentalModelSource, bankID string, m *model.MentalModel) *model.MentalModel {
-	agent := &reflect.Agent{Provider: e.provider, Cfg: reflect.DefaultConfig()}
+	cfg := reflect.DefaultConfig()
+		cfg.Model = os.Getenv("HINDSIGHT_GO_LLM_MODEL")
+		agent := &reflect.Agent{Provider: e.provider, Cfg: cfg}
 	if m.MaxTokens > 0 {
 		agent.Cfg.MaxTokens = m.MaxTokens
 	}
