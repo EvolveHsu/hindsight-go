@@ -55,10 +55,18 @@ func (e *Engine) GetKnowledgeBaseTree(ctx context.Context, params api.GetKnowled
 	if err != nil {
 		return nil, internal(err)
 	}
-	if len(params.Tags) > 0 {
+	if len(params.Tags) > 0 || params.TagGroups.Set && strings.TrimSpace(params.TagGroups.Value) != "" {
+		match := "any"
+		if params.TagsMatch.Set {
+			match = string(params.TagsMatch.Value)
+		}
+		groups := ""
+		if params.TagGroups.Set {
+			groups = params.TagGroups.Value
+		}
 		filtered := rows[:0]
 		for _, r := range rows {
-			if knowledgeTagsMatch(r.Tags, params.Tags, params.TagsMatch) {
+			if knowledgeTagsMatch(r.Tags, params.Tags, match, groups) {
 				filtered = append(filtered, r)
 			}
 		}
@@ -112,7 +120,28 @@ func knowledgeNode(r model.KnowledgeRow) api.KnowledgeNode {
 	return node
 }
 
-func knowledgeTagsMatch(pageTags, wanted []string, match api.OptGetKnowledgeBaseTreeTagsMatch) bool {
+// knowledgeTagGroupNode mirrors the recall tag_groups grammar for in-memory
+// evaluation in the KB tree and search handlers.
+type knowledgeTagGroupNode struct {
+	Tags    []string                  `json:"tags"`
+	Match   string                    `json:"match"`
+	Resolve string                    `json:"resolve"`
+	And     []knowledgeTagGroupNode   `json:"and"`
+	Or      []knowledgeTagGroupNode   `json:"or"`
+	Not     *knowledgeTagGroupNode    `json:"not"`
+}
+
+func knowledgeTagsMatch(pageTags, wanted []string, match string, tagGroups string) bool {
+	if strings.TrimSpace(tagGroups) != "" {
+		// Compound groups share the recall grammar; evaluate leaves with the
+		// same per-row matcher and AND/OR/NOT the results in Go. Fuzzy leaves
+		// are rejected (no trigram resolver here), matching the SQL path.
+		var nodes []knowledgeTagGroupNode
+		if err := json.Unmarshal([]byte(tagGroups), &nodes); err != nil {
+			return false
+		}
+		return evalKnowledgeGroups(pageTags, nodes)
+	}
 	if len(wanted) == 0 {
 		return true
 	}
@@ -124,11 +153,7 @@ func knowledgeTagsMatch(pageTags, wanted []string, match api.OptGetKnowledgeBase
 		}
 		return false
 	}
-	mode := ""
-	if match.Set {
-		mode = string(match.Value)
-	}
-	switch mode {
+	switch match {
 	case "all", "all_strict":
 		for _, tag := range wanted {
 			if !has(tag) {
@@ -146,7 +171,17 @@ func knowledgeTagsMatch(pageTags, wanted []string, match api.OptGetKnowledgeBase
 			}
 		}
 		return true
-	default:
+	case "any_strict":
+		if len(pageTags) == 0 {
+			return false
+		}
+		for _, tag := range wanted {
+			if has(tag) {
+				return true
+			}
+		}
+		return false
+	default: // any
 		for _, tag := range wanted {
 			if has(tag) {
 				return true
@@ -154,6 +189,50 @@ func knowledgeTagsMatch(pageTags, wanted []string, match api.OptGetKnowledgeBase
 		}
 		return false
 	}
+}
+
+// evalKnowledgeGroups evaluates compound tag groups in Go for the KB tree and
+// search handlers (the row set is already in memory). Top-level groups AND.
+func evalKnowledgeGroups(pageTags []string, nodes []knowledgeTagGroupNode) bool {
+	for _, n := range nodes {
+		if !evalKnowledgeNode(pageTags, n) {
+			return false
+		}
+	}
+	return true
+}
+
+func evalKnowledgeNode(pageTags []string, n knowledgeTagGroupNode) bool {
+	if n.Not != nil {
+		return !evalKnowledgeNode(pageTags, *n.Not)
+	}
+	if len(n.Or) > 0 {
+		for _, child := range n.Or {
+			if evalKnowledgeNode(pageTags, child) {
+				return true
+			}
+		}
+		return false
+	}
+	if len(n.And) > 0 {
+		for _, child := range n.And {
+			if !evalKnowledgeNode(pageTags, child) {
+				return false
+			}
+		}
+		return true
+	}
+	if len(n.Tags) > 0 {
+		if n.Resolve == "fuzzy" {
+			return false
+		}
+		match := n.Match
+		if match == "" {
+			match = "any"
+		}
+		return knowledgeTagsMatch(pageTags, n.Tags, match, "")
+	}
+	return true
 }
 
 func (e *Engine) GetKnowledgePage(ctx context.Context, params api.GetKnowledgePageParams) (api.GetKnowledgePageRes, error) {
@@ -213,6 +292,23 @@ func (e *Engine) SearchKnowledgeBase(ctx context.Context, params api.SearchKnowl
 	rows, err := ks.SearchKnowledgeRows(ctx, params.BankID, params.Q, limit)
 	if err != nil {
 		return nil, internal(err)
+	}
+	if len(params.Tags) > 0 || params.TagGroups.Set && strings.TrimSpace(params.TagGroups.Value) != "" {
+		match := "any"
+		if params.TagsMatch.Set {
+			match = string(params.TagsMatch.Value)
+		}
+		groups := ""
+		if params.TagGroups.Set {
+			groups = params.TagGroups.Value
+		}
+		filtered := rows[:0]
+		for _, r := range rows {
+			if knowledgeTagsMatch(r.Tags, params.Tags, match, groups) {
+				filtered = append(filtered, r)
+			}
+		}
+		rows = filtered
 	}
 	results := make([]api.KnowledgePageSearchResult, 0, len(rows))
 	for _, r := range rows {

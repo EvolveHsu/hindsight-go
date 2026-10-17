@@ -93,6 +93,11 @@ type Client struct {
 	BaseURL string
 	APIKey  string
 	HTTP    *http.Client
+	// SkipJSONResponseFormat drops response_format hints from outgoing
+	// requests. Some OpenAI-compatible providers 400 on response_format even
+	// though they return valid JSON; set HINDSIGHT_GO_LLM_SKIP_JSON_FORMAT=1
+	// to work around them (upstream llm setting, ported in v1.0.0).
+	SkipJSONResponseFormat bool
 }
 
 // NewClient builds a client with sane timeouts.
@@ -106,6 +111,9 @@ func NewClient(baseURL, apiKey string) *Client {
 
 // Chat sends one chat completion request.
 func (c *Client) Chat(ctx context.Context, req ChatRequest) (*ChatResponse, error) {
+	if c.SkipJSONResponseFormat {
+		req.ResponseFormat = nil
+	}
 	raw, err := json.Marshal(req)
 	if err != nil {
 		return nil, err

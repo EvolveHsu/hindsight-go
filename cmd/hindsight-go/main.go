@@ -94,6 +94,9 @@ func main() {
 	// answer 501 with setup instructions.
 	if base := os.Getenv("HINDSIGHT_GO_LLM_BASE_URL"); base != "" {
 		client := llm.NewClient(base, os.Getenv("HINDSIGHT_GO_LLM_API_KEY"))
+		if os.Getenv("HINDSIGHT_GO_LLM_SKIP_JSON_FORMAT") == "1" {
+			client.SkipJSONResponseFormat = true
+		}
 		engine.SetReflectProvider(client)
 		engine.SetExtractor(extract.New(client, os.Getenv("HINDSIGHT_GO_LLM_MODEL")))
 		engine.SetConsolidationProvider(client)

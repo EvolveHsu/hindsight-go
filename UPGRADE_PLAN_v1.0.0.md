@@ -107,11 +107,11 @@ P1 - 稳定性【2026-10-17 已完成并部署 NAS】
 - [x] consolidation 单响应事务化（审查确认已有实现）
 - [x] recall 链接去重保留最强（审查确认 FuseArms 已按 Unit.ID 去重）
 
-P2 - 新功能
+P2 - 新功能【2026-10-17 已完成并部署 NAS】
 
-- entities / KB 五个接口加 tags / tags_match / tag_groups
-- LLM 请求跳过 json_object 的配置
-- structured-output schema 数值边界剥离
+- [x] entities / KB 五个接口加 tags / tags_match / tag_groups（生成层已有参数；KB 树和搜索 handler 补上 tag_groups 解析 + any_strict 模式；storepg 的 entities/graph 走 memoryTagFilter SQL 路径）
+- [x] LLM 请求跳过 json_object 的配置（HINDSIGHT_GO_LLM_SKIP_JSON_FORMAT=1，客户端全局剥掉 response_format）
+- [x] structured-output schema 数值边界剥离（本实现的 reflect/extract 不发 response_format，schema 边界问题不适用；LLM 侧配置已覆盖）
 
 每项修完后跑全量 go test ./... -count=1 加 scripts/coverage_assert.py。
 
