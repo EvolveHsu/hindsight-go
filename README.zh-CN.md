@@ -6,7 +6,7 @@
 
 ## 功能特性
 
-- **99 / 99 OpenAPI 操作全覆盖**：规范化后的上游契约中每一个操作都有生成 Handler 和 Go 实现。
+- **101 / 101 OpenAPI 操作全覆盖**：规范化后的上游 v1.1.0 契约中每一个操作都有生成 Handler 和 Go 实现。
 - **REST 与 MCP 同端口**：`/v1/...` REST 路由和 `/mcp/{bank}/` Streamable HTTP MCP 共用同一套实现，工具调用与 API 调用行为一致。
 - **完整的 Agent Memory 工作流**：retain、recall、reflect、consolidation、entities、temporal 和 semantic links、directives、bank aliases、operations、Knowledge Base、webhooks、transfer/import/export、文件保留。
 - **PostgreSQL + pgvector 存储**：提供与上游 schema 兼容的 PostgreSQL 后端，支持生产部署和既有 Hindsight 数据迁移。

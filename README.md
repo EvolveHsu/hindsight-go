@@ -6,7 +6,7 @@ A Go implementation of the [Hindsight](https://github.com/vectorize-io/hindsight
 
 ## Features
 
-- **99 / 99 OpenAPI operations**: every operation in the normalized upstream contract has a generated handler and a Go implementation.
+- **101 / 101 OpenAPI operations**: every operation in the normalized upstream v1.1.0 contract has a generated handler and a Go implementation.
 - **REST + MCP on one port**: `/v1/...` REST routes and `/mcp/{bank}/` Streamable HTTP MCP share the same implementation, so tool calls and API calls behave identically.
 - **Agent memory workflow**: retain, recall, reflect, consolidation, entities, temporal and semantic links, directives, bank aliases, operations, knowledge base, webhooks, transfer/import/export, and file retention.
 - **PostgreSQL + pgvector storage**: an upstream-schema-compatible PostgreSQL backend is included for durable deployments and migration from existing Hindsight data.
