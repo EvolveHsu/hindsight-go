@@ -1,9 +1,9 @@
 package server
 
 import (
-	"os"
 	"context"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -89,6 +89,25 @@ func (e *Engine) ListMentalModels(ctx context.Context, params api.ListMentalMode
 	models, err := mms.ListMentalModels(ctx, params.BankID)
 	if err != nil {
 		return nil, internal(err)
+	}
+	if len(params.Tags) > 0 {
+		match := string(params.TagsMatch.Or(api.ListMentalModelsTagsMatchAny))
+		filtered := models[:0]
+		for _, m := range models {
+			if knowledgeTagsMatch(m.Tags, params.Tags, match, "") {
+				filtered = append(filtered, m)
+			}
+		}
+		models = filtered
+	}
+	if params.ExcludeKnowledgePages.Set && params.ExcludeKnowledgePages.Value {
+		filtered := models[:0]
+		for _, m := range models {
+			if m.Content == "" {
+				filtered = append(filtered, m)
+			}
+		}
+		models = filtered
 	}
 	limit, offset := params.Limit.Or(50), params.Offset.Or(0)
 	items := make([]api.MentalModelResponse, 0, len(models))
@@ -176,7 +195,7 @@ func (e *Engine) DeleteMentalModel(ctx context.Context, params api.DeleteMentalM
 }
 
 // RefreshMentalModel implements refresh_mental_model (sync in lite).
-func (e *Engine) RefreshMentalModel(ctx context.Context, params api.RefreshMentalModelParams) (api.RefreshMentalModelRes, error) {
+func (e *Engine) RefreshMentalModel(ctx context.Context, req api.OptNilRefreshMentalModelRequest, params api.RefreshMentalModelParams) (api.RefreshMentalModelRes, error) {
 	mms, err := e.mmStore()
 	if err != nil {
 		return nil, err
@@ -206,8 +225,8 @@ func (e *Engine) RefreshMentalModel(ctx context.Context, params api.RefreshMenta
 // retrieval and evidence discipline; a mental model is its durable artifact.
 func (e *Engine) refreshMentalModelNow(ctx context.Context, mms MentalModelSource, bankID string, m *model.MentalModel) *model.MentalModel {
 	cfg := reflect.DefaultConfig()
-		cfg.Model = os.Getenv("HINDSIGHT_GO_LLM_MODEL")
-		agent := &reflect.Agent{Provider: e.provider, Cfg: cfg}
+	cfg.Model = os.Getenv("HINDSIGHT_GO_LLM_MODEL")
+	agent := &reflect.Agent{Provider: e.provider, Cfg: cfg}
 	if m.MaxTokens > 0 {
 		agent.Cfg.MaxTokens = m.MaxTokens
 	}

@@ -54,7 +54,7 @@ func (e *Engine) GetGraph(ctx context.Context, params api.GetGraphParams) (api.G
 		DocumentID: params.DocumentID.Or(""),
 		ChunkID:    params.ChunkID.Or(""),
 		Tags:       params.Tags,
-		TagsMatch:  params.TagsMatch.Or("all_strict"),
+		TagsMatch:  string(params.TagsMatch.Or(api.GetGraphTagsMatchAllStrict)),
 	}
 	data, err := src.GraphData(ctx, params.BankID, opt)
 	if err != nil {

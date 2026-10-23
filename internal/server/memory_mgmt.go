@@ -52,9 +52,41 @@ func (e *Engine) ListMemories(ctx context.Context, params api.ListMemoriesParams
 		return nil, notFound("bank %q does not exist", params.BankID)
 	}
 	limit, offset := params.Limit.Or(50), params.Offset.Or(0)
-	units, total, err := src.ListMemories(ctx, params.BankID, limit, offset)
+	filtering := params.Q.Set || params.DocumentID.Set || params.EntityID.Set || len(params.Tags) > 0
+	fetchLimit, fetchOffset := limit, offset
+	if filtering {
+		fetchLimit, fetchOffset = 1_000_000, 0
+	}
+	units, total, err := src.ListMemories(ctx, params.BankID, fetchLimit, fetchOffset)
 	if err != nil {
 		return nil, internal(err)
+	}
+	if filtering {
+		q := strings.ToLower(params.Q.Or(""))
+		match := string(params.TagsMatch.Or(api.ListMemoriesTagsMatchAny))
+		filtered := units[:0]
+		for _, u := range units {
+			if q != "" && !strings.Contains(strings.ToLower(u.Text), q) && !strings.Contains(strings.ToLower(u.Context), q) {
+				continue
+			}
+			if params.DocumentID.Set && params.DocumentID.Value != "" && u.DocumentID != params.DocumentID.Value {
+				continue
+			}
+			if !knowledgeTagsMatch(u.Tags, params.Tags, match, "") {
+				continue
+			}
+			filtered = append(filtered, u)
+		}
+		units = filtered
+		total = len(units)
+		if offset > total {
+			offset = total
+		}
+		end := offset + limit
+		if end > total {
+			end = total
+		}
+		units = units[offset:end]
 	}
 	items := make([]api.MemoryUnitListItem, 0, len(units))
 	for i := range units {
@@ -200,9 +232,38 @@ func (e *Engine) ListDocuments(ctx context.Context, params api.ListDocumentsPara
 		return nil, err
 	}
 	limit, offset := params.Limit.Or(50), params.Offset.Or(0)
-	docs, total, err := src.ListDocuments(ctx, params.BankID, limit, offset)
+	filtering := params.Q.Set || len(params.Tags) > 0
+	fetchLimit, fetchOffset := limit, offset
+	if filtering {
+		fetchLimit, fetchOffset = 1_000_000, 0
+	}
+	docs, total, err := src.ListDocuments(ctx, params.BankID, fetchLimit, fetchOffset)
 	if err != nil {
 		return nil, internal(err)
+	}
+	if filtering {
+		q := strings.ToLower(params.Q.Or(""))
+		match := string(params.TagsMatch.Or(api.ListDocumentsTagsMatchAny))
+		filtered := docs[:0]
+		for _, d := range docs {
+			if q != "" && !strings.Contains(strings.ToLower(d.ID), q) && !strings.Contains(strings.ToLower(d.ContentHash), q) {
+				continue
+			}
+			if !knowledgeTagsMatch(d.Tags, params.Tags, match, "") {
+				continue
+			}
+			filtered = append(filtered, d)
+		}
+		docs = filtered
+		total = len(docs)
+		if offset > total {
+			offset = total
+		}
+		end := offset + limit
+		if end > total {
+			end = total
+		}
+		docs = docs[offset:end]
 	}
 	items := make([]api.DocumentListItem, 0, len(docs))
 	for _, d := range docs {

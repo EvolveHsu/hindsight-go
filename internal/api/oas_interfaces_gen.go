@@ -133,6 +133,10 @@ type GetAgentStatsRes interface {
 	getAgentStatsRes()
 }
 
+type GetAuditLogRes interface {
+	getAuditLogRes()
+}
+
 type GetBankAttachmentRes interface {
 	getBankAttachmentRes()
 }
@@ -151,6 +155,10 @@ type GetChunkRes interface {
 
 type GetDirectiveRes interface {
 	getDirectiveRes()
+}
+
+type GetDocumentHistoryRes interface {
+	getDocumentHistoryRes()
 }
 
 type GetDocumentRes interface {

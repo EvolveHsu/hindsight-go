@@ -3577,6 +3577,124 @@ func decodeGetAgentStatsParams(args [1]string, argsEscaped bool, r *http.Request
 	return params, nil
 }
 
+// GetAuditLogParams is parameters of get_audit_log operation.
+type GetAuditLogParams struct {
+	BankID string
+	LogID  string
+}
+
+func unpackGetAuditLogParams(packed middleware.Parameters) (params GetAuditLogParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "bank_id",
+			In:   "path",
+		}
+		params.BankID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "log_id",
+			In:   "path",
+		}
+		params.LogID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetAuditLogParams(args [2]string, argsEscaped bool, r *http.Request) (params GetAuditLogParams, _ error) {
+	// Decode path: bank_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "bank_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.BankID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "bank_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: log_id.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "log_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LogID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "log_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // GetBankAttachmentParams is parameters of get_bank_attachment operation.
 type GetBankAttachmentParams struct {
 	BankID       string
@@ -4120,6 +4238,289 @@ func decodeGetDocumentParams(args [2]string, argsEscaped bool, r *http.Request) 
 		return params, &ogenerrors.DecodeParamError{
 			Name: "document_id",
 			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetDocumentHistoryParams is parameters of get_document_history operation.
+type GetDocumentHistoryParams struct {
+	BankID     string
+	DocumentID string
+	// Maximum number of operations to read.
+	Limit OptInt `json:",omitempty,omitzero"`
+	// Offset for pagination, in operations.
+	Offset OptInt `json:",omitempty,omitzero"`
+}
+
+func unpackGetDocumentHistoryParams(packed middleware.Parameters) (params GetDocumentHistoryParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "bank_id",
+			In:   "path",
+		}
+		params.BankID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "document_id",
+			In:   "path",
+		}
+		params.DocumentID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "limit",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Limit = v.(OptInt)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "offset",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Offset = v.(OptInt)
+		}
+	}
+	return params
+}
+
+func decodeGetDocumentHistoryParams(args [2]string, argsEscaped bool, r *http.Request) (params GetDocumentHistoryParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode path: bank_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "bank_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.BankID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "bank_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: document_id.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "document_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.DocumentID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "document_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Set default value for query: limit.
+	{
+		val := int(100)
+		params.Limit.SetTo(val)
+	}
+	// Decode query: limit.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotLimitVal int
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotLimitVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Limit.SetTo(paramsDotLimitVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Limit.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        true,
+							Min:           1,
+							MaxSet:        true,
+							Max:           1000,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+							Pattern:       nil,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "limit",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: offset.
+	{
+		val := int(0)
+		params.Offset.SetTo(val)
+	}
+	// Decode query: offset.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "offset",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotOffsetVal int
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotOffsetVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Offset.SetTo(paramsDotOffsetVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Offset.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        true,
+							Min:           0,
+							MaxSet:        false,
+							Max:           0,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+							Pattern:       nil,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "offset",
+			In:   "query",
 			Err:  err,
 		}
 	}
@@ -4816,14 +5217,17 @@ func decodeGetEntityGraphParams(args [1]string, argsEscaped bool, r *http.Reques
 
 // GetGraphParams is parameters of get_graph operation.
 type GetGraphParams struct {
-	BankID     string
-	Type       OptString `json:",omitempty,omitzero"`
-	Limit      OptInt    `json:",omitempty,omitzero"`
-	Q          OptString `json:",omitempty,omitzero"`
-	Tags       []string  `json:",omitempty"`
-	TagsMatch  OptString `json:",omitempty,omitzero"`
-	DocumentID OptString `json:",omitempty,omitzero"`
-	ChunkID    OptString `json:",omitempty,omitzero"`
+	BankID string
+	Type   OptString `json:",omitempty,omitzero"`
+	Limit  OptInt    `json:",omitempty,omitzero"`
+	// Case-insensitive substring filter on memory text and context. Not indexed: it scans the bank, so it
+	// slows as the bank grows. Meant for browsing and inspection, not for high-volume or latency-sensitive
+	// workloads — use recall for that.
+	Q          OptString            `json:",omitempty,omitzero"`
+	Tags       []string             `json:",omitempty"`
+	TagsMatch  OptGetGraphTagsMatch `json:",omitempty,omitzero"`
+	DocumentID OptString            `json:",omitempty,omitzero"`
+	ChunkID    OptString            `json:",omitempty,omitzero"`
 }
 
 func unpackGetGraphParams(packed middleware.Parameters) (params GetGraphParams) {
@@ -4876,7 +5280,7 @@ func unpackGetGraphParams(packed middleware.Parameters) (params GetGraphParams) 
 			In:   "query",
 		}
 		if v, ok := packed[key]; ok {
-			params.TagsMatch = v.(OptString)
+			params.TagsMatch = v.(OptGetGraphTagsMatch)
 		}
 	}
 	{
@@ -5146,7 +5550,7 @@ func decodeGetGraphParams(args [1]string, argsEscaped bool, r *http.Request) (pa
 	}
 	// Set default value for query: tags_match.
 	{
-		val := string("all_strict")
+		val := GetGraphTagsMatch("all_strict")
 		params.TagsMatch.SetTo(val)
 	}
 	// Decode query: tags_match.
@@ -5159,7 +5563,7 @@ func decodeGetGraphParams(args [1]string, argsEscaped bool, r *http.Request) (pa
 
 		if err := q.HasParam(cfg); err == nil {
 			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotTagsMatchVal string
+				var paramsDotTagsMatchVal GetGraphTagsMatch
 				if err := func() error {
 					val, err := d.DecodeValue()
 					if err != nil {
@@ -5171,7 +5575,7 @@ func decodeGetGraphParams(args [1]string, argsEscaped bool, r *http.Request) (pa
 						return err
 					}
 
-					paramsDotTagsMatchVal = c
+					paramsDotTagsMatchVal = GetGraphTagsMatch(c)
 					return nil
 				}(); err != nil {
 					return err
@@ -5179,6 +5583,21 @@ func decodeGetGraphParams(args [1]string, argsEscaped bool, r *http.Request) (pa
 				params.TagsMatch.SetTo(paramsDotTagsMatchVal)
 				return nil
 			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.TagsMatch.Get(); ok {
+					if err := func() error {
+						if err := value.Validate(); err != nil {
+							return err
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
 				return err
 			}
 		}
@@ -8608,12 +9027,16 @@ func decodeListDocumentChunksParams(args [2]string, argsEscaped bool, r *http.Re
 // ListDocumentsParams is parameters of list_documents operation.
 type ListDocumentsParams struct {
 	BankID string
-	// Case-insensitive substring filter on document ID (e.g. 'report' matches 'report-2024').
+	// Case-insensitive substring filter on document ID or document text (e.g. 'report' matches
+	// 'report-2024' or any document containing 'report'). Meant for browsing and inspection, not for
+	// high-volume or latency-sensitive workloads — use recall for that. Matches are capped: past the
+	// cap, `total` is a lower bound and `total_is_estimate` is true. A store-owned backend may match
+	// approximately; each item's `matched_fields` says what matched.
 	Q OptString `json:",omitempty,omitzero"`
 	// Filter documents by tags.
 	Tags []string `json:",omitempty"`
-	// How to match tags: 'any', 'all', 'any_strict', 'all_strict'.
-	TagsMatch OptString `json:",omitempty,omitzero"`
+	// How to match tags: 'any', 'all', 'any_strict', 'all_strict', 'exact'.
+	TagsMatch OptListDocumentsTagsMatch `json:",omitempty,omitzero"`
 	// Time axis to filter and order by: `created_at` (when the document first arrived) or `updated_at`
 	// (its last write, the default ordering). Filtering and ordering both follow `time_field`, and rows
 	// with no value on that column are excluded — so `total` counts only rows carrying that timestamp,
@@ -8659,7 +9082,7 @@ func unpackListDocumentsParams(packed middleware.Parameters) (params ListDocumen
 			In:   "query",
 		}
 		if v, ok := packed[key]; ok {
-			params.TagsMatch = v.(OptString)
+			params.TagsMatch = v.(OptListDocumentsTagsMatch)
 		}
 	}
 	{
@@ -8844,7 +9267,7 @@ func decodeListDocumentsParams(args [1]string, argsEscaped bool, r *http.Request
 	}
 	// Set default value for query: tags_match.
 	{
-		val := string("any_strict")
+		val := ListDocumentsTagsMatch("any_strict")
 		params.TagsMatch.SetTo(val)
 	}
 	// Decode query: tags_match.
@@ -8857,7 +9280,7 @@ func decodeListDocumentsParams(args [1]string, argsEscaped bool, r *http.Request
 
 		if err := q.HasParam(cfg); err == nil {
 			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotTagsMatchVal string
+				var paramsDotTagsMatchVal ListDocumentsTagsMatch
 				if err := func() error {
 					val, err := d.DecodeValue()
 					if err != nil {
@@ -8869,7 +9292,7 @@ func decodeListDocumentsParams(args [1]string, argsEscaped bool, r *http.Request
 						return err
 					}
 
-					paramsDotTagsMatchVal = c
+					paramsDotTagsMatchVal = ListDocumentsTagsMatch(c)
 					return nil
 				}(); err != nil {
 					return err
@@ -8877,6 +9300,21 @@ func decodeListDocumentsParams(args [1]string, argsEscaped bool, r *http.Request
 				params.TagsMatch.SetTo(paramsDotTagsMatchVal)
 				return nil
 			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.TagsMatch.Get(); ok {
+					if err := func() error {
+						if err := value.Validate(); err != nil {
+							return err
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
 				return err
 			}
 		}
@@ -9592,6 +10030,9 @@ type ListLlmRequestsParams struct {
 	Operation OptString `json:",omitempty,omitzero"`
 	// Filter by call scope.
 	Scope OptString `json:",omitempty,omitzero"`
+	// Filter by kind of model call, told apart by scope: embedding (embedding_), rerank, decision
+	// (decision_), or llm (every other scope).
+	CallType OptListLlmRequestsCallType `json:",omitempty,omitzero"`
 	// Filter by LLM provider.
 	Provider OptString `json:",omitempty,omitzero"`
 	// Filter to one operation run (all LLM calls sharing a trace).
@@ -9645,6 +10086,15 @@ func unpackListLlmRequestsParams(packed middleware.Parameters) (params ListLlmRe
 		}
 		if v, ok := packed[key]; ok {
 			params.Scope = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "call_type",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.CallType = v.(OptListLlmRequestsCallType)
 		}
 	}
 	{
@@ -9897,6 +10347,62 @@ func decodeListLlmRequestsParams(args [1]string, argsEscaped bool, r *http.Reque
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "scope",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: call_type.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "call_type",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotCallTypeVal ListLlmRequestsCallType
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotCallTypeVal = ListLlmRequestsCallType(c)
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.CallType.SetTo(paramsDotCallTypeVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.CallType.Get(); ok {
+					if err := func() error {
+						if err := value.Validate(); err != nil {
+							return err
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "call_type",
 			In:   "query",
 			Err:  err,
 		}
@@ -10340,8 +10846,11 @@ func decodeListLlmRequestsParams(args [1]string, argsEscaped bool, r *http.Reque
 
 // ListMemoriesParams is parameters of list_memories operation.
 type ListMemoriesParams struct {
-	BankID             string
-	Type               OptString                `json:",omitempty,omitzero"`
+	BankID string
+	Type   OptString `json:",omitempty,omitzero"`
+	// Case-insensitive substring filter on memory text and context. Not indexed: it scans the bank, so it
+	// slows as the bank grows. Meant for browsing and inspection, not for high-volume or latency-sensitive
+	// workloads — use recall for that.
 	Q                  OptString                `json:",omitempty,omitzero"`
 	ConsolidationState OptString                `json:",omitempty,omitzero"`
 	State              OptString                `json:",omitempty,omitzero"`
@@ -11185,6 +11694,8 @@ type ListMentalModelsParams struct {
 	Detail OptListMentalModelsDetail `json:",omitempty,omitzero"`
 	Limit  OptInt                    `json:",omitempty,omitzero"`
 	Offset OptInt                    `json:",omitempty,omitzero"`
+	// Leave out the mental models that hold knowledge page content (list standalone models only).
+	ExcludeKnowledgePages OptBool `json:",omitempty,omitzero"`
 }
 
 func unpackListMentalModelsParams(packed middleware.Parameters) (params ListMentalModelsParams) {
@@ -11238,6 +11749,15 @@ func unpackListMentalModelsParams(packed middleware.Parameters) (params ListMent
 		}
 		if v, ok := packed[key]; ok {
 			params.Offset = v.(OptInt)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "exclude_knowledge_pages",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.ExcludeKnowledgePages = v.(OptBool)
 		}
 	}
 	return params
@@ -11594,6 +12114,52 @@ func decodeListMentalModelsParams(args [1]string, argsEscaped bool, r *http.Requ
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "offset",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: exclude_knowledge_pages.
+	{
+		val := bool(false)
+		params.ExcludeKnowledgePages.SetTo(val)
+	}
+	// Decode query: exclude_knowledge_pages.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "exclude_knowledge_pages",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotExcludeKnowledgePagesVal bool
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToBool(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotExcludeKnowledgePagesVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.ExcludeKnowledgePages.SetTo(paramsDotExcludeKnowledgePagesVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "exclude_knowledge_pages",
 			In:   "query",
 			Err:  err,
 		}
@@ -13066,6 +13632,8 @@ type LlmRequestStatsParams struct {
 	BankID string
 	// Filter by operation.
 	Operation OptString `json:",omitempty,omitzero"`
+	// Filter by kind of model call: llm, embedding, rerank or decision.
+	CallType OptLlmRequestStatsCallType `json:",omitempty,omitzero"`
 	// Time period: 1d, 7d, or 30d.
 	Period OptString `json:",omitempty,omitzero"`
 }
@@ -13085,6 +13653,15 @@ func unpackLlmRequestStatsParams(packed middleware.Parameters) (params LlmReques
 		}
 		if v, ok := packed[key]; ok {
 			params.Operation = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "call_type",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.CallType = v.(OptLlmRequestStatsCallType)
 		}
 	}
 	{
@@ -13183,6 +13760,62 @@ func decodeLlmRequestStatsParams(args [1]string, argsEscaped bool, r *http.Reque
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "operation",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: call_type.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "call_type",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotCallTypeVal LlmRequestStatsCallType
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotCallTypeVal = LlmRequestStatsCallType(c)
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.CallType.SetTo(paramsDotCallTypeVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.CallType.Get(); ok {
+					if err := func() error {
+						if err := value.Validate(); err != nil {
+							return err
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "call_type",
 			In:   "query",
 			Err:  err,
 		}

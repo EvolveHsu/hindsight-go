@@ -25,7 +25,7 @@ BACKUP_DIR="${ROOT_DIR}/deploy/backups"
 OLD_CONTAINER="${HINDSIGHT_OLD_CONTAINER:-hindsight}"
 OLD_COMPOSE="${HINDSIGHT_OLD_COMPOSE:-$ROOT_DIR/../hindsight/docker-compose.yml}"
 PG_IMAGE="${HINDSIGHT_PG_IMAGE:-pgvector/pgvector:pg18}"
-CP_IMAGE="${HINDSIGHT_CP_IMAGE:-ghcr.io/vectorize-io/hindsight-control-plane:0.10.2}"
+CP_IMAGE="${HINDSIGHT_CP_IMAGE:-ghcr.io/vectorize-io/hindsight-control-plane:1.1.0}"
 STAMP="$(date +%Y%m%d-%H%M%S)"
 DUMP_NAME="hindsight-pre-go-${STAMP}.dump"
 

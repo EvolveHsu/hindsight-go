@@ -123,12 +123,12 @@ func knowledgeNode(r model.KnowledgeRow) api.KnowledgeNode {
 // knowledgeTagGroupNode mirrors the recall tag_groups grammar for in-memory
 // evaluation in the KB tree and search handlers.
 type knowledgeTagGroupNode struct {
-	Tags    []string                  `json:"tags"`
-	Match   string                    `json:"match"`
-	Resolve string                    `json:"resolve"`
-	And     []knowledgeTagGroupNode   `json:"and"`
-	Or      []knowledgeTagGroupNode   `json:"or"`
-	Not     *knowledgeTagGroupNode    `json:"not"`
+	Tags    []string                `json:"tags"`
+	Match   string                  `json:"match"`
+	Resolve string                  `json:"resolve"`
+	And     []knowledgeTagGroupNode `json:"and"`
+	Or      []knowledgeTagGroupNode `json:"or"`
+	Not     *knowledgeTagGroupNode  `json:"not"`
 }
 
 func knowledgeTagsMatch(pageTags, wanted []string, match string, tagGroups string) bool {

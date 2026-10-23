@@ -355,6 +355,12 @@ type Invoker interface {
 	//
 	// GET /v1/default/banks/{bank_id}/stats
 	GetAgentStats(ctx context.Context, params GetAgentStatsParams) (GetAgentStatsRes, error)
+	// GetAuditLog invokes get_audit_log operation.
+	//
+	// Get one audit log entry with its full request and response bodies.
+	//
+	// GET /v1/default/banks/{bank_id}/audit-logs/{log_id}
+	GetAuditLog(ctx context.Context, params GetAuditLogParams) (GetAuditLogRes, error)
 	// GetBankAttachment invokes get_bank_attachment operation.
 	//
 	// Serve the bytes of an attachment retained as inline content. The id is the one inside a placeholder
@@ -413,6 +419,23 @@ type Invoker interface {
 	//
 	// GET /v1/default/banks/{bank_id}/documents/{document_id}
 	GetDocument(ctx context.Context, params GetDocumentParams) (GetDocumentRes, error)
+	// GetDocumentHistory invokes get_document_history operation.
+	//
+	// What each change to a document did, newest first: every retain, append and reprocess (facts added
+	// and removed), every fact edit, invalidation, restore, delete, retag and per-fact observation clear
+	// (observations removed), and every consolidation run (observations created, updated and removed).
+	// Observations are rebuilt, not versioned, so this is the only record of the ones a change removed.
+	// Ids and counts only, with each id list capped at 100.
+	//
+	// Rebuilt from the bank's async operations, which carry these events: it reaches back only as far as
+	// operations are kept (HINDSIGHT_API_OPERATION_RETENTION_DAYS, unlimited by default), and a change
+	// that ran without an operation is not in it — a synchronous retain (async=false), or a fact edit,
+	// delete or retag while auto-consolidation is off. A fact edit, delete or retag is recorded on the
+	// consolidation operation it queues. Clearing every observation in the bank is not listed. total,
+	// limit and offset count operations, not events.
+	//
+	// GET /v1/default/banks/{bank_id}/documents/{document_id}/history
+	GetDocumentHistory(ctx context.Context, params GetDocumentHistoryParams) (GetDocumentHistoryRes, error)
 	// GetEntity invokes get_entity operation.
 	//
 	// Get detailed information about an entity including observations (mental model).
@@ -732,7 +755,7 @@ type Invoker interface {
 	// Submit an async task to re-run the source query through reflect and update the content.
 	//
 	// POST /v1/default/banks/{bank_id}/mental-models/{mental_model_id}/refresh
-	RefreshMentalModel(ctx context.Context, params RefreshMentalModelParams) (RefreshMentalModelRes, error)
+	RefreshMentalModel(ctx context.Context, request OptNilRefreshMentalModelRequest, params RefreshMentalModelParams) (RefreshMentalModelRes, error)
 	// RegenerateEntityObservations invokes regenerate_entity_observations operation.
 	//
 	// This endpoint is deprecated. Entity observations have been replaced by mental models.
@@ -4867,6 +4890,123 @@ func (c *Client) sendGetAgentStats(ctx context.Context, params GetAgentStatsPara
 	return result, nil
 }
 
+// GetAuditLog invokes get_audit_log operation.
+//
+// Get one audit log entry with its full request and response bodies.
+//
+// GET /v1/default/banks/{bank_id}/audit-logs/{log_id}
+func (c *Client) GetAuditLog(ctx context.Context, params GetAuditLogParams) (GetAuditLogRes, error) {
+	res, err := c.sendGetAuditLog(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetAuditLog(ctx context.Context, params GetAuditLogParams) (res GetAuditLogRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("get_audit_log"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/default/banks/{bank_id}/audit-logs/{log_id}"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, GetAuditLogOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/v1/default/banks/"
+	{
+		// Encode "bank_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "bank_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BankID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/audit-logs/"
+	{
+		// Encode "log_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "log_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LogID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetAuditLogResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // GetBankAttachment invokes get_bank_attachment operation.
 //
 // Serve the bytes of an attachment retained as inline content. The id is the one inside a placeholder
@@ -5610,6 +5750,173 @@ func (c *Client) sendGetDocument(ctx context.Context, params GetDocumentParams) 
 	return result, nil
 }
 
+// GetDocumentHistory invokes get_document_history operation.
+//
+// What each change to a document did, newest first: every retain, append and reprocess (facts added
+// and removed), every fact edit, invalidation, restore, delete, retag and per-fact observation clear
+// (observations removed), and every consolidation run (observations created, updated and removed).
+// Observations are rebuilt, not versioned, so this is the only record of the ones a change removed.
+// Ids and counts only, with each id list capped at 100.
+//
+// Rebuilt from the bank's async operations, which carry these events: it reaches back only as far as
+// operations are kept (HINDSIGHT_API_OPERATION_RETENTION_DAYS, unlimited by default), and a change
+// that ran without an operation is not in it — a synchronous retain (async=false), or a fact edit,
+// delete or retag while auto-consolidation is off. A fact edit, delete or retag is recorded on the
+// consolidation operation it queues. Clearing every observation in the bank is not listed. total,
+// limit and offset count operations, not events.
+//
+// GET /v1/default/banks/{bank_id}/documents/{document_id}/history
+func (c *Client) GetDocumentHistory(ctx context.Context, params GetDocumentHistoryParams) (GetDocumentHistoryRes, error) {
+	res, err := c.sendGetDocumentHistory(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetDocumentHistory(ctx context.Context, params GetDocumentHistoryParams) (res GetDocumentHistoryRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("get_document_history"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/default/banks/{bank_id}/documents/{document_id}/history"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, GetDocumentHistoryOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/default/banks/"
+	{
+		// Encode "bank_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "bank_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BankID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/documents/"
+	{
+		// Encode "document_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "document_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.DocumentID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/history"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "limit" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Limit.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "offset" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "offset",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Offset.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetDocumentHistoryResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // GetEntity invokes get_entity operation.
 //
 // Get detailed information about an entity including observations (mental model).
@@ -6147,7 +6454,7 @@ func (c *Client) sendGetGraph(ctx context.Context, params GetGraphParams) (res G
 
 		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
 			if val, ok := params.TagsMatch.Get(); ok {
-				return e.EncodeValue(conv.StringToString(val))
+				return e.EncodeValue(conv.StringToString(string(val)))
 			}
 			return nil
 		}); err != nil {
@@ -8992,7 +9299,7 @@ func (c *Client) sendListDocuments(ctx context.Context, params ListDocumentsPara
 
 		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
 			if val, ok := params.TagsMatch.Get(); ok {
-				return e.EncodeValue(conv.StringToString(val))
+				return e.EncodeValue(conv.StringToString(string(val)))
 			}
 			return nil
 		}); err != nil {
@@ -9431,6 +9738,23 @@ func (c *Client) sendListLlmRequests(ctx context.Context, params ListLlmRequests
 		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
 			if val, ok := params.Scope.Get(); ok {
 				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "call_type" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "call_type",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.CallType.Get(); ok {
+				return e.EncodeValue(conv.StringToString(string(val)))
 			}
 			return nil
 		}); err != nil {
@@ -10116,6 +10440,23 @@ func (c *Client) sendListMentalModels(ctx context.Context, params ListMentalMode
 		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
 			if val, ok := params.Offset.Get(); ok {
 				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "exclude_knowledge_pages" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "exclude_knowledge_pages",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.ExcludeKnowledgePages.Get(); ok {
+				return e.EncodeValue(conv.BoolToString(val))
 			}
 			return nil
 		}); err != nil {
@@ -11040,6 +11381,23 @@ func (c *Client) sendLlmRequestStats(ctx context.Context, params LlmRequestStats
 		}
 	}
 	{
+		// Encode "call_type" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "call_type",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.CallType.Get(); ok {
+				return e.EncodeValue(conv.StringToString(string(val)))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
 		// Encode "period" parameter.
 		cfg := uri.QueryParameterEncodingConfig{
 			Name:    "period",
@@ -11705,12 +12063,12 @@ func (c *Client) sendReflect(ctx context.Context, request *ReflectRequest, param
 // Submit an async task to re-run the source query through reflect and update the content.
 //
 // POST /v1/default/banks/{bank_id}/mental-models/{mental_model_id}/refresh
-func (c *Client) RefreshMentalModel(ctx context.Context, params RefreshMentalModelParams) (RefreshMentalModelRes, error) {
-	res, err := c.sendRefreshMentalModel(ctx, params)
+func (c *Client) RefreshMentalModel(ctx context.Context, request OptNilRefreshMentalModelRequest, params RefreshMentalModelParams) (RefreshMentalModelRes, error) {
+	res, err := c.sendRefreshMentalModel(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendRefreshMentalModel(ctx context.Context, params RefreshMentalModelParams) (res RefreshMentalModelRes, err error) {
+func (c *Client) sendRefreshMentalModel(ctx context.Context, request OptNilRefreshMentalModelRequest, params RefreshMentalModelParams) (res RefreshMentalModelRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("refresh_mental_model"),
 		semconv.HTTPRequestMethodKey.String("POST"),
@@ -11793,6 +12151,9 @@ func (c *Client) sendRefreshMentalModel(ctx context.Context, params RefreshMenta
 	r, err := ht.NewRequest(ctx, "POST", u)
 	if err != nil {
 		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeRefreshMentalModelRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
 	}
 
 	stage = "SendRequest"

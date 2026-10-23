@@ -1,12 +1,12 @@
 package server
 
 import (
-	"strconv"
 	"context"
 	"errors"
 	"fmt"
 	api "github.com/EvolveHsu/hindsight-go/internal/api"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -57,8 +57,8 @@ func overloaded(retryAfterSeconds int) error {
 		retryAfterSeconds = 5
 	}
 	return &statusError{
-		status: http.StatusServiceUnavailable,
-		body:   map[string]any{"detail": "store overloaded; retry later"},
+		status:  http.StatusServiceUnavailable,
+		body:    map[string]any{"detail": "store overloaded; retry later"},
 		headers: http.Header{"Retry-After": []string{strconv.Itoa(retryAfterSeconds)}},
 	}
 }
@@ -133,6 +133,9 @@ func (e *Engine) RetainMemories(ctx context.Context, req *api.RetainRequest, par
 		if strings.TrimSpace(text) == "" {
 			return nil, badRequest("items[%d].content is empty", i)
 		}
+		if req.Async.Set && req.Async.Value && it.UpdateMode.Set && it.UpdateMode.Value == api.MemoryItemUpdateModeAppend && it.DocumentID.Value == "" {
+			return nil, badRequest("items[%d]: async append requires document_id", i)
+		}
 		ri := model.RetainItem{
 			Content:    text,
 			DocumentID: it.DocumentID.Value,
@@ -152,8 +155,7 @@ func (e *Engine) RetainMemories(ctx context.Context, req *api.RetainRequest, par
 			// Explicit verbatim strategies opt out of the extractor, matching upstream's strategy seam.
 			facts, xerr := e.extractor.Extract(ctx, ri.Content, ri.Context)
 			if xerr != nil {
-				extracted = append(extracted, ri)
-				continue
+				return nil, internal(fmt.Errorf("retain extraction failed: %w", xerr))
 			}
 			docID := ri.DocumentID
 			if docID == "" {
@@ -267,6 +269,9 @@ func (e *Engine) RecallMemories(ctx context.Context, req *api.RecallRequest, par
 	hits, err = applyRecallRequestFilters(hits, req)
 	if err != nil {
 		return nil, err
+	}
+	if !req.PreferObservations.Set || req.PreferObservations.Value {
+		preferObservations(hits)
 	}
 
 	out := make([]api.RecallResult, 0, len(hits))

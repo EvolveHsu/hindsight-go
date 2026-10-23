@@ -1050,6 +1050,96 @@ func (s *DispositionTraits) Validate() error {
 	return nil
 }
 
+func (s *DocumentEvent) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Kind.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "kind",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s DocumentEventKind) Validate() error {
+	switch s {
+	case "retain":
+		return nil
+	case "append":
+		return nil
+	case "reprocess":
+		return nil
+	case "retag":
+		return nil
+	case "fact_edited":
+		return nil
+	case "fact_invalidated":
+		return nil
+	case "fact_restored":
+		return nil
+	case "fact_deleted":
+		return nil
+	case "observations_cleared":
+		return nil
+	case "consolidation":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s *DocumentHistoryResponse) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.Items == nil {
+			return errors.New("nil is invalid value")
+		}
+		var failures []validate.FieldError
+		for i, elem := range s.Items {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "items",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s *DocumentResponse) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -1387,6 +1477,23 @@ func (s GetEntityGraphTagsMatch) Validate() error {
 }
 
 func (s GetEntityTagsMatch) Validate() error {
+	switch s {
+	case "any":
+		return nil
+	case "all":
+		return nil
+	case "any_strict":
+		return nil
+	case "all_strict":
+		return nil
+	case "exact":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s GetGraphTagsMatch) Validate() error {
 	switch s {
 	case "any":
 		return nil
@@ -2014,6 +2121,23 @@ func (s *ListDocumentsResponse) Validate() error {
 	return nil
 }
 
+func (s ListDocumentsTagsMatch) Validate() error {
+	switch s {
+	case "any":
+		return nil
+	case "all":
+		return nil
+	case "any_strict":
+		return nil
+	case "all_strict":
+		return nil
+	case "exact":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
 func (s ListDocumentsTimeField) Validate() error {
 	switch s {
 	case "created_at":
@@ -2036,6 +2160,21 @@ func (s ListEntitiesTagsMatch) Validate() error {
 	case "all_strict":
 		return nil
 	case "exact":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s ListLlmRequestsCallType) Validate() error {
+	switch s {
+	case "llm":
+		return nil
+	case "embedding":
+		return nil
+	case "rerank":
+		return nil
+	case "decision":
 		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)
@@ -2258,6 +2397,21 @@ func (s LlmOperationHealthStatus) Validate() error {
 	case "unreachable":
 		return nil
 	case "timeout":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s LlmRequestStatsCallType) Validate() error {
+	switch s {
+	case "llm":
+		return nil
+	case "embedding":
+		return nil
+	case "rerank":
+		return nil
+	case "decision":
 		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)

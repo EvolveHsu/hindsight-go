@@ -9,6 +9,28 @@ import (
 	"github.com/EvolveHsu/hindsight-go/internal/model"
 )
 
+// validTagsMatch rejects unknown tag match modes instead of silently widening
+// them to "any" (upstream v1.1.0 behavior).
+func validTagsMatch(mode string) bool {
+	switch mode {
+	case "", "any", "all", "any_strict", "all_strict", "exact":
+		return true
+	default:
+		return false
+	}
+}
+
+// preferObservations boosts observation hits in the fused result, the v1.1.0
+// default (observations are higher-level conclusions; raw facts stay available).
+func preferObservations(hits []model.RecallHit) {
+	for i := range hits {
+		if hits[i].Unit != nil && hits[i].Unit.FactType == model.FactObservation {
+			hits[i].FusedScore *= 1.05
+		}
+	}
+	sort.SliceStable(hits, func(i, j int) bool { return hits[i].FusedScore > hits[j].FusedScore })
+}
+
 func applyRecallRequestFilters(hits []model.RecallHit, req *api.RecallRequest) ([]model.RecallHit, error) {
 	if req == nil {
 		return hits, nil

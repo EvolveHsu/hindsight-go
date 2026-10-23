@@ -185,6 +185,8 @@ func (s *AuditLogEntry) SetMetadata(val AuditLogEntryMetadata) {
 	s.Metadata = val
 }
 
+func (*AuditLogEntry) getAuditLogRes() {}
+
 type AuditLogEntryMetadata map[string]jx.Raw
 
 func (s *AuditLogEntryMetadata) init() AuditLogEntryMetadata {
@@ -4113,6 +4115,223 @@ func (s *DispositionTraits) SetEmpathy(val int) {
 	s.Empathy = val
 }
 
+// One change to a document, and its effect on the facts and observations built from it.
+// Ref: #/components/schemas/DocumentEvent
+type DocumentEvent struct {
+	DocumentID string            `json:"document_id"`
+	Kind       DocumentEventKind `json:"kind"`
+	CreatedAt  OptDateTime       `json:"created_at"`
+	// The operation this event was recorded on (filled in when read).
+	OperationID OptNilString `json:"operation_id"`
+	// The fact a fact_* event changed.
+	FactID              OptNilString           `json:"fact_id"`
+	FactsAdded          OptInt                 `json:"facts_added"`
+	FactsRemoved        OptInt                 `json:"facts_removed"`
+	ObservationsCreated OptObservationIdSample `json:"observations_created"`
+	ObservationsUpdated OptObservationIdSample `json:"observations_updated"`
+	ObservationsRemoved OptObservationIdSample `json:"observations_removed"`
+}
+
+// GetDocumentID returns the value of DocumentID.
+func (s *DocumentEvent) GetDocumentID() string {
+	return s.DocumentID
+}
+
+// GetKind returns the value of Kind.
+func (s *DocumentEvent) GetKind() DocumentEventKind {
+	return s.Kind
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *DocumentEvent) GetCreatedAt() OptDateTime {
+	return s.CreatedAt
+}
+
+// GetOperationID returns the value of OperationID.
+func (s *DocumentEvent) GetOperationID() OptNilString {
+	return s.OperationID
+}
+
+// GetFactID returns the value of FactID.
+func (s *DocumentEvent) GetFactID() OptNilString {
+	return s.FactID
+}
+
+// GetFactsAdded returns the value of FactsAdded.
+func (s *DocumentEvent) GetFactsAdded() OptInt {
+	return s.FactsAdded
+}
+
+// GetFactsRemoved returns the value of FactsRemoved.
+func (s *DocumentEvent) GetFactsRemoved() OptInt {
+	return s.FactsRemoved
+}
+
+// GetObservationsCreated returns the value of ObservationsCreated.
+func (s *DocumentEvent) GetObservationsCreated() OptObservationIdSample {
+	return s.ObservationsCreated
+}
+
+// GetObservationsUpdated returns the value of ObservationsUpdated.
+func (s *DocumentEvent) GetObservationsUpdated() OptObservationIdSample {
+	return s.ObservationsUpdated
+}
+
+// GetObservationsRemoved returns the value of ObservationsRemoved.
+func (s *DocumentEvent) GetObservationsRemoved() OptObservationIdSample {
+	return s.ObservationsRemoved
+}
+
+// SetDocumentID sets the value of DocumentID.
+func (s *DocumentEvent) SetDocumentID(val string) {
+	s.DocumentID = val
+}
+
+// SetKind sets the value of Kind.
+func (s *DocumentEvent) SetKind(val DocumentEventKind) {
+	s.Kind = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *DocumentEvent) SetCreatedAt(val OptDateTime) {
+	s.CreatedAt = val
+}
+
+// SetOperationID sets the value of OperationID.
+func (s *DocumentEvent) SetOperationID(val OptNilString) {
+	s.OperationID = val
+}
+
+// SetFactID sets the value of FactID.
+func (s *DocumentEvent) SetFactID(val OptNilString) {
+	s.FactID = val
+}
+
+// SetFactsAdded sets the value of FactsAdded.
+func (s *DocumentEvent) SetFactsAdded(val OptInt) {
+	s.FactsAdded = val
+}
+
+// SetFactsRemoved sets the value of FactsRemoved.
+func (s *DocumentEvent) SetFactsRemoved(val OptInt) {
+	s.FactsRemoved = val
+}
+
+// SetObservationsCreated sets the value of ObservationsCreated.
+func (s *DocumentEvent) SetObservationsCreated(val OptObservationIdSample) {
+	s.ObservationsCreated = val
+}
+
+// SetObservationsUpdated sets the value of ObservationsUpdated.
+func (s *DocumentEvent) SetObservationsUpdated(val OptObservationIdSample) {
+	s.ObservationsUpdated = val
+}
+
+// SetObservationsRemoved sets the value of ObservationsRemoved.
+func (s *DocumentEvent) SetObservationsRemoved(val OptObservationIdSample) {
+	s.ObservationsRemoved = val
+}
+
+// What a change was. A named enum, not a Literal: inline enums are named after their field by the
+// generated Rust client, and `kind` already names the knowledge-base node enum there.
+// Ref: #/components/schemas/DocumentEventKind
+type DocumentEventKind string
+
+const (
+	DocumentEventKindRetain              DocumentEventKind = "retain"
+	DocumentEventKindAppend              DocumentEventKind = "append"
+	DocumentEventKindReprocess           DocumentEventKind = "reprocess"
+	DocumentEventKindRetag               DocumentEventKind = "retag"
+	DocumentEventKindFactEdited          DocumentEventKind = "fact_edited"
+	DocumentEventKindFactInvalidated     DocumentEventKind = "fact_invalidated"
+	DocumentEventKindFactRestored        DocumentEventKind = "fact_restored"
+	DocumentEventKindFactDeleted         DocumentEventKind = "fact_deleted"
+	DocumentEventKindObservationsCleared DocumentEventKind = "observations_cleared"
+	DocumentEventKindConsolidation       DocumentEventKind = "consolidation"
+)
+
+// AllValues returns all DocumentEventKind values.
+func (DocumentEventKind) AllValues() []DocumentEventKind {
+	return []DocumentEventKind{
+		DocumentEventKindRetain,
+		DocumentEventKindAppend,
+		DocumentEventKindReprocess,
+		DocumentEventKindRetag,
+		DocumentEventKindFactEdited,
+		DocumentEventKindFactInvalidated,
+		DocumentEventKindFactRestored,
+		DocumentEventKindFactDeleted,
+		DocumentEventKindObservationsCleared,
+		DocumentEventKindConsolidation,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s DocumentEventKind) MarshalText() ([]byte, error) {
+	switch s {
+	case DocumentEventKindRetain:
+		return []byte(s), nil
+	case DocumentEventKindAppend:
+		return []byte(s), nil
+	case DocumentEventKindReprocess:
+		return []byte(s), nil
+	case DocumentEventKindRetag:
+		return []byte(s), nil
+	case DocumentEventKindFactEdited:
+		return []byte(s), nil
+	case DocumentEventKindFactInvalidated:
+		return []byte(s), nil
+	case DocumentEventKindFactRestored:
+		return []byte(s), nil
+	case DocumentEventKindFactDeleted:
+		return []byte(s), nil
+	case DocumentEventKindObservationsCleared:
+		return []byte(s), nil
+	case DocumentEventKindConsolidation:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *DocumentEventKind) UnmarshalText(data []byte) error {
+	switch DocumentEventKind(data) {
+	case DocumentEventKindRetain:
+		*s = DocumentEventKindRetain
+		return nil
+	case DocumentEventKindAppend:
+		*s = DocumentEventKindAppend
+		return nil
+	case DocumentEventKindReprocess:
+		*s = DocumentEventKindReprocess
+		return nil
+	case DocumentEventKindRetag:
+		*s = DocumentEventKindRetag
+		return nil
+	case DocumentEventKindFactEdited:
+		*s = DocumentEventKindFactEdited
+		return nil
+	case DocumentEventKindFactInvalidated:
+		*s = DocumentEventKindFactInvalidated
+		return nil
+	case DocumentEventKindFactRestored:
+		*s = DocumentEventKindFactRestored
+		return nil
+	case DocumentEventKindFactDeleted:
+		*s = DocumentEventKindFactDeleted
+		return nil
+	case DocumentEventKindObservationsCleared:
+		*s = DocumentEventKindObservationsCleared
+		return nil
+	case DocumentEventKindConsolidation:
+		*s = DocumentEventKindConsolidation
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Response for the async document-export endpoint (202).
 //
 // The export runs in the background; poll the operations endpoint for status. On completion the
@@ -4145,6 +4364,69 @@ func (s *DocumentExportSubmitResponse) SetStatus(val OptString) {
 }
 
 func (*DocumentExportSubmitResponse) exportDocumentsRes() {}
+
+// A document's change history, newest first. `total`, `limit` and `offset` count operations: one
+// operation can carry several events for the same document (an oversized retain in slices).
+// Ref: #/components/schemas/DocumentHistoryResponse
+type DocumentHistoryResponse struct {
+	DocumentID string          `json:"document_id"`
+	Total      int             `json:"total"`
+	Limit      int             `json:"limit"`
+	Offset     int             `json:"offset"`
+	Items      []DocumentEvent `json:"items"`
+}
+
+// GetDocumentID returns the value of DocumentID.
+func (s *DocumentHistoryResponse) GetDocumentID() string {
+	return s.DocumentID
+}
+
+// GetTotal returns the value of Total.
+func (s *DocumentHistoryResponse) GetTotal() int {
+	return s.Total
+}
+
+// GetLimit returns the value of Limit.
+func (s *DocumentHistoryResponse) GetLimit() int {
+	return s.Limit
+}
+
+// GetOffset returns the value of Offset.
+func (s *DocumentHistoryResponse) GetOffset() int {
+	return s.Offset
+}
+
+// GetItems returns the value of Items.
+func (s *DocumentHistoryResponse) GetItems() []DocumentEvent {
+	return s.Items
+}
+
+// SetDocumentID sets the value of DocumentID.
+func (s *DocumentHistoryResponse) SetDocumentID(val string) {
+	s.DocumentID = val
+}
+
+// SetTotal sets the value of Total.
+func (s *DocumentHistoryResponse) SetTotal(val int) {
+	s.Total = val
+}
+
+// SetLimit sets the value of Limit.
+func (s *DocumentHistoryResponse) SetLimit(val int) {
+	s.Limit = val
+}
+
+// SetOffset sets the value of Offset.
+func (s *DocumentHistoryResponse) SetOffset(val int) {
+	s.Offset = val
+}
+
+// SetItems sets the value of Items.
+func (s *DocumentHistoryResponse) SetItems(val []DocumentEvent) {
+	s.Items = val
+}
+
+func (*DocumentHistoryResponse) getDocumentHistoryRes() {}
 
 // Response for the async document-import endpoint (202).
 //
@@ -5773,6 +6055,11 @@ type GetAgentStatsNotFound struct{}
 
 func (*GetAgentStatsNotFound) getAgentStatsRes() {}
 
+// GetAuditLogNotFound is response for GetAuditLog operation.
+type GetAuditLogNotFound struct{}
+
+func (*GetAuditLogNotFound) getAuditLogRes() {}
+
 type GetBankAttachmentOK struct {
 	Data io.Reader
 }
@@ -5929,6 +6216,68 @@ func (s *GetEntityTagsMatch) UnmarshalText(data []byte) error {
 type GetGraphNotFound struct{}
 
 func (*GetGraphNotFound) getGraphRes() {}
+
+type GetGraphTagsMatch string
+
+const (
+	GetGraphTagsMatchAny       GetGraphTagsMatch = "any"
+	GetGraphTagsMatchAll       GetGraphTagsMatch = "all"
+	GetGraphTagsMatchAnyStrict GetGraphTagsMatch = "any_strict"
+	GetGraphTagsMatchAllStrict GetGraphTagsMatch = "all_strict"
+	GetGraphTagsMatchExact     GetGraphTagsMatch = "exact"
+)
+
+// AllValues returns all GetGraphTagsMatch values.
+func (GetGraphTagsMatch) AllValues() []GetGraphTagsMatch {
+	return []GetGraphTagsMatch{
+		GetGraphTagsMatchAny,
+		GetGraphTagsMatchAll,
+		GetGraphTagsMatchAnyStrict,
+		GetGraphTagsMatchAllStrict,
+		GetGraphTagsMatchExact,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s GetGraphTagsMatch) MarshalText() ([]byte, error) {
+	switch s {
+	case GetGraphTagsMatchAny:
+		return []byte(s), nil
+	case GetGraphTagsMatchAll:
+		return []byte(s), nil
+	case GetGraphTagsMatchAnyStrict:
+		return []byte(s), nil
+	case GetGraphTagsMatchAllStrict:
+		return []byte(s), nil
+	case GetGraphTagsMatchExact:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *GetGraphTagsMatch) UnmarshalText(data []byte) error {
+	switch GetGraphTagsMatch(data) {
+	case GetGraphTagsMatchAny:
+		*s = GetGraphTagsMatchAny
+		return nil
+	case GetGraphTagsMatchAll:
+		*s = GetGraphTagsMatchAll
+		return nil
+	case GetGraphTagsMatchAnyStrict:
+		*s = GetGraphTagsMatchAnyStrict
+		return nil
+	case GetGraphTagsMatchAllStrict:
+		*s = GetGraphTagsMatchAllStrict
+		return nil
+	case GetGraphTagsMatchExact:
+		*s = GetGraphTagsMatchExact
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
 
 // GetKnowledgeBaseTreeNotFound is response for GetKnowledgeBaseTree operation.
 type GetKnowledgeBaseTreeNotFound struct{}
@@ -6176,11 +6525,13 @@ func (*HTTPValidationError) exportDocumentsSyncRemovedRes()     {}
 func (*HTTPValidationError) exportKnowledgeBaseRes()            {}
 func (*HTTPValidationError) fileRetainRes()                     {}
 func (*HTTPValidationError) getAgentStatsRes()                  {}
+func (*HTTPValidationError) getAuditLogRes()                    {}
 func (*HTTPValidationError) getBankAttachmentRes()              {}
 func (*HTTPValidationError) getBankConfigRes()                  {}
 func (*HTTPValidationError) getBankProfileRes()                 {}
 func (*HTTPValidationError) getChunkRes()                       {}
 func (*HTTPValidationError) getDirectiveRes()                   {}
+func (*HTTPValidationError) getDocumentHistoryRes()             {}
 func (*HTTPValidationError) getDocumentRes()                    {}
 func (*HTTPValidationError) getEntityGraphRes()                 {}
 func (*HTTPValidationError) getEntityRes()                      {}
@@ -7861,6 +8212,69 @@ func (s *ListDocumentsResponse) SetOffset(val int) {
 
 func (*ListDocumentsResponse) listDocumentsRes() {}
 
+// How to match tags: 'any', 'all', 'any_strict', 'all_strict', 'exact'.
+type ListDocumentsTagsMatch string
+
+const (
+	ListDocumentsTagsMatchAny       ListDocumentsTagsMatch = "any"
+	ListDocumentsTagsMatchAll       ListDocumentsTagsMatch = "all"
+	ListDocumentsTagsMatchAnyStrict ListDocumentsTagsMatch = "any_strict"
+	ListDocumentsTagsMatchAllStrict ListDocumentsTagsMatch = "all_strict"
+	ListDocumentsTagsMatchExact     ListDocumentsTagsMatch = "exact"
+)
+
+// AllValues returns all ListDocumentsTagsMatch values.
+func (ListDocumentsTagsMatch) AllValues() []ListDocumentsTagsMatch {
+	return []ListDocumentsTagsMatch{
+		ListDocumentsTagsMatchAny,
+		ListDocumentsTagsMatchAll,
+		ListDocumentsTagsMatchAnyStrict,
+		ListDocumentsTagsMatchAllStrict,
+		ListDocumentsTagsMatchExact,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ListDocumentsTagsMatch) MarshalText() ([]byte, error) {
+	switch s {
+	case ListDocumentsTagsMatchAny:
+		return []byte(s), nil
+	case ListDocumentsTagsMatchAll:
+		return []byte(s), nil
+	case ListDocumentsTagsMatchAnyStrict:
+		return []byte(s), nil
+	case ListDocumentsTagsMatchAllStrict:
+		return []byte(s), nil
+	case ListDocumentsTagsMatchExact:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ListDocumentsTagsMatch) UnmarshalText(data []byte) error {
+	switch ListDocumentsTagsMatch(data) {
+	case ListDocumentsTagsMatchAny:
+		*s = ListDocumentsTagsMatchAny
+		return nil
+	case ListDocumentsTagsMatchAll:
+		*s = ListDocumentsTagsMatchAll
+		return nil
+	case ListDocumentsTagsMatchAnyStrict:
+		*s = ListDocumentsTagsMatchAnyStrict
+		return nil
+	case ListDocumentsTagsMatchAllStrict:
+		*s = ListDocumentsTagsMatchAllStrict
+		return nil
+	case ListDocumentsTagsMatchExact:
+		*s = ListDocumentsTagsMatchExact
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Time axis to filter and order by: `created_at` (when the document first arrived) or `updated_at`
 // (its last write, the default ordering). Filtering and ordering both follow `time_field`, and rows
 // with no value on that column are excluded — so `total` counts only rows carrying that timestamp,
@@ -7968,6 +8382,63 @@ func (s *ListEntitiesTagsMatch) UnmarshalText(data []byte) error {
 		return nil
 	case ListEntitiesTagsMatchExact:
 		*s = ListEntitiesTagsMatchExact
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Filter by kind of model call, told apart by scope: embedding (embedding_), rerank, decision
+// (decision_), or llm (every other scope).
+type ListLlmRequestsCallType string
+
+const (
+	ListLlmRequestsCallTypeLlm       ListLlmRequestsCallType = "llm"
+	ListLlmRequestsCallTypeEmbedding ListLlmRequestsCallType = "embedding"
+	ListLlmRequestsCallTypeRerank    ListLlmRequestsCallType = "rerank"
+	ListLlmRequestsCallTypeDecision  ListLlmRequestsCallType = "decision"
+)
+
+// AllValues returns all ListLlmRequestsCallType values.
+func (ListLlmRequestsCallType) AllValues() []ListLlmRequestsCallType {
+	return []ListLlmRequestsCallType{
+		ListLlmRequestsCallTypeLlm,
+		ListLlmRequestsCallTypeEmbedding,
+		ListLlmRequestsCallTypeRerank,
+		ListLlmRequestsCallTypeDecision,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ListLlmRequestsCallType) MarshalText() ([]byte, error) {
+	switch s {
+	case ListLlmRequestsCallTypeLlm:
+		return []byte(s), nil
+	case ListLlmRequestsCallTypeEmbedding:
+		return []byte(s), nil
+	case ListLlmRequestsCallTypeRerank:
+		return []byte(s), nil
+	case ListLlmRequestsCallTypeDecision:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ListLlmRequestsCallType) UnmarshalText(data []byte) error {
+	switch ListLlmRequestsCallType(data) {
+	case ListLlmRequestsCallTypeLlm:
+		*s = ListLlmRequestsCallTypeLlm
+		return nil
+	case ListLlmRequestsCallTypeEmbedding:
+		*s = ListLlmRequestsCallTypeEmbedding
+		return nil
+	case ListLlmRequestsCallTypeRerank:
+		*s = ListLlmRequestsCallTypeRerank
+		return nil
+	case ListLlmRequestsCallTypeDecision:
+		*s = ListLlmRequestsCallTypeDecision
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
@@ -8585,6 +9056,62 @@ func (s *LlmOperationHealthStatus) UnmarshalText(data []byte) error {
 		return nil
 	case LlmOperationHealthStatusTimeout:
 		*s = LlmOperationHealthStatusTimeout
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Filter by kind of model call: llm, embedding, rerank or decision.
+type LlmRequestStatsCallType string
+
+const (
+	LlmRequestStatsCallTypeLlm       LlmRequestStatsCallType = "llm"
+	LlmRequestStatsCallTypeEmbedding LlmRequestStatsCallType = "embedding"
+	LlmRequestStatsCallTypeRerank    LlmRequestStatsCallType = "rerank"
+	LlmRequestStatsCallTypeDecision  LlmRequestStatsCallType = "decision"
+)
+
+// AllValues returns all LlmRequestStatsCallType values.
+func (LlmRequestStatsCallType) AllValues() []LlmRequestStatsCallType {
+	return []LlmRequestStatsCallType{
+		LlmRequestStatsCallTypeLlm,
+		LlmRequestStatsCallTypeEmbedding,
+		LlmRequestStatsCallTypeRerank,
+		LlmRequestStatsCallTypeDecision,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s LlmRequestStatsCallType) MarshalText() ([]byte, error) {
+	switch s {
+	case LlmRequestStatsCallTypeLlm:
+		return []byte(s), nil
+	case LlmRequestStatsCallTypeEmbedding:
+		return []byte(s), nil
+	case LlmRequestStatsCallTypeRerank:
+		return []byte(s), nil
+	case LlmRequestStatsCallTypeDecision:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *LlmRequestStatsCallType) UnmarshalText(data []byte) error {
+	switch LlmRequestStatsCallType(data) {
+	case LlmRequestStatsCallTypeLlm:
+		*s = LlmRequestStatsCallTypeLlm
+		return nil
+	case LlmRequestStatsCallTypeEmbedding:
+		*s = LlmRequestStatsCallTypeEmbedding
+		return nil
+	case LlmRequestStatsCallTypeRerank:
+		*s = LlmRequestStatsCallTypeRerank
+		return nil
+	case LlmRequestStatsCallTypeDecision:
+		*s = LlmRequestStatsCallTypeDecision
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
@@ -12392,6 +12919,33 @@ func (s *MinScores) SetFinal(val OptFloat64) {
 	s.Final = val
 }
 
+// How many observations an event touched, and (up to `MAX_IDS`) which.
+// Ref: #/components/schemas/ObservationIdSample
+type ObservationIdSample struct {
+	Count OptInt   `json:"count"`
+	Ids   []string `json:"ids"`
+}
+
+// GetCount returns the value of Count.
+func (s *ObservationIdSample) GetCount() OptInt {
+	return s.Count
+}
+
+// GetIds returns the value of Ids.
+func (s *ObservationIdSample) GetIds() []string {
+	return s.Ids
+}
+
+// SetCount sets the value of Count.
+func (s *ObservationIdSample) SetCount(val OptInt) {
+	s.Count = val
+}
+
+// SetIds sets the value of Ids.
+func (s *ObservationIdSample) SetIds(val []string) {
+	s.Ids = val
+}
+
 // A distinct observation scope: an exact tag set plus its observation count.
 // Ref: #/components/schemas/ObservationScope
 type ObservationScope struct {
@@ -14183,6 +14737,52 @@ func (o OptGetEntityTagsMatch) Or(d GetEntityTagsMatch) GetEntityTagsMatch {
 	return d
 }
 
+// NewOptGetGraphTagsMatch returns new OptGetGraphTagsMatch with value set to v.
+func NewOptGetGraphTagsMatch(v GetGraphTagsMatch) OptGetGraphTagsMatch {
+	return OptGetGraphTagsMatch{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptGetGraphTagsMatch is optional GetGraphTagsMatch.
+type OptGetGraphTagsMatch struct {
+	Value GetGraphTagsMatch
+	Set   bool
+}
+
+// IsSet returns true if OptGetGraphTagsMatch was set.
+func (o OptGetGraphTagsMatch) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptGetGraphTagsMatch) Reset() {
+	var v GetGraphTagsMatch
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptGetGraphTagsMatch) SetTo(v GetGraphTagsMatch) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptGetGraphTagsMatch) Get() (v GetGraphTagsMatch, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptGetGraphTagsMatch) Or(d GetGraphTagsMatch) GetGraphTagsMatch {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptGetKnowledgeBaseTreeTagsMatch returns new OptGetKnowledgeBaseTreeTagsMatch with value set to v.
 func NewOptGetKnowledgeBaseTreeTagsMatch(v GetKnowledgeBaseTreeTagsMatch) OptGetKnowledgeBaseTreeTagsMatch {
 	return OptGetKnowledgeBaseTreeTagsMatch{
@@ -14597,6 +15197,52 @@ func (o OptListDirectivesTagsMatch) Or(d ListDirectivesTagsMatch) ListDirectives
 	return d
 }
 
+// NewOptListDocumentsTagsMatch returns new OptListDocumentsTagsMatch with value set to v.
+func NewOptListDocumentsTagsMatch(v ListDocumentsTagsMatch) OptListDocumentsTagsMatch {
+	return OptListDocumentsTagsMatch{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptListDocumentsTagsMatch is optional ListDocumentsTagsMatch.
+type OptListDocumentsTagsMatch struct {
+	Value ListDocumentsTagsMatch
+	Set   bool
+}
+
+// IsSet returns true if OptListDocumentsTagsMatch was set.
+func (o OptListDocumentsTagsMatch) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptListDocumentsTagsMatch) Reset() {
+	var v ListDocumentsTagsMatch
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptListDocumentsTagsMatch) SetTo(v ListDocumentsTagsMatch) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptListDocumentsTagsMatch) Get() (v ListDocumentsTagsMatch, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptListDocumentsTagsMatch) Or(d ListDocumentsTagsMatch) ListDocumentsTagsMatch {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptListDocumentsTimeField returns new OptListDocumentsTimeField with value set to v.
 func NewOptListDocumentsTimeField(v ListDocumentsTimeField) OptListDocumentsTimeField {
 	return OptListDocumentsTimeField{
@@ -14683,6 +15329,52 @@ func (o OptListEntitiesTagsMatch) Get() (v ListEntitiesTagsMatch, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptListEntitiesTagsMatch) Or(d ListEntitiesTagsMatch) ListEntitiesTagsMatch {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptListLlmRequestsCallType returns new OptListLlmRequestsCallType with value set to v.
+func NewOptListLlmRequestsCallType(v ListLlmRequestsCallType) OptListLlmRequestsCallType {
+	return OptListLlmRequestsCallType{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptListLlmRequestsCallType is optional ListLlmRequestsCallType.
+type OptListLlmRequestsCallType struct {
+	Value ListLlmRequestsCallType
+	Set   bool
+}
+
+// IsSet returns true if OptListLlmRequestsCallType was set.
+func (o OptListLlmRequestsCallType) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptListLlmRequestsCallType) Reset() {
+	var v ListLlmRequestsCallType
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptListLlmRequestsCallType) SetTo(v ListLlmRequestsCallType) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptListLlmRequestsCallType) Get() (v ListLlmRequestsCallType, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptListLlmRequestsCallType) Or(d ListLlmRequestsCallType) ListLlmRequestsCallType {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -14913,6 +15605,52 @@ func (o OptListTagsSource) Get() (v ListTagsSource, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptListTagsSource) Or(d ListTagsSource) ListTagsSource {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptLlmRequestStatsCallType returns new OptLlmRequestStatsCallType with value set to v.
+func NewOptLlmRequestStatsCallType(v LlmRequestStatsCallType) OptLlmRequestStatsCallType {
+	return OptLlmRequestStatsCallType{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptLlmRequestStatsCallType is optional LlmRequestStatsCallType.
+type OptLlmRequestStatsCallType struct {
+	Value LlmRequestStatsCallType
+	Set   bool
+}
+
+// IsSet returns true if OptLlmRequestStatsCallType was set.
+func (o OptLlmRequestStatsCallType) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptLlmRequestStatsCallType) Reset() {
+	var v LlmRequestStatsCallType
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptLlmRequestStatsCallType) SetTo(v LlmRequestStatsCallType) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptLlmRequestStatsCallType) Get() (v LlmRequestStatsCallType, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptLlmRequestStatsCallType) Or(d LlmRequestStatsCallType) LlmRequestStatsCallType {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -16109,6 +16847,188 @@ func (o OptMinScores) Get() (v MinScores, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptMinScores) Or(d MinScores) MinScores {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilRefreshMentalModelRequest returns new OptNilRefreshMentalModelRequest with value set to v.
+func NewOptNilRefreshMentalModelRequest(v RefreshMentalModelRequest) OptNilRefreshMentalModelRequest {
+	return OptNilRefreshMentalModelRequest{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilRefreshMentalModelRequest is optional nullable RefreshMentalModelRequest.
+type OptNilRefreshMentalModelRequest struct {
+	Value RefreshMentalModelRequest
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilRefreshMentalModelRequest was set.
+func (o OptNilRefreshMentalModelRequest) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilRefreshMentalModelRequest) Reset() {
+	var v RefreshMentalModelRequest
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilRefreshMentalModelRequest) SetTo(v RefreshMentalModelRequest) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilRefreshMentalModelRequest) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilRefreshMentalModelRequest) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v RefreshMentalModelRequest
+	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilRefreshMentalModelRequest) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilRefreshMentalModelRequest) Get() (v RefreshMentalModelRequest, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilRefreshMentalModelRequest) Or(d RefreshMentalModelRequest) RefreshMentalModelRequest {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilString returns new OptNilString with value set to v.
+func NewOptNilString(v string) OptNilString {
+	return OptNilString{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilString is optional nullable string.
+type OptNilString struct {
+	Value string
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilString was set.
+func (o OptNilString) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilString) Reset() {
+	var v string
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilString) SetTo(v string) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilString) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilString) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v string
+	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilString) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilString) Get() (v string, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilString) Or(d string) string {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptObservationIdSample returns new OptObservationIdSample with value set to v.
+func NewOptObservationIdSample(v ObservationIdSample) OptObservationIdSample {
+	return OptObservationIdSample{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptObservationIdSample is optional ObservationIdSample.
+type OptObservationIdSample struct {
+	Value ObservationIdSample
+	Set   bool
+}
+
+// IsSet returns true if OptObservationIdSample was set.
+func (o OptObservationIdSample) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptObservationIdSample) Reset() {
+	var v ObservationIdSample
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptObservationIdSample) SetTo(v ObservationIdSample) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptObservationIdSample) Get() (v ObservationIdSample, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptObservationIdSample) Or(d ObservationIdSample) ObservationIdSample {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -19838,6 +20758,24 @@ func (s *RefreshMentalModelOperationDetailsOutcome) UnmarshalText(data []byte) e
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
+}
+
+// Optional body of POST /mental-models/{id}/refresh.
+// Ref: #/components/schemas/RefreshMentalModelRequest
+type RefreshMentalModelRequest struct {
+	// 'full' regenerates the content from scratch for this refresh only, whatever `trigger.mode` says; the
+	// stored trigger is not changed. null runs the model's own mode.
+	Mode OptNilString `json:"mode"`
+}
+
+// GetMode returns the value of Mode.
+func (s *RefreshMentalModelRequest) GetMode() OptNilString {
+	return s.Mode
+}
+
+// SetMode sets the value of Mode.
+func (s *RefreshMentalModelRequest) SetMode(val OptNilString) {
+	s.Mode = val
 }
 
 // Response model for reprocess document endpoint.

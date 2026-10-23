@@ -23,11 +23,11 @@ import (
 )
 
 // Version is the semantic version of this Go implementation.
-const Version = "0.1.0"
+const Version = "0.1.2"
 
 // UpstreamAPIVersion mirrors the upstream OpenAPI info.version the generated
 // types were frozen from.
-const UpstreamAPIVersion = "0.10.2"
+const UpstreamAPIVersion = "1.1.0"
 
 // startedAt backs the liveness uptime field.
 var startedAt = time.Now()

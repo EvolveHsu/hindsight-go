@@ -439,6 +439,15 @@ func (UnimplementedHandler) GetAgentStats(ctx context.Context, params GetAgentSt
 	return r, ht.ErrNotImplemented
 }
 
+// GetAuditLog implements get_audit_log operation.
+//
+// Get one audit log entry with its full request and response bodies.
+//
+// GET /v1/default/banks/{bank_id}/audit-logs/{log_id}
+func (UnimplementedHandler) GetAuditLog(ctx context.Context, params GetAuditLogParams) (r GetAuditLogRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetBankAttachment implements get_bank_attachment operation.
 //
 // Serve the bytes of an attachment retained as inline content. The id is the one inside a placeholder
@@ -515,6 +524,26 @@ func (UnimplementedHandler) GetDirective(ctx context.Context, params GetDirectiv
 //
 // GET /v1/default/banks/{bank_id}/documents/{document_id}
 func (UnimplementedHandler) GetDocument(ctx context.Context, params GetDocumentParams) (r GetDocumentRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetDocumentHistory implements get_document_history operation.
+//
+// What each change to a document did, newest first: every retain, append and reprocess (facts added
+// and removed), every fact edit, invalidation, restore, delete, retag and per-fact observation clear
+// (observations removed), and every consolidation run (observations created, updated and removed).
+// Observations are rebuilt, not versioned, so this is the only record of the ones a change removed.
+// Ids and counts only, with each id list capped at 100.
+//
+// Rebuilt from the bank's async operations, which carry these events: it reaches back only as far as
+// operations are kept (HINDSIGHT_API_OPERATION_RETENTION_DAYS, unlimited by default), and a change
+// that ran without an operation is not in it — a synchronous retain (async=false), or a fact edit,
+// delete or retag while auto-consolidation is off. A fact edit, delete or retag is recorded on the
+// consolidation operation it queues. Clearing every observation in the bank is not listed. total,
+// limit and offset count operations, not events.
+//
+// GET /v1/default/banks/{bank_id}/documents/{document_id}/history
+func (UnimplementedHandler) GetDocumentHistory(ctx context.Context, params GetDocumentHistoryParams) (r GetDocumentHistoryRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -957,7 +986,7 @@ func (UnimplementedHandler) Reflect(ctx context.Context, req *ReflectRequest, pa
 // Submit an async task to re-run the source query through reflect and update the content.
 //
 // POST /v1/default/banks/{bank_id}/mental-models/{mental_model_id}/refresh
-func (UnimplementedHandler) RefreshMentalModel(ctx context.Context, params RefreshMentalModelParams) (r RefreshMentalModelRes, _ error) {
+func (UnimplementedHandler) RefreshMentalModel(ctx context.Context, req OptNilRefreshMentalModelRequest, params RefreshMentalModelParams) (r RefreshMentalModelRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

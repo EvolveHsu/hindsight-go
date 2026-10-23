@@ -218,6 +218,18 @@ func (s *DirectiveResponse) setDefaults() {
 }
 
 // setDefaults set default value of fields.
+func (s *DocumentEvent) setDefaults() {
+	{
+		val := int(0)
+		s.FactsAdded.SetTo(val)
+	}
+	{
+		val := int(0)
+		s.FactsRemoved.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
 func (s *DocumentExportSubmitResponse) setDefaults() {
 	{
 		val := string("pending")
@@ -584,7 +596,7 @@ func (s *MentalModelTraceToolCall) setDefaults() {
 // setDefaults set default value of fields.
 func (s *MentalModelTriggerInput) setDefaults() {
 	{
-		val := Budget("mid")
+		val := Budget("low")
 		s.Budget.SetTo(val)
 	}
 	{
@@ -608,7 +620,7 @@ func (s *MentalModelTriggerInput) setDefaults() {
 // setDefaults set default value of fields.
 func (s *MentalModelTriggerOutput) setDefaults() {
 	{
-		val := Budget("mid")
+		val := Budget("low")
 		s.Budget.SetTo(val)
 	}
 	{
@@ -626,6 +638,14 @@ func (s *MentalModelTriggerOutput) setDefaults() {
 	{
 		val := bool(false)
 		s.KeepTrace.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *ObservationIdSample) setDefaults() {
+	{
+		val := int(0)
+		s.Count.SetTo(val)
 	}
 }
 
@@ -668,7 +688,7 @@ func (s *RecallRequest) setDefaults() {
 		s.PreferObservations.SetTo(val)
 	}
 	{
-		val := Budget("mid")
+		val := Budget("low")
 		s.Budget.SetTo(val)
 	}
 	{
@@ -704,7 +724,7 @@ func (s *ReflectBasedOn) setDefaults() {
 // setDefaults set default value of fields.
 func (s *ReflectRequest) setDefaults() {
 	{
-		val := Budget("mid")
+		val := Budget("low")
 		s.Budget.SetTo(val)
 	}
 	{

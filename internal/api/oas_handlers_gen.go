@@ -5135,6 +5135,153 @@ func (s *Server) handleGetAgentStatsRequest(args [1]string, argsEscaped bool, w 
 	}
 }
 
+// handleGetAuditLogRequest handles get_audit_log operation.
+//
+// Get one audit log entry with its full request and response bodies.
+//
+// GET /v1/default/banks/{bank_id}/audit-logs/{log_id}
+func (s *Server) handleGetAuditLogRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	statusWriter := &codeRecorder{ResponseWriter: w}
+	w = statusWriter
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("get_audit_log"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v1/default/banks/{bank_id}/audit-logs/{log_id}"),
+	}
+	// Add attributes from config.
+	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), GetAuditLogOperation,
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Add Labeler to context.
+	labeler := &Labeler{attrs: otelAttrs}
+	ctx = contextWithLabeler(ctx, labeler)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+
+		attrSet := labeler.AttributeSet()
+		attrs := attrSet.ToSlice()
+		code := statusWriter.status
+		if code != 0 {
+			codeAttr := semconv.HTTPResponseStatusCode(code)
+			attrs = append(attrs, codeAttr)
+			span.SetAttributes(attrs...)
+		}
+		attrOpt := metric.WithAttributes(attrs...)
+
+		// Increment request counter.
+		s.requests.Add(ctx, 1, attrOpt)
+
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), attrOpt)
+	}()
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+
+			// https://opentelemetry.io/docs/specs/semconv/http/http-spans/#status
+			// Span Status MUST be left unset if HTTP status code was in the 1xx, 2xx or 3xx ranges,
+			// unless there was another error (e.g., network error receiving the response body; or 3xx codes with
+			// max redirects exceeded), in which case status MUST be set to Error.
+			code := statusWriter.status
+			if code < 100 || code >= 500 {
+				span.SetStatus(codes.Error, stage)
+			}
+
+			attrSet := labeler.AttributeSet()
+			attrs := attrSet.ToSlice()
+			if code != 0 {
+				attrs = append(attrs, semconv.HTTPResponseStatusCode(code))
+			}
+
+			s.errors.Add(ctx, 1, metric.WithAttributes(attrs...))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: GetAuditLogOperation,
+			ID:   "get_audit_log",
+		}
+	)
+	params, err := decodeGetAuditLogParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var rawBody []byte
+
+	var response GetAuditLogRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    GetAuditLogOperation,
+			OperationSummary: "Get audit log entry",
+			OperationID:      "get_audit_log",
+			Body:             nil,
+			RawBody:          rawBody,
+			Params: middleware.Parameters{
+				{
+					Name: "bank_id",
+					In:   "path",
+				}: params.BankID,
+				{
+					Name: "log_id",
+					In:   "path",
+				}: params.LogID,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = GetAuditLogParams
+			Response = GetAuditLogRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackGetAuditLogParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetAuditLog(ctx, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.GetAuditLog(ctx, params)
+	}
+	if err != nil {
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeGetAuditLogResponse(response, w, span); err != nil {
+		defer recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
 // handleGetBankAttachmentRequest handles get_bank_attachment operation.
 //
 // Serve the bytes of an attachment retained as inline content. The id is the one inside a placeholder
@@ -6137,6 +6284,172 @@ func (s *Server) handleGetDocumentRequest(args [2]string, argsEscaped bool, w ht
 	}
 
 	if err := encodeGetDocumentResponse(response, w, span); err != nil {
+		defer recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
+// handleGetDocumentHistoryRequest handles get_document_history operation.
+//
+// What each change to a document did, newest first: every retain, append and reprocess (facts added
+// and removed), every fact edit, invalidation, restore, delete, retag and per-fact observation clear
+// (observations removed), and every consolidation run (observations created, updated and removed).
+// Observations are rebuilt, not versioned, so this is the only record of the ones a change removed.
+// Ids and counts only, with each id list capped at 100.
+//
+// Rebuilt from the bank's async operations, which carry these events: it reaches back only as far as
+// operations are kept (HINDSIGHT_API_OPERATION_RETENTION_DAYS, unlimited by default), and a change
+// that ran without an operation is not in it — a synchronous retain (async=false), or a fact edit,
+// delete or retag while auto-consolidation is off. A fact edit, delete or retag is recorded on the
+// consolidation operation it queues. Clearing every observation in the bank is not listed. total,
+// limit and offset count operations, not events.
+//
+// GET /v1/default/banks/{bank_id}/documents/{document_id}/history
+func (s *Server) handleGetDocumentHistoryRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	statusWriter := &codeRecorder{ResponseWriter: w}
+	w = statusWriter
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("get_document_history"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/v1/default/banks/{bank_id}/documents/{document_id}/history"),
+	}
+	// Add attributes from config.
+	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), GetDocumentHistoryOperation,
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Add Labeler to context.
+	labeler := &Labeler{attrs: otelAttrs}
+	ctx = contextWithLabeler(ctx, labeler)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+
+		attrSet := labeler.AttributeSet()
+		attrs := attrSet.ToSlice()
+		code := statusWriter.status
+		if code != 0 {
+			codeAttr := semconv.HTTPResponseStatusCode(code)
+			attrs = append(attrs, codeAttr)
+			span.SetAttributes(attrs...)
+		}
+		attrOpt := metric.WithAttributes(attrs...)
+
+		// Increment request counter.
+		s.requests.Add(ctx, 1, attrOpt)
+
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), attrOpt)
+	}()
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+
+			// https://opentelemetry.io/docs/specs/semconv/http/http-spans/#status
+			// Span Status MUST be left unset if HTTP status code was in the 1xx, 2xx or 3xx ranges,
+			// unless there was another error (e.g., network error receiving the response body; or 3xx codes with
+			// max redirects exceeded), in which case status MUST be set to Error.
+			code := statusWriter.status
+			if code < 100 || code >= 500 {
+				span.SetStatus(codes.Error, stage)
+			}
+
+			attrSet := labeler.AttributeSet()
+			attrs := attrSet.ToSlice()
+			if code != 0 {
+				attrs = append(attrs, semconv.HTTPResponseStatusCode(code))
+			}
+
+			s.errors.Add(ctx, 1, metric.WithAttributes(attrs...))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: GetDocumentHistoryOperation,
+			ID:   "get_document_history",
+		}
+	)
+	params, err := decodeGetDocumentHistoryParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var rawBody []byte
+
+	var response GetDocumentHistoryRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    GetDocumentHistoryOperation,
+			OperationSummary: "Get document change history",
+			OperationID:      "get_document_history",
+			Body:             nil,
+			RawBody:          rawBody,
+			Params: middleware.Parameters{
+				{
+					Name: "bank_id",
+					In:   "path",
+				}: params.BankID,
+				{
+					Name: "document_id",
+					In:   "path",
+				}: params.DocumentID,
+				{
+					Name: "limit",
+					In:   "query",
+				}: params.Limit,
+				{
+					Name: "offset",
+					In:   "query",
+				}: params.Offset,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = GetDocumentHistoryParams
+			Response = GetDocumentHistoryRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackGetDocumentHistoryParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetDocumentHistory(ctx, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.GetDocumentHistory(ctx, params)
+	}
+	if err != nil {
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeGetDocumentHistoryResponse(response, w, span); err != nil {
 		defer recordError("EncodeResponse", err)
 		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
@@ -10107,6 +10420,10 @@ func (s *Server) handleListLlmRequestsRequest(args [1]string, argsEscaped bool, 
 					In:   "query",
 				}: params.Scope,
 				{
+					Name: "call_type",
+					In:   "query",
+				}: params.CallType,
+				{
 					Name: "provider",
 					In:   "query",
 				}: params.Provider,
@@ -10502,6 +10819,10 @@ func (s *Server) handleListMentalModelsRequest(args [1]string, argsEscaped bool,
 					Name: "offset",
 					In:   "query",
 				}: params.Offset,
+				{
+					Name: "exclude_knowledge_pages",
+					In:   "query",
+				}: params.ExcludeKnowledgePages,
 			},
 			Raw: r,
 		}
@@ -11436,6 +11757,10 @@ func (s *Server) handleLlmRequestStatsRequest(args [1]string, argsEscaped bool, 
 					Name: "operation",
 					In:   "query",
 				}: params.Operation,
+				{
+					Name: "call_type",
+					In:   "query",
+				}: params.CallType,
 				{
 					Name: "period",
 					In:   "query",
@@ -12493,6 +12818,21 @@ func (s *Server) handleRefreshMentalModelRequest(args [2]string, argsEscaped boo
 	}
 
 	var rawBody []byte
+	request, rawBody, close, err := s.decodeRefreshMentalModelRequest(r)
+	if err != nil {
+		err = &ogenerrors.DecodeRequestError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeRequest", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	defer func() {
+		if err := close(); err != nil {
+			recordError("CloseRequest", err)
+		}
+	}()
 
 	var response RefreshMentalModelRes
 	if m := s.cfg.Middleware; m != nil {
@@ -12501,7 +12841,7 @@ func (s *Server) handleRefreshMentalModelRequest(args [2]string, argsEscaped boo
 			OperationName:    RefreshMentalModelOperation,
 			OperationSummary: "Refresh mental model",
 			OperationID:      "refresh_mental_model",
-			Body:             nil,
+			Body:             request,
 			RawBody:          rawBody,
 			Params: middleware.Parameters{
 				{
@@ -12517,7 +12857,7 @@ func (s *Server) handleRefreshMentalModelRequest(args [2]string, argsEscaped boo
 		}
 
 		type (
-			Request  = struct{}
+			Request  = OptNilRefreshMentalModelRequest
 			Params   = RefreshMentalModelParams
 			Response = RefreshMentalModelRes
 		)
@@ -12530,12 +12870,12 @@ func (s *Server) handleRefreshMentalModelRequest(args [2]string, argsEscaped boo
 			mreq,
 			unpackRefreshMentalModelParams,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.RefreshMentalModel(ctx, params)
+				response, err = s.h.RefreshMentalModel(ctx, request, params)
 				return response, err
 			},
 		)
 	} else {
-		response, err = s.h.RefreshMentalModel(ctx, params)
+		response, err = s.h.RefreshMentalModel(ctx, request, params)
 	}
 	if err != nil {
 		defer recordError("Internal", err)

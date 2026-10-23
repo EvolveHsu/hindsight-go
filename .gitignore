@@ -8,3 +8,4 @@ tools/out/
 .env
 .env.*
 !.env.example
+*.dump

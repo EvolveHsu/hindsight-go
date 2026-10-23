@@ -1,9 +1,9 @@
 package server
 
 import (
-	"os"
 	"context"
 	"net/http"
+	"os"
 	"strings"
 
 	api "github.com/EvolveHsu/hindsight-go/internal/api"
