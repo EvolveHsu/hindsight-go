@@ -235,7 +235,7 @@ FROM llm_requests WHERE %[2]s ORDER BY started_at DESC LIMIT $%[3]d OFFSET $%[4]
 	})
 }
 
-func (s *Store) LLMStatsJSON(ctx context.Context, bankID, operation, period string) ([]byte, error) {
+func (s *Store) LLMStatsJSON(ctx context.Context, bankID, operation, period, splitBy string) ([]byte, error) {
 	trunc := "day"
 	interval := "7 days"
 	switch period {
@@ -309,9 +309,49 @@ GROUP BY 1,2 ORDER BY 1`, trunc, auditTimeLayout, opFilter), args...)
 	if len(buckets) > 0 {
 		start = buckets[0].Time
 	}
-	return json.Marshal(map[string]any{
+	out := map[string]any{
 		"bank_id": bankID, "period": period, "trunc": trunc, "start": start, "buckets": buckets,
-	})
+	}
+	// v1.2.0 split_by: one extra pass grouping each bucket by model or operation.
+	if splitBy == "model" || splitBy == "operation" {
+		col := "model"
+		if splitBy == "operation" {
+			col = "operation"
+		}
+		grows, gerr := s.pool.Query(ctx, fmt.Sprintf(`
+SELECT to_char(date_trunc('%s', started_at), '%s'), COALESCE(%s,''), status, count(*),
+       COALESCE(sum(total_tokens),0)
+FROM llm_requests
+WHERE bank_id=$1 AND started_at >= now() - $2::interval%s
+GROUP BY 1,2,3 ORDER BY 1,2`, trunc, auditTimeLayout, col, opFilter), args...)
+		if gerr != nil {
+			return nil, gerr
+		}
+		defer grows.Close()
+		type seriesRow struct {
+			Time   string `json:"time"`
+			Key    string `json:"key"`
+			Total  int    `json:"total"`
+			Calls  int    `json:"calls"`
+			Tokens int    `json:"tokens"`
+		}
+		series := []seriesRow{}
+		for grows.Next() {
+			var r seriesRow
+			var status string
+			if err := grows.Scan(&r.Time, &r.Key, &status, &r.Total, &r.Tokens); err != nil {
+				return nil, err
+			}
+			r.Calls = r.Total
+			series = append(series, r)
+		}
+		if err := grows.Err(); err != nil {
+			return nil, err
+		}
+		out["series"] = series
+		out["split_by"] = splitBy
+	}
+	return json.Marshal(out)
 }
 
 func (s *Store) MentalModelHistoryJSON(ctx context.Context, bankID, modelID string) ([]byte, error) {

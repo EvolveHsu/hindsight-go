@@ -596,7 +596,7 @@ func (s *MentalModelTraceToolCall) setDefaults() {
 // setDefaults set default value of fields.
 func (s *MentalModelTriggerInput) setDefaults() {
 	{
-		val := Budget("low")
+		val := Budget("mid")
 		s.Budget.SetTo(val)
 	}
 	{
@@ -620,7 +620,7 @@ func (s *MentalModelTriggerInput) setDefaults() {
 // setDefaults set default value of fields.
 func (s *MentalModelTriggerOutput) setDefaults() {
 	{
-		val := Budget("low")
+		val := Budget("mid")
 		s.Budget.SetTo(val)
 	}
 	{
@@ -688,7 +688,7 @@ func (s *RecallRequest) setDefaults() {
 		s.PreferObservations.SetTo(val)
 	}
 	{
-		val := Budget("low")
+		val := Budget("mid")
 		s.Budget.SetTo(val)
 	}
 	{
@@ -724,7 +724,7 @@ func (s *ReflectBasedOn) setDefaults() {
 // setDefaults set default value of fields.
 func (s *ReflectRequest) setDefaults() {
 	{
-		val := Budget("low")
+		val := Budget("mid")
 		s.Budget.SetTo(val)
 	}
 	{

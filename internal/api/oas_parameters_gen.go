@@ -13634,8 +13634,10 @@ type LlmRequestStatsParams struct {
 	Operation OptString `json:",omitempty,omitzero"`
 	// Filter by kind of model call: llm, embedding, rerank or decision.
 	CallType OptLlmRequestStatsCallType `json:",omitempty,omitzero"`
-	// Time period: 1d, 7d, or 30d.
+	// Time period: 1d (by hour), 7d, or 30d (by day).
 	Period OptString `json:",omitempty,omitzero"`
+	// Also split each bucket by model or by operation (returned in `series`).
+	SplitBy OptLlmRequestStatsSplitBy `json:",omitempty,omitzero"`
 }
 
 func unpackLlmRequestStatsParams(packed middleware.Parameters) (params LlmRequestStatsParams) {
@@ -13671,6 +13673,15 @@ func unpackLlmRequestStatsParams(packed middleware.Parameters) (params LlmReques
 		}
 		if v, ok := packed[key]; ok {
 			params.Period = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "split_by",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.SplitBy = v.(OptLlmRequestStatsSplitBy)
 		}
 	}
 	return params
@@ -13862,6 +13873,62 @@ func decodeLlmRequestStatsParams(args [1]string, argsEscaped bool, r *http.Reque
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "period",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: split_by.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "split_by",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotSplitByVal LlmRequestStatsSplitBy
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotSplitByVal = LlmRequestStatsSplitBy(c)
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.SplitBy.SetTo(paramsDotSplitByVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.SplitBy.Get(); ok {
+					if err := func() error {
+						if err := value.Validate(); err != nil {
+							return err
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "split_by",
 			In:   "query",
 			Err:  err,
 		}

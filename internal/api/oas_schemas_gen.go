@@ -7595,6 +7595,8 @@ type LLMRequestStatsResponse struct {
 	Trunc   string                  `json:"trunc"`
 	Start   string                  `json:"start"`
 	Buckets []LLMRequestStatsBucket `json:"buckets"`
+	// Only present when split_by is used. Per-bucket breakdown by model or operation.
+	Series []LLMRequestStatsResponseSeriesItem `json:"series"`
 }
 
 // GetBankID returns the value of BankID.
@@ -7622,6 +7624,11 @@ func (s *LLMRequestStatsResponse) GetBuckets() []LLMRequestStatsBucket {
 	return s.Buckets
 }
 
+// GetSeries returns the value of Series.
+func (s *LLMRequestStatsResponse) GetSeries() []LLMRequestStatsResponseSeriesItem {
+	return s.Series
+}
+
 // SetBankID sets the value of BankID.
 func (s *LLMRequestStatsResponse) SetBankID(val string) {
 	s.BankID = val
@@ -7647,7 +7654,70 @@ func (s *LLMRequestStatsResponse) SetBuckets(val []LLMRequestStatsBucket) {
 	s.Buckets = val
 }
 
+// SetSeries sets the value of Series.
+func (s *LLMRequestStatsResponse) SetSeries(val []LLMRequestStatsResponseSeriesItem) {
+	s.Series = val
+}
+
 func (*LLMRequestStatsResponse) llmRequestStatsRes() {}
+
+type LLMRequestStatsResponseSeriesItem struct {
+	Time   string `json:"time"`
+	Key    string `json:"key"`
+	Total  OptInt `json:"total"`
+	Calls  int    `json:"calls"`
+	Tokens int    `json:"tokens"`
+}
+
+// GetTime returns the value of Time.
+func (s *LLMRequestStatsResponseSeriesItem) GetTime() string {
+	return s.Time
+}
+
+// GetKey returns the value of Key.
+func (s *LLMRequestStatsResponseSeriesItem) GetKey() string {
+	return s.Key
+}
+
+// GetTotal returns the value of Total.
+func (s *LLMRequestStatsResponseSeriesItem) GetTotal() OptInt {
+	return s.Total
+}
+
+// GetCalls returns the value of Calls.
+func (s *LLMRequestStatsResponseSeriesItem) GetCalls() int {
+	return s.Calls
+}
+
+// GetTokens returns the value of Tokens.
+func (s *LLMRequestStatsResponseSeriesItem) GetTokens() int {
+	return s.Tokens
+}
+
+// SetTime sets the value of Time.
+func (s *LLMRequestStatsResponseSeriesItem) SetTime(val string) {
+	s.Time = val
+}
+
+// SetKey sets the value of Key.
+func (s *LLMRequestStatsResponseSeriesItem) SetKey(val string) {
+	s.Key = val
+}
+
+// SetTotal sets the value of Total.
+func (s *LLMRequestStatsResponseSeriesItem) SetTotal(val OptInt) {
+	s.Total = val
+}
+
+// SetCalls sets the value of Calls.
+func (s *LLMRequestStatsResponseSeriesItem) SetCalls(val int) {
+	s.Calls = val
+}
+
+// SetTokens sets the value of Tokens.
+func (s *LLMRequestStatsResponseSeriesItem) SetTokens(val int) {
+	s.Tokens = val
+}
 
 // Token totals for a time bucket.
 // Ref: #/components/schemas/LLMRequestTokenSums
@@ -9122,6 +9192,48 @@ func (s *LlmRequestStatsCallType) UnmarshalText(data []byte) error {
 type LlmRequestStatsNotFound struct{}
 
 func (*LlmRequestStatsNotFound) llmRequestStatsRes() {}
+
+// Also split each bucket by model or by operation (returned in `series`).
+type LlmRequestStatsSplitBy string
+
+const (
+	LlmRequestStatsSplitByModel     LlmRequestStatsSplitBy = "model"
+	LlmRequestStatsSplitByOperation LlmRequestStatsSplitBy = "operation"
+)
+
+// AllValues returns all LlmRequestStatsSplitBy values.
+func (LlmRequestStatsSplitBy) AllValues() []LlmRequestStatsSplitBy {
+	return []LlmRequestStatsSplitBy{
+		LlmRequestStatsSplitByModel,
+		LlmRequestStatsSplitByOperation,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s LlmRequestStatsSplitBy) MarshalText() ([]byte, error) {
+	switch s {
+	case LlmRequestStatsSplitByModel:
+		return []byte(s), nil
+	case LlmRequestStatsSplitByOperation:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *LlmRequestStatsSplitBy) UnmarshalText(data []byte) error {
+	switch LlmRequestStatsSplitBy(data) {
+	case LlmRequestStatsSplitByModel:
+		*s = LlmRequestStatsSplitByModel
+		return nil
+	case LlmRequestStatsSplitByOperation:
+		*s = LlmRequestStatsSplitByOperation
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
 
 // A field within a map-type entity label group. Supports recursion via type='map'.
 // Ref: #/components/schemas/MapField-Input
@@ -15651,6 +15763,52 @@ func (o OptLlmRequestStatsCallType) Get() (v LlmRequestStatsCallType, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptLlmRequestStatsCallType) Or(d LlmRequestStatsCallType) LlmRequestStatsCallType {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptLlmRequestStatsSplitBy returns new OptLlmRequestStatsSplitBy with value set to v.
+func NewOptLlmRequestStatsSplitBy(v LlmRequestStatsSplitBy) OptLlmRequestStatsSplitBy {
+	return OptLlmRequestStatsSplitBy{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptLlmRequestStatsSplitBy is optional LlmRequestStatsSplitBy.
+type OptLlmRequestStatsSplitBy struct {
+	Value LlmRequestStatsSplitBy
+	Set   bool
+}
+
+// IsSet returns true if OptLlmRequestStatsSplitBy was set.
+func (o OptLlmRequestStatsSplitBy) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptLlmRequestStatsSplitBy) Reset() {
+	var v LlmRequestStatsSplitBy
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptLlmRequestStatsSplitBy) SetTo(v LlmRequestStatsSplitBy) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptLlmRequestStatsSplitBy) Get() (v LlmRequestStatsSplitBy, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptLlmRequestStatsSplitBy) Or(d LlmRequestStatsSplitBy) LlmRequestStatsSplitBy {
 	if v, ok := o.Get(); ok {
 		return v
 	}

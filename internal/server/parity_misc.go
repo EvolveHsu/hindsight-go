@@ -17,7 +17,7 @@ type historySource interface {
 	AuditLogsJSON(ctx context.Context, bankID, action, transport, startDate, endDate string, limit, offset int) ([]byte, error)
 	AuditStatsJSON(ctx context.Context, bankID, action, period string) ([]byte, error)
 	LLMRequestsJSON(ctx context.Context, bankID, status, operation, scope, provider, traceID, startDate, endDate string, limit, offset int) ([]byte, error)
-	LLMStatsJSON(ctx context.Context, bankID, operation, period string) ([]byte, error)
+	LLMStatsJSON(ctx context.Context, bankID, operation, period, splitBy string) ([]byte, error)
 	MentalModelHistoryJSON(ctx context.Context, bankID, modelID string) ([]byte, error)
 	ObservationHistoryJSON(ctx context.Context, bankID, observationID string) ([]byte, error)
 }
@@ -93,7 +93,11 @@ func (e *Engine) LlmRequestStats(ctx context.Context, params api.LlmRequestStats
 	if params.Period.Set && params.Period.Value != "" {
 		period = params.Period.Value
 	}
-	raw, err := src.LLMStatsJSON(ctx, params.BankID, optValue(params.Operation), period)
+	splitBy := ""
+	if params.SplitBy.Set {
+		splitBy = string(params.SplitBy.Value)
+	}
+	raw, err := src.LLMStatsJSON(ctx, params.BankID, optValue(params.Operation), period, splitBy)
 	if err != nil {
 		return nil, internal(err)
 	}

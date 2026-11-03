@@ -10,7 +10,7 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "1.1.0"
+    "version": "1.2.0"
   },
   "paths": {
     "/health": {
@@ -212,6 +212,15 @@
               "type": "string",
               "title": "Chunk Id"
             }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Authorization"
+            }
           }
         ],
         "responses": {
@@ -247,7 +256,7 @@
           "Memory"
         ],
         "summary": "List memory units",
-        "description": "List memory units with pagination and optional full-text search. Supports filtering by type, source document, linked entity ID, and a time window. Results are sorted by most recent first (mentioned_at DESC, then created_at DESC) unless a time window selects another axis.",
+        "description": "List memory units with pagination and an optional substring filter (`q`). Supports filtering by type, source document, linked entity ID, and a time window. Results are sorted by most recent first (mentioned_at DESC, then created_at DESC) unless a time window selects another axis.",
         "operationId": "list_memories",
         "parameters": [
           {
@@ -404,6 +413,15 @@
               "minimum": 0,
               "default": 0,
               "title": "Offset"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Authorization"
             }
           }
         ],
@@ -818,9 +836,9 @@
             "in": "query",
             "required": false,
             "schema": {
+              "type": "string",
               "description": "Case-insensitive substring filter on bank ID or name (e.g. 'alice')",
-              "title": "Q",
-              "type": "string"
+              "title": "Q"
             },
             "description": "Case-insensitive substring filter on bank ID or name (e.g. 'alice')"
           },
@@ -849,6 +867,15 @@
               "title": "Offset"
             },
             "description": "Offset for pagination"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Authorization"
+            }
           }
         ],
         "responses": {
@@ -1093,12 +1120,12 @@
             "in": "query",
             "required": false,
             "schema": {
-              "description": "Only count memories carrying these tags. An entity is returned only when a matching memory mentions it, and its mention count and dates cover the matching memories only.",
-              "title": "Tags",
               "type": "array",
               "items": {
                 "type": "string"
-              }
+              },
+              "description": "Only count memories carrying these tags. An entity is returned only when a matching memory mentions it, and its mention count and dates cover the matching memories only.",
+              "title": "Tags"
             },
             "description": "Only count memories carrying these tags. An entity is returned only when a matching memory mentions it, and its mention count and dates cover the matching memories only."
           },
@@ -1126,11 +1153,20 @@
             "in": "query",
             "required": false,
             "schema": {
+              "type": "string",
               "description": "Compound tag filter as a JSON-encoded list of tag groups — the same shape `tag_groups` takes in a recall body (leaves {tags, match, resolve} and {and: [...]}, {or: [...]}, {not: ...}; groups are AND-ed). Mutually exclusive with `tags`.",
-              "title": "Tag Groups",
-              "type": "string"
+              "title": "Tag Groups"
             },
             "description": "Compound tag filter as a JSON-encoded list of tag groups — the same shape `tag_groups` takes in a recall body (leaves {tags, match, resolve} and {and: [...]}, {or: [...]}, {not: ...}; groups are AND-ed). Mutually exclusive with `tags`."
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Authorization"
+            }
           }
         ],
         "responses": {
@@ -1208,12 +1244,12 @@
             "in": "query",
             "required": false,
             "schema": {
-              "description": "Only count memories carrying these tags. Edges and node mention counts are computed from the matching memories only.",
-              "title": "Tags",
               "type": "array",
               "items": {
                 "type": "string"
-              }
+              },
+              "description": "Only count memories carrying these tags. Edges and node mention counts are computed from the matching memories only.",
+              "title": "Tags"
             },
             "description": "Only count memories carrying these tags. Edges and node mention counts are computed from the matching memories only."
           },
@@ -1241,11 +1277,20 @@
             "in": "query",
             "required": false,
             "schema": {
+              "type": "string",
               "description": "Compound tag filter as a JSON-encoded list of tag groups — the same shape `tag_groups` takes in a recall body (leaves {tags, match, resolve} and {and: [...]}, {or: [...]}, {not: ...}; groups are AND-ed). Mutually exclusive with `tags`.",
-              "title": "Tag Groups",
-              "type": "string"
+              "title": "Tag Groups"
             },
             "description": "Compound tag filter as a JSON-encoded list of tag groups — the same shape `tag_groups` takes in a recall body (leaves {tags, match, resolve} and {and: [...]}, {or: [...]}, {not: ...}; groups are AND-ed). Mutually exclusive with `tags`."
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Authorization"
+            }
           }
         ],
         "responses": {
@@ -1307,12 +1352,12 @@
             "in": "query",
             "required": false,
             "schema": {
-              "description": "Only count memories carrying these tags. The entity is a 404 when no matching memory mentions it; its mention count and dates cover the matching memories only.",
-              "title": "Tags",
               "type": "array",
               "items": {
                 "type": "string"
-              }
+              },
+              "description": "Only count memories carrying these tags. The entity is a 404 when no matching memory mentions it; its mention count and dates cover the matching memories only.",
+              "title": "Tags"
             },
             "description": "Only count memories carrying these tags. The entity is a 404 when no matching memory mentions it; its mention count and dates cover the matching memories only."
           },
@@ -1340,11 +1385,20 @@
             "in": "query",
             "required": false,
             "schema": {
+              "type": "string",
               "description": "Compound tag filter as a JSON-encoded list of tag groups — the same shape `tag_groups` takes in a recall body (leaves {tags, match, resolve} and {and: [...]}, {or: [...]}, {not: ...}; groups are AND-ed). Mutually exclusive with `tags`.",
-              "title": "Tag Groups",
-              "type": "string"
+              "title": "Tag Groups"
             },
             "description": "Compound tag filter as a JSON-encoded list of tag groups — the same shape `tag_groups` takes in a recall body (leaves {tags, match, resolve} and {and: [...]}, {or: [...]}, {not: ...}; groups are AND-ed). Mutually exclusive with `tags`."
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Authorization"
+            }
           }
         ],
         "responses": {
@@ -1524,6 +1578,15 @@
               "title": "Exclude Knowledge Pages"
             },
             "description": "Leave out the mental models that hold knowledge page content (list standalone models only)."
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Authorization"
+            }
           }
         ],
         "responses": {
@@ -1837,7 +1900,7 @@
           "Mental Models"
         ],
         "summary": "Refresh mental model",
-        "description": "Submit an async task to re-run the source query through reflect and update the content.",
+        "description": "Submit an async task to re-run the source query through reflect and update the content. With no body the refresh runs in the model's own `trigger.mode`. Send `{\"mode\": \"full\"}` for a full refresh: the content is regenerated from scratch this once (to clear the drift delta edits accumulate) while the stored trigger keeps its mode. Unlike clearing the model first, a full refresh that fails leaves the previous content in place.",
         "operationId": "refresh_mental_model",
         "parameters": [
           {
@@ -2027,12 +2090,12 @@
             "in": "query",
             "required": false,
             "schema": {
-              "description": "Only return pages carrying these tags (matched per `tags_match`, like recall).",
-              "title": "Tags",
               "type": "array",
               "items": {
                 "type": "string"
-              }
+              },
+              "description": "Only return pages carrying these tags (matched per `tags_match`, like recall).",
+              "title": "Tags"
             },
             "description": "Only return pages carrying these tags (matched per `tags_match`, like recall)."
           },
@@ -2060,11 +2123,20 @@
             "in": "query",
             "required": false,
             "schema": {
+              "type": "string",
               "description": "JSON-encoded compound tag filter, same shape as recall's `tag_groups`, e.g. `[{\"or\":[{\"tags\":[\"user:kate\"],\"match\":\"all_strict\"},{\"tags\":[\"team\"]}]}]`. Top-level groups are AND-ed, and AND-ed with `tags`.",
-              "title": "Tag Groups",
-              "type": "string"
+              "title": "Tag Groups"
             },
             "description": "JSON-encoded compound tag filter, same shape as recall's `tag_groups`, e.g. `[{\"or\":[{\"tags\":[\"user:kate\"],\"match\":\"all_strict\"},{\"tags\":[\"team\"]}]}]`. Top-level groups are AND-ed, and AND-ed with `tags`."
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Authorization"
+            }
           }
         ],
         "responses": {
@@ -2295,12 +2367,12 @@
             "in": "query",
             "required": false,
             "schema": {
-              "description": "Only return pages carrying these tags (matched per `tags_match`, like recall).",
-              "title": "Tags",
               "type": "array",
               "items": {
                 "type": "string"
-              }
+              },
+              "description": "Only return pages carrying these tags (matched per `tags_match`, like recall).",
+              "title": "Tags"
             },
             "description": "Only return pages carrying these tags (matched per `tags_match`, like recall)."
           },
@@ -2328,11 +2400,20 @@
             "in": "query",
             "required": false,
             "schema": {
+              "type": "string",
               "description": "JSON-encoded compound tag filter, same shape as recall's `tag_groups`, e.g. `[{\"or\":[{\"tags\":[\"user:kate\"],\"match\":\"all_strict\"},{\"tags\":[\"team\"]}]}]`. Top-level groups are AND-ed, and AND-ed with `tags`.",
-              "title": "Tag Groups",
-              "type": "string"
+              "title": "Tag Groups"
             },
             "description": "JSON-encoded compound tag filter, same shape as recall's `tag_groups`, e.g. `[{\"or\":[{\"tags\":[\"user:kate\"],\"match\":\"all_strict\"},{\"tags\":[\"team\"]}]}]`. Top-level groups are AND-ed, and AND-ed with `tags`."
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Authorization"
+            }
           }
         ],
         "responses": {
@@ -2547,12 +2628,12 @@
             "in": "query",
             "required": false,
             "schema": {
-              "description": "Filter directives by execution scope. Omit or pass [] to list all directives.",
-              "title": "Tags",
               "type": "array",
               "items": {
                 "type": "string"
-              }
+              },
+              "description": "Filter directives by execution scope. Omit or pass [] to list all directives.",
+              "title": "Tags"
             },
             "description": "Filter directives by execution scope. Omit or pass [] to list all directives."
           },
@@ -2606,6 +2687,15 @@
               "minimum": 0,
               "default": 0,
               "title": "Offset"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Authorization"
             }
           }
         ],
@@ -2967,6 +3057,15 @@
               "default": 0,
               "title": "Offset"
             }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Authorization"
+            }
           }
         ],
         "responses": {
@@ -3183,7 +3282,7 @@
           "Documents"
         ],
         "summary": "Update document",
-        "description": "Update mutable fields on a document without re-processing its content.\n\n**Tags** (`tags`): The array REPLACES the document's tags, it is not merged into them — send the complete set you want the document to end up with, and any tag you leave out is dropped. An empty array (`[]`) therefore clears every tag; only omitting the field entirely is rejected (422).\n\nThe new tags are propagated to all associated memory units. Observations derived from those units are invalidated and queued for re-consolidation under the new tags. Co-source memories from other documents that shared those observations are also reset. Tags are compared as a set, so re-sending the tags a document already has (in any order) changes nothing and queues no re-consolidation.\n\nAt least one field must be provided.",
+        "description": "Update mutable fields on a document without re-processing its content.\n\n**Tags** (`tags`): The array REPLACES the document's tags, it is not merged into them — send the complete set you want the document to end up with, and any tag you leave out is dropped. An empty array (`[]`) therefore clears every tag; only omitting the field entirely is rejected (422).\n\nThe new tags are propagated to all associated memory units.\n\n**Observation scopes** (`observation_scopes`): Replaces how the document's memories are scoped during consolidation, with the same values retain accepts. Use it to move a bank whose documents were retained under per-session tags to `shared` without re-extracting anything. It is also what a later reprocess of the document retains with.\n\nA memory is re-consolidated only when the change moves the observation scopes it resolves to: its observations are deleted and it is queued again, along with co-source memories from other documents that shared those observations. A change that resolves to the same scopes (a tag change under `shared`, `combined` over one tag vs `[[that tag]]`, re-sending the current values) keeps every observation and queues nothing.\n\nAt least one field must be provided.",
         "operationId": "update_document",
         "parameters": [
           {
@@ -3312,9 +3411,9 @@
             "in": "query",
             "required": false,
             "schema": {
+              "type": "string",
               "description": "Wildcard pattern to filter tags (e.g., 'user:*' for user:alice, '*-admin' for role-admin). Use '*' as wildcard. Case-insensitive.",
-              "title": "Q",
-              "type": "string"
+              "title": "Q"
             },
             "description": "Wildcard pattern to filter tags (e.g., 'user:*' for user:alice, '*-admin' for role-admin). Use '*' as wildcard. Case-insensitive."
           },
@@ -3359,6 +3458,15 @@
               "title": "Offset"
             },
             "description": "Offset for pagination"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Authorization"
+            }
           }
         ],
         "responses": {
@@ -3454,9 +3562,9 @@
             "in": "query",
             "required": false,
             "schema": {
+              "type": "string",
               "description": "Filter by status: pending, processing, completed, failed, or cancelled",
-              "title": "Status",
-              "type": "string"
+              "title": "Status"
             },
             "description": "Filter by status: pending, processing, completed, failed, or cancelled"
           },
@@ -3465,9 +3573,9 @@
             "in": "query",
             "required": false,
             "schema": {
+              "type": "string",
               "description": "Filter by operation type: retain, consolidation, refresh_mental_model, file_convert_retain, webhook_delivery",
-              "title": "Type",
-              "type": "string"
+              "title": "Type"
             },
             "description": "Filter by operation type: retain, consolidation, refresh_mental_model, file_convert_retain, webhook_delivery"
           },
@@ -3509,6 +3617,15 @@
               "title": "Exclude Parents"
             },
             "description": "Exclude parent batch operations from results"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Authorization"
+            }
           }
         ],
         "responses": {
@@ -3658,7 +3775,7 @@
           "Operations"
         ],
         "summary": "Retry a failed async operation",
-        "description": "Re-queue a failed async operation so the worker picks it up again",
+        "description": "Re-queue a failed or cancelled async operation so the worker picks it up again. On a deferred operation (pending with a future next_retry_at), runs it now.",
         "operationId": "retry_operation",
         "parameters": [
           {
@@ -4500,12 +4617,12 @@
             "in": "query",
             "required": false,
             "schema": {
-              "description": "Document id(s) to export; omit for all",
-              "title": "Document Id",
               "type": "array",
               "items": {
                 "type": "string"
-              }
+              },
+              "description": "Document id(s) to export; omit for all",
+              "title": "Document Id"
             },
             "description": "Document id(s) to export; omit for all"
           },
@@ -4532,6 +4649,15 @@
               "title": "Include Knowledge Base"
             },
             "description": "Also export Mental Models and Knowledge Pages (restored on import; whole-bank only)"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Authorization"
+            }
           }
         ],
         "responses": {
@@ -4617,14 +4743,23 @@
             "in": "query",
             "required": false,
             "schema": {
-              "description": "Document id(s); omit for the whole bank",
-              "title": "Document Id",
               "type": "array",
               "items": {
                 "type": "string"
-              }
+              },
+              "description": "Document id(s); omit for the whole bank",
+              "title": "Document Id"
             },
             "description": "Document id(s); omit for the whole bank"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Authorization"
+            }
           }
         ],
         "responses": {
@@ -4689,9 +4824,9 @@
             "in": "query",
             "required": false,
             "schema": {
+              "type": "string",
               "description": "restore mode: the bank to create; defaults to the archive's source bank",
-              "title": "Target Bank Id",
-              "type": "string"
+              "title": "Target Bank Id"
             },
             "description": "restore mode: the bank to create; defaults to the archive's source bank"
           },
@@ -4712,9 +4847,9 @@
             "in": "query",
             "required": false,
             "schema": {
+              "type": "boolean",
               "description": "restore mode: carry the memories and everything backing them (default true)",
-              "title": "Include Data",
-              "type": "boolean"
+              "title": "Include Data"
             },
             "description": "restore mode: carry the memories and everything backing them (default true)"
           },
@@ -4723,9 +4858,9 @@
             "in": "query",
             "required": false,
             "schema": {
+              "type": "boolean",
               "description": "restore mode: restore the bank's config overrides, directives and webhooks (default true)",
-              "title": "Include Bank Config",
-              "type": "boolean"
+              "title": "Include Bank Config"
             },
             "description": "restore mode: restore the bank's config overrides, directives and webhooks (default true)"
           },
@@ -4734,11 +4869,20 @@
             "in": "query",
             "required": false,
             "schema": {
+              "type": "boolean",
               "description": "restore mode: carry audit_log and llm_requests (default false)",
-              "title": "Include History",
-              "type": "boolean"
+              "title": "Include History"
             },
             "description": "restore mode: carry audit_log and llm_requests (default false)"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Authorization"
+            }
           }
         ],
         "requestBody": {
@@ -5724,11 +5868,20 @@
             "in": "query",
             "required": false,
             "schema": {
+              "type": "string",
               "description": "Pagination cursor (created_at of last item)",
-              "title": "Cursor",
-              "type": "string"
+              "title": "Cursor"
             },
             "description": "Pagination cursor (created_at of last item)"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Authorization"
+            }
           }
         ],
         "responses": {
@@ -5829,11 +5982,20 @@
             "in": "query",
             "required": false,
             "schema": {
+              "type": "string",
               "description": "Optional fact type filter (world, experience, observation)",
-              "title": "Type",
-              "type": "string"
+              "title": "Type"
             },
             "description": "Optional fact type filter (world, experience, observation)"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Authorization"
+            }
           }
         ],
         "responses": {
@@ -5936,9 +6098,9 @@
             "in": "query",
             "required": false,
             "schema": {
+              "type": "string",
               "description": "Filter by action type",
-              "title": "Action",
-              "type": "string"
+              "title": "Action"
             },
             "description": "Filter by action type"
           },
@@ -5947,9 +6109,9 @@
             "in": "query",
             "required": false,
             "schema": {
+              "type": "string",
               "description": "Filter by transport (http, mcp, system)",
-              "title": "Transport",
-              "type": "string"
+              "title": "Transport"
             },
             "description": "Filter by transport (http, mcp, system)"
           },
@@ -5958,9 +6120,9 @@
             "in": "query",
             "required": false,
             "schema": {
+              "type": "string",
               "description": "Filter from this ISO datetime (inclusive)",
-              "title": "Start Date",
-              "type": "string"
+              "title": "Start Date"
             },
             "description": "Filter from this ISO datetime (inclusive)"
           },
@@ -5969,9 +6131,9 @@
             "in": "query",
             "required": false,
             "schema": {
+              "type": "string",
               "description": "Filter until this ISO datetime (exclusive)",
-              "title": "End Date",
-              "type": "string"
+              "title": "End Date"
             },
             "description": "Filter until this ISO datetime (exclusive)"
           },
@@ -6001,6 +6163,15 @@
               "title": "Offset"
             },
             "description": "Offset for pagination"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Authorization"
+            }
           }
         ],
         "responses": {
@@ -6053,9 +6224,9 @@
             "in": "query",
             "required": false,
             "schema": {
+              "type": "string",
               "description": "Filter by action type",
-              "title": "Action",
-              "type": "string"
+              "title": "Action"
             },
             "description": "Filter by action type"
           },
@@ -6070,6 +6241,15 @@
               "title": "Period"
             },
             "description": "Time period: 1d, 7d, or 30d"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Authorization"
+            }
           }
         ],
         "responses": {
@@ -6105,7 +6285,7 @@
           "LLM Traces"
         ],
         "summary": "List LLM request traces",
-        "description": "List traced LLM requests for a bank, ordered by most recent first. Requires LLM request tracing to be enabled (HINDSIGHT_API_LLM_TRACE_ENABLED).",
+        "description": "List traced LLM requests for a bank, ordered by most recent first. Requires LLM request tracing to be enabled (HINDSIGHT_API_LLM_TRACE_ENABLED). Requests older than HINDSIGHT_API_LLM_TRACE_RETENTION_DAYS are deleted; `retention_days` in the response says how many days are kept (null = forever).",
         "operationId": "list_llm_requests",
         "parameters": [
           {
@@ -6271,6 +6451,15 @@
               "title": "Offset"
             },
             "description": "Offset for pagination"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Authorization"
+            }
           }
         ],
         "responses": {
@@ -6306,7 +6495,7 @@
           "LLM Traces"
         ],
         "summary": "LLM request statistics",
-        "description": "Get LLM request counts grouped by time bucket and status for charting.",
+        "description": "Get LLM request counts grouped by time bucket and status for charting. Only requests within HINDSIGHT_API_LLM_TRACE_RETENTION_DAYS are kept, so a period longer than `retention_days` (in the response; null = kept forever) only covers the last `retention_days`.",
         "operationId": "llm_request_stats",
         "parameters": [
           {
@@ -6352,11 +6541,35 @@
             "required": false,
             "schema": {
               "type": "string",
-              "description": "Time period: 1d, 7d, or 30d",
+              "description": "Time period: 1d (by hour), 7d, or 30d (by day)",
               "default": "7d",
               "title": "Period"
             },
-            "description": "Time period: 1d, 7d, or 30d"
+            "description": "Time period: 1d (by hour), 7d, or 30d (by day)"
+          },
+          {
+            "name": "split_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "model",
+                "operation"
+              ],
+              "type": "string",
+              "description": "Also split each bucket by model or by operation (returned in `series`)",
+              "title": "Split By"
+            },
+            "description": "Also split each bucket by model or by operation (returned in `series`)"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Authorization"
+            }
           }
         ],
         "responses": {
@@ -10485,6 +10698,42 @@
             },
             "type": "array",
             "title": "Buckets"
+          },
+          "series": {
+            "description": "Only present when split_by is used. Per-bucket breakdown by model or operation.",
+            "items": {
+              "properties": {
+                "time": {
+                  "type": "string",
+                  "title": "Time"
+                },
+                "key": {
+                  "type": "string",
+                  "title": "Key"
+                },
+                "total": {
+                  "type": "integer",
+                  "title": "Total"
+                },
+                "calls": {
+                  "type": "integer",
+                  "title": "Calls"
+                },
+                "tokens": {
+                  "type": "integer",
+                  "title": "Tokens"
+                }
+              },
+              "required": [
+                "time",
+                "key",
+                "calls",
+                "tokens"
+              ],
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Series"
           }
         },
         "type": "object",
@@ -15251,6 +15500,56 @@
         "type": "object",
         "title": "RefreshMentalModelRequest",
         "description": "Optional body of POST /mental-models/{id}/refresh."
+      },
+      "LLMRequestSeriesSums": {
+        "properties": {
+          "calls": {
+            "type": "integer",
+            "title": "Calls"
+          },
+          "tokens": {
+            "type": "integer",
+            "title": "Tokens"
+          }
+        },
+        "type": "object",
+        "required": [
+          "calls",
+          "tokens"
+        ],
+        "title": "LLMRequestSeriesSums",
+        "description": "Calls and tokens (total + reasoning) of one model or operation within a time bucket."
+      },
+      "RerankOptions": {
+        "properties": {
+          "prune": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prune",
+            "description": "Drop the results the decision model judges no help to the query, instead of only ranking them last. Costs no extra request. When omitted, uses the bank/global recall_decision_model_prune config (false unless configured)."
+          },
+          "dedup": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dedup",
+            "description": "Drop a result that repeats a better-ranked one, so the same fact comes back once. Costs one more decision-model request after the ranking one. When omitted, uses the bank/global recall_decision_model_dedup config (false unless configured)."
+          }
+        },
+        "type": "object",
+        "title": "RerankOptions",
+        "description": "What the decision-model reranker does beyond ordering. Each field left unset (null) uses the\nbank/global config; neither has any effect unless a decision model is set up for recall."
       }
     }
   }

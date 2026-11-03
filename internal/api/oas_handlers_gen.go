@@ -10306,7 +10306,9 @@ func (s *Server) handleListEntitiesRequest(args [1]string, argsEscaped bool, w h
 // handleListLlmRequestsRequest handles list_llm_requests operation.
 //
 // List traced LLM requests for a bank, ordered by most recent first. Requires LLM request tracing to
-// be enabled (HINDSIGHT_API_LLM_TRACE_ENABLED).
+// be enabled (HINDSIGHT_API_LLM_TRACE_ENABLED). Requests older than
+// HINDSIGHT_API_LLM_TRACE_RETENTION_DAYS are deleted; `retention_days` in the response says how many
+// days are kept (null = forever).
 //
 // GET /v1/default/banks/{bank_id}/llm-requests
 func (s *Server) handleListLlmRequestsRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -10501,9 +10503,9 @@ func (s *Server) handleListLlmRequestsRequest(args [1]string, argsEscaped bool, 
 
 // handleListMemoriesRequest handles list_memories operation.
 //
-// List memory units with pagination and optional full-text search. Supports filtering by type, source
-// document, linked entity ID, and a time window. Results are sorted by most recent first (mentioned_at
-// DESC, then created_at DESC) unless a time window selects another axis.
+// List memory units with pagination and an optional substring filter (`q`). Supports filtering by
+// type, source document, linked entity ID, and a time window. Results are sorted by most recent first
+// (mentioned_at DESC, then created_at DESC) unless a time window selects another axis.
 //
 // GET /v1/default/banks/{bank_id}/memories/list
 func (s *Server) handleListMemoriesRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -11652,7 +11654,9 @@ func (s *Server) handleListWebhooksRequest(args [1]string, argsEscaped bool, w h
 
 // handleLlmRequestStatsRequest handles llm_request_stats operation.
 //
-// Get LLM request counts grouped by time bucket and status for charting.
+// Get LLM request counts grouped by time bucket and status for charting. Only requests within
+// HINDSIGHT_API_LLM_TRACE_RETENTION_DAYS are kept, so a period longer than `retention_days` (in the
+// response; null = kept forever) only covers the last `retention_days`.
 //
 // GET /v1/default/banks/{bank_id}/llm-requests/stats
 func (s *Server) handleLlmRequestStatsRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -11765,6 +11769,10 @@ func (s *Server) handleLlmRequestStatsRequest(args [1]string, argsEscaped bool, 
 					Name: "period",
 					In:   "query",
 				}: params.Period,
+				{
+					Name: "split_by",
+					In:   "query",
+				}: params.SplitBy,
 			},
 			Raw: r,
 		}
@@ -12732,7 +12740,11 @@ func (s *Server) handleReflectRequest(args [1]string, argsEscaped bool, w http.R
 
 // handleRefreshMentalModelRequest handles refresh_mental_model operation.
 //
-// Submit an async task to re-run the source query through reflect and update the content.
+// Submit an async task to re-run the source query through reflect and update the content. With no body
+// the refresh runs in the model's own `trigger.mode`. Send `{"mode": "full"}` for a full refresh: the
+// content is regenerated from scratch this once (to clear the drift delta edits accumulate) while the
+// stored trigger keeps its mode. Unlike clearing the model first, a full refresh that fails leaves the
+// previous content in place.
 //
 // POST /v1/default/banks/{bank_id}/mental-models/{mental_model_id}/refresh
 func (s *Server) handleRefreshMentalModelRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -13522,7 +13534,8 @@ func (s *Server) handleRetainMemoriesRequest(args [1]string, argsEscaped bool, w
 
 // handleRetryOperationRequest handles retry_operation operation.
 //
-// Re-queue a failed async operation so the worker picks it up again.
+// Re-queue a failed or cancelled async operation so the worker picks it up again. On a deferred
+// operation (pending with a future next_retry_at), runs it now.
 //
 // POST /v1/default/banks/{bank_id}/operations/{operation_id}/retry
 func (s *Server) handleRetryOperationRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -14955,10 +14968,18 @@ func (s *Server) handleUpdateDirectiveRequest(args [2]string, argsEscaped bool, 
 // complete set you want the document to end up with, and any tag you leave out is dropped. An empty
 // array (`[]`) therefore clears every tag; only omitting the field entirely is rejected (422).
 //
-// The new tags are propagated to all associated memory units. Observations derived from those units
-// are invalidated and queued for re-consolidation under the new tags. Co-source memories from other
-// documents that shared those observations are also reset. Tags are compared as a set, so re-sending
-// the tags a document already has (in any order) changes nothing and queues no re-consolidation.
+// The new tags are propagated to all associated memory units.
+//
+// Observation scopes (`observation_scopes`): Replaces how the document's memories are scoped during
+// consolidation, with the same values retain accepts. Use it to move a bank whose documents were
+// retained under per-session tags to `shared` without re-extracting anything. It is also what a later
+// reprocess of the document retains with.
+//
+// A memory is re-consolidated only when the change moves the observation scopes it resolves to: its
+// observations are deleted and it is queued again, along with co-source memories from other documents
+// that shared those observations. A change that resolves to the same scopes (a tag change under
+// `shared`, `combined` over one tag vs `[[that tag]]`, re-sending the current values) keeps every
+// observation and queues nothing.
 //
 // At least one field must be provided.
 //

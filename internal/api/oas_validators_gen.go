@@ -2418,6 +2418,17 @@ func (s LlmRequestStatsCallType) Validate() error {
 	}
 }
 
+func (s LlmRequestStatsSplitBy) Validate() error {
+	switch s {
+	case "model":
+		return nil
+	case "operation":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
 func (s *MapFieldInput) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
