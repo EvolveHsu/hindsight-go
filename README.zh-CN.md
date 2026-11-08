@@ -153,6 +153,18 @@ pwsh scripts/check.ps1
 | `HINDSIGHT_GO_LLM_API_KEY` | LLM API Key。 |
 | `HINDSIGHT_GO_LLM_MODEL` | LLM 模型名称。 |
 
+### Retain 抽取预算
+
+| 变量 | 说明 |
+|---|---|
+| `HINDSIGHT_GO_RETAIN_MAX_TOKENS` | 初始输出预算（含推理 token），默认 8192。 |
+| `HINDSIGHT_GO_RETAIN_MAX_TOKENS_LIMIT` | 扩容上限，默认 32768，最多 131072，不能小于初始预算。 |
+
+截断时翻倍预算重试，最多调用模型 3 次，且不超过上限；不保存部分事实。
+非法配置启动失败。只接受完整 JSON 数组（可整体包在代码块中），其他格式错误不盲目重试。
+日志只含次数、预算、结束原因类别及用量，不记录记忆原文或模型响应。
+这些设置不改变 reflect 或 consolidation。
+
 ### Embeddings
 
 | 变量 | 说明 |

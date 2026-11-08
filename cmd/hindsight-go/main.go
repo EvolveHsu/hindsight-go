@@ -35,6 +35,10 @@ func main() {
 	addr := flag.String("addr", "0.0.0.0:8890", "listen address")
 	flag.Parse()
 
+	extractOptions, err := extract.OptionsFromEnv()
+	if err != nil {
+		log.Fatalf("retain extraction: %v", err)
+	}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
@@ -98,9 +102,14 @@ func main() {
 			client.SkipJSONResponseFormat = true
 		}
 		engine.SetReflectProvider(client)
-		engine.SetExtractor(extract.New(client, os.Getenv("HINDSIGHT_GO_LLM_MODEL")))
+		extractor, err := extract.NewWithOptions(client, os.Getenv("HINDSIGHT_GO_LLM_MODEL"), extractOptions)
+		if err != nil {
+			log.Fatalf("retain extraction: %v", err)
+		}
+		engine.SetExtractor(extractor)
 		engine.SetConsolidationProvider(client)
 		log.Printf("LLM provider: %s (model %q)", base, os.Getenv("HINDSIGHT_GO_LLM_MODEL"))
+		log.Printf("retain extraction: initial_tokens=%d limit_tokens=%d", extractOptions.MaxTokens, extractOptions.MaxTokensLimit)
 	}
 
 	httpHandler, err := server.AsHTTPHandler(engine)

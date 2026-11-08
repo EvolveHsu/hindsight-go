@@ -153,6 +153,20 @@ The generated API package in `internal/api` is committed intentionally so a norm
 | `HINDSIGHT_GO_LLM_API_KEY` | LLM API key. |
 | `HINDSIGHT_GO_LLM_MODEL` | LLM model name. |
 
+### Retain extraction budget
+
+| Variable | Purpose |
+|---|---|
+| `HINDSIGHT_GO_RETAIN_MAX_TOKENS` | Initial output budget, including reasoning tokens. Default: 8192. |
+| `HINDSIGHT_GO_RETAIN_MAX_TOKENS_LIMIT` | Expansion ceiling. Default: 32768; maximum: 131072. Must be at least the initial budget. |
+
+Truncated extractions retry with a doubled budget, up to the ceiling and at
+most three model calls. Partial facts are never stored. Invalid configuration
+fails startup. Complete JSON arrays (optionally fenced) are required; malformed
+non-truncated responses are not retried. Logs contain only attempt counts,
+budgets, finish categories and usage, never memory or model response text.
+These settings do not change reflect or consolidation.
+
 ### Embeddings
 
 | Variable | Purpose |

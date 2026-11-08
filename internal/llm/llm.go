@@ -64,9 +64,21 @@ type Choice struct {
 
 // Usage is token accounting as reported by the provider.
 type Usage struct {
-	PromptTokens     int `json:"prompt_tokens"`
-	CompletionTokens int `json:"completion_tokens"`
-	TotalTokens      int `json:"total_tokens"`
+	PromptTokens             int `json:"prompt_tokens"`
+	CompletionTokens         int `json:"completion_tokens"`
+	TotalTokens              int `json:"total_tokens"`
+	CompletionThinkingTokens int `json:"completion_thinking_tokens,omitempty"`
+	CompletionTokensDetails  struct {
+		ReasoningTokens int `json:"reasoning_tokens"`
+	} `json:"completion_tokens_details,omitempty"`
+}
+
+// ReasoningTokens accepts both standard and provider-specific usage shapes.
+func (u Usage) ReasoningTokens() int {
+	if u.CompletionTokensDetails.ReasoningTokens > 0 {
+		return u.CompletionTokensDetails.ReasoningTokens
+	}
+	return u.CompletionThinkingTokens
 }
 
 // ChatRequest is the OpenAI-compatible request body.

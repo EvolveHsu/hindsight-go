@@ -1,0 +1,5 @@
+FROM hindsight-go:local
+COPY runtime/hindsight-go /bin/hindsight-go
+LABEL org.opencontainers.image.title="hindsight-go retain truncation fix" \
+      org.opencontainers.image.version="retain-fix-20261107" \
+      org.opencontainers.image.revision="9b159017d9c63f1f205ae34c622876b23357b090+retain-fix"
