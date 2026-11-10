@@ -15,6 +15,7 @@ type DocumentExtraSource interface {
 	DocumentChunks(ctx context.Context, bankID, docID string, limit, offset int) (*model.ChunkPage, error)
 	Chunk(ctx context.Context, chunkID string) (*model.ChunkInfo, error)
 	UpdateDocumentTags(ctx context.Context, bankID, docID string, tags []string) (bool, error)
+	PatchDocumentTags(ctx context.Context, bankID, docID string, replace, add, remove []string) (bool, error)
 	ReprocessDocument(ctx context.Context, bankID, docID string) (*model.ReprocessResult, error)
 }
 
@@ -78,18 +79,26 @@ func (e *Engine) GetChunk(ctx context.Context, params api.GetChunkParams) (api.G
 }
 
 // UpdateDocument implements update_document (PATCH /documents/{document_id}).
-// The tags array replaces the document's tags and is pushed down to its memory
-// units; derived observations are invalidated so they are rebuilt under the new
-// scope.
+// The tags array replaces the document's tags; add_tags/remove_tags apply an
+// incremental update. Both modes push the final tags down to memory units and
+// invalidate derived observations so they are rebuilt under the new scope.
 func (e *Engine) UpdateDocument(ctx context.Context, req *api.UpdateDocumentRequest, params api.UpdateDocumentParams) (api.UpdateDocumentRes, error) {
 	src, err := e.documentExtraSource()
 	if err != nil {
 		return nil, err
 	}
-	if req == nil || req.Tags == nil {
-		return nil, &statusError{status: http.StatusUnprocessableEntity, body: map[string]any{"detail": "At least one field (tags) must be provided"}}
+	if req == nil || (req.Tags == nil && req.AddTags == nil && req.RemoveTags == nil) {
+		return nil, &statusError{status: http.StatusUnprocessableEntity, body: map[string]any{"detail": "At least one field (tags, add_tags or remove_tags) must be provided"}}
 	}
-	ok, err := src.UpdateDocumentTags(ctx, params.BankID, params.DocumentID, req.Tags)
+	if req.Tags != nil && (req.AddTags != nil || req.RemoveTags != nil) {
+		return nil, &statusError{status: http.StatusUnprocessableEntity, body: map[string]any{"detail": "tags cannot be combined with add_tags or remove_tags"}}
+	}
+	var ok bool
+	if req.Tags != nil {
+		ok, err = src.UpdateDocumentTags(ctx, params.BankID, params.DocumentID, req.Tags)
+	} else {
+		ok, err = src.PatchDocumentTags(ctx, params.BankID, params.DocumentID, nil, req.AddTags, req.RemoveTags)
+	}
 	if err != nil {
 		return nil, internal(err)
 	}

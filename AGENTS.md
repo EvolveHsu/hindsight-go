@@ -15,8 +15,8 @@
 - 上游：`https://github.com/vectorize-io/hindsight`
 - 官方 Control Plane：
   `https://github.com/vectorize-io/hindsight/tree/main/hindsight-control-plane`
-- 当前 Go 服务版本：`0.1.3`
-- 当前上游 API 契约：`1.2.0`
+- 当前 Go 服务版本：`0.1.4`
+- 当前上游 API 契约：`1.2.1`
 - NAS 数据面容器：`hindsight-go`
 - NAS API/MCP 端口：`38462 -> 8890`
 - Control Plane：`hindsight-control-plane`，`38463 -> 9999`

@@ -236,6 +236,7 @@ func (s *Store) SetBankAliasPrimary(ctx context.Context, bankID, alias string, p
 	if !found {
 		return false, nil
 	}
+
 	for i := range rows {
 		if rows[i].alias == alias {
 			rows[i].primary = primary
@@ -243,4 +244,18 @@ func (s *Store) SetBankAliasPrimary(ctx context.Context, bankID, alias string, p
 	}
 	s.aliases[bankID] = rows
 	return true, nil
+}
+
+// BankAliasExists reports whether alias already belongs to any bank.
+func (s *Store) BankAliasExists(ctx context.Context, alias string) (bool, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	for _, rows := range s.aliases {
+		for _, row := range rows {
+			if row.alias == alias {
+				return true, nil
+			}
+		}
+	}
+	return false, nil
 }

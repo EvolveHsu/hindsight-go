@@ -16,6 +16,7 @@ type BankStats struct {
 	PendingConsolidation int
 	FailedConsolidation  int
 	TotalObservations    int
+	PausedMentalModels   int
 }
 
 // MemoryBucket is one bucket in the memories-timeseries endpoint.

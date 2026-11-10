@@ -60,17 +60,23 @@ func (s *Store) GetMentalModel(ctx context.Context, bankID, id string) (*model.M
 	if err := s.ensureMentalModelsTable(ctx); err != nil {
 		return nil, err
 	}
+	failedAt := "NULL::timestamptz"
+	if s.upstream {
+		failedAt = "mm.last_refresh_failed_at"
+	}
 	row := s.pool.QueryRow(ctx, fmt.Sprintf(`
 SELECT id, bank_id, name, source_query, content, COALESCE(tags::text[], '{}'), max_tokens,
        COALESCE(to_char(%s, 'YYYY-MM-DD"T"HH24:MI:SSTZH:TZM'), ''),
        COALESCE(to_char(%s, 'YYYY-MM-DD"T"HH24:MI:SSTZH:TZM'), ''),
+       COALESCE(to_char(%s, 'YYYY-MM-DD"T"HH24:MI:SSTZH:TZM'), ''),
        to_char(created_at, 'YYYY-MM-DD"T"HH24:MI:SSTZH:TZM')
-FROM mental_models WHERE id = $1 AND bank_id = $2`, s.mmRefreshColumn(), s.mmSeenColumn()), id, bankID)
+FROM mental_models mm WHERE id = $1 AND bank_id = $2`,
+		s.mmRefreshColumn(), s.mmSeenColumn(), failedAt), id, bankID)
 	m := &model.MentalModel{}
 	var maxTokens *int
 	var lastRef, lastSeen, created *string
 	if err := row.Scan(&m.ID, &m.BankID, &m.Name, &m.SourceQuery, &m.Content, &m.Tags,
-		&maxTokens, &lastRef, &lastSeen, &created); err != nil {
+		&maxTokens, &lastRef, &lastSeen, &m.LastRefreshFailedAt, &created); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, nil
 		}
@@ -89,6 +95,11 @@ FROM mental_models WHERE id = $1 AND bank_id = $2`, s.mmRefreshColumn(), s.mmSee
 	if created != nil {
 		m.CreatedAt = *created
 	}
+	pages, err := s.knowledgePageModelIDs(ctx, bankID)
+	if err != nil {
+		return nil, err
+	}
+	m.IsPage = pages[m.ID]
 	return m, nil
 }
 
@@ -97,12 +108,18 @@ func (s *Store) ListMentalModels(ctx context.Context, bankID string) ([]*model.M
 	if err := s.ensureMentalModelsTable(ctx); err != nil {
 		return nil, err
 	}
+	failedAt := "NULL::timestamptz"
+	if s.upstream {
+		failedAt = "mm.last_refresh_failed_at"
+	}
 	rows, err := s.pool.Query(ctx, fmt.Sprintf(`
 SELECT id, bank_id, name, source_query, content, COALESCE(tags::text[], '{}'), max_tokens,
        COALESCE(to_char(%s, 'YYYY-MM-DD"T"HH24:MI:SSTZH:TZM'), ''),
        COALESCE(to_char(%s, 'YYYY-MM-DD"T"HH24:MI:SSTZH:TZM'), ''),
+       COALESCE(to_char(%s, 'YYYY-MM-DD"T"HH24:MI:SSTZH:TZM'), ''),
        to_char(created_at, 'YYYY-MM-DD"T"HH24:MI:SSTZH:TZM')
-FROM mental_models WHERE bank_id = $1`, s.mmRefreshColumn(), s.mmSeenColumn()), bankID)
+FROM mental_models mm WHERE bank_id = $1`,
+		s.mmRefreshColumn(), s.mmSeenColumn(), failedAt), bankID)
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +129,7 @@ FROM mental_models WHERE bank_id = $1`, s.mmRefreshColumn(), s.mmSeenColumn()), 
 		m := &model.MentalModel{}
 		var maxTokens *int
 		if err := rows.Scan(&m.ID, &m.BankID, &m.Name, &m.SourceQuery, &m.Content, &m.Tags,
-			&maxTokens, &m.LastRefreshed, &m.LastSeen, &m.CreatedAt); err != nil {
+			&maxTokens, &m.LastRefreshed, &m.LastSeen, &m.LastRefreshFailedAt, &m.CreatedAt); err != nil {
 			return nil, err
 		}
 		m.Tags = normalizeTags(m.Tags)
@@ -122,6 +139,43 @@ FROM mental_models WHERE bank_id = $1`, s.mmRefreshColumn(), s.mmSeenColumn()), 
 		out = append(out, m)
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].CreatedAt < out[j].CreatedAt })
+	pages, err := s.knowledgePageModelIDs(ctx, bankID)
+	if err != nil {
+		return nil, err
+	}
+	for _, m := range out {
+		m.IsPage = pages[m.ID]
+	}
+	return out, rows.Err()
+}
+
+func (s *Store) knowledgePageModelIDs(ctx context.Context, bankID string) (map[string]bool, error) {
+	out := map[string]bool{}
+	if !s.upstream {
+		return out, nil
+	}
+	var table *string
+	if err := s.pool.QueryRow(ctx, "SELECT to_regclass('knowledge_pages')::text").Scan(&table); err != nil {
+		return nil, err
+	}
+	if table == nil {
+		return out, nil
+	}
+	rows, err := s.pool.Query(ctx, `
+SELECT mental_model_id
+FROM knowledge_pages
+WHERE bank_id = $1 AND kind = 'page' AND mental_model_id IS NOT NULL`, bankID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var id string
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		out[id] = true
+	}
 	return out, rows.Err()
 }
 

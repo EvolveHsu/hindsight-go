@@ -234,8 +234,8 @@ func TestToolsListServesTheCapturedCatalog(t *testing.T) {
 
 	result := rpcResult(t, ts.URL, "example-bank", "tools/list", map[string]any{})
 	tools, _ := result["tools"].([]any)
-	if len(tools) != 36 {
-		t.Fatalf("tool count = %d, want 36 (the captured upstream surface)", len(tools))
+	if len(tools) != 43 {
+		t.Fatalf("tool count = %d, want 43 (v1.2.1 Pages aliases included)", len(tools))
 	}
 
 	seen := map[string]bool{}
@@ -247,7 +247,10 @@ func TestToolsListServesTheCapturedCatalog(t *testing.T) {
 			t.Errorf("tool %q has no inputSchema", name)
 		}
 	}
-	for _, want := range []string{"retain", "sync_retain", "recall", "reflect", "list_memories", "get_bank"} {
+	for _, want := range []string{
+		"retain", "sync_retain", "recall", "reflect", "list_memories", "get_bank",
+		"get_page_tree", "search_pages", "get_page", "create_page", "delete_page_node",
+	} {
 		if !seen[want] {
 			t.Errorf("tools/list is missing %q", want)
 		}
@@ -422,12 +425,12 @@ func TestNonMCPPathIsPassedThrough(t *testing.T) {
 
 func TestBankFromPath(t *testing.T) {
 	cases := map[string]string{
-		"/mcp":                "default",
-		"/mcp/":               "default",
-		"/mcp/custom":          "custom",
+		"/mcp":                  "default",
+		"/mcp/":                 "default",
+		"/mcp/custom":           "custom",
 		"/mcp/default/":         "default",
 		"/mcp/default/messages": "default",
-		"/mcp/a%20b/":         "a b",
+		"/mcp/a%20b/":           "a b",
 	}
 	for path, want := range cases {
 		got, ok := bankFromPath(path, "default")

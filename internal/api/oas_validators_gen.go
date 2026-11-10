@@ -889,6 +889,34 @@ func (s *CreatePageRequest) Validate() error {
 
 	var failures []validate.FieldError
 	if err := func() error {
+		if value, ok := s.MaxTokens.Get(); ok {
+			if err := func() error {
+				if err := (validate.Int{
+					MinSet:        true,
+					Min:           256,
+					MaxSet:        true,
+					Max:           8192,
+					MinExclusive:  false,
+					MaxExclusive:  false,
+					MultipleOfSet: false,
+					MultipleOf:    0,
+					Pattern:       nil,
+				}).Validate(int64(value)); err != nil {
+					return errors.Wrap(err, "int")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "max_tokens",
+			Error: err,
+		})
+	}
+	if err := func() error {
 		if value, ok := s.Trigger.Get(); ok {
 			if err := func() error {
 				if err := value.Validate(); err != nil {
@@ -1534,6 +1562,23 @@ func (s GetMentalModelDetail) Validate() error {
 	case "content":
 		return nil
 	case "full":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s GetPageTreeTagsMatch) Validate() error {
+	switch s {
+	case "any":
+		return nil
+	case "all":
+		return nil
+	case "any_strict":
+		return nil
+	case "all_strict":
+		return nil
+	case "exact":
 		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)
@@ -3774,6 +3819,209 @@ func (s *OperationsListResponse) Validate() error {
 	return nil
 }
 
+func (s *PageBundleResponse) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.Files == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "files",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *PageNode) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Kind.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "kind",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.Trigger.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "trigger",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		var failures []validate.FieldError
+		for i, elem := range s.Children {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "children",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s PageNodeKind) Validate() error {
+	switch s {
+	case "folder":
+		return nil
+	case "page":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s *PageSearchResponse) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.Results == nil {
+			return errors.New("nil is invalid value")
+		}
+		var failures []validate.FieldError
+		for i, elem := range s.Results {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "results",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *PageSearchResult) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := (validate.Float{}).Validate(float64(s.Score)); err != nil {
+			return errors.Wrap(err, "float")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "score",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *PageTreeResponse) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.Roots == nil {
+			return errors.New("nil is invalid value")
+		}
+		var failures []validate.FieldError
+		for i, elem := range s.Roots {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "roots",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s *PromptBlockModel) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -4494,6 +4742,8 @@ func (s RefreshMentalModelOperationDetailsFailureReason) Validate() error {
 		return nil
 	case "structured_output_failed":
 		return nil
+	case "candidate_rejected":
+		return nil
 	case "retrieval_failed":
 		return nil
 	case "no_answer":
@@ -4518,6 +4768,8 @@ func (s RefreshMentalModelOperationDetailsOutcome) Validate() error {
 	case "refresh_failed_delta_not_applied":
 		return nil
 	case "refresh_failed_structured_output":
+		return nil
+	case "refresh_failed_candidate_rejected":
 		return nil
 	case "refresh_failed_error":
 		return nil
@@ -4605,6 +4857,23 @@ func (s RunSettingModelKind) Validate() error {
 }
 
 func (s SearchKnowledgeBaseTagsMatch) Validate() error {
+	switch s {
+	case "any":
+		return nil
+	case "all":
+		return nil
+	case "any_strict":
+		return nil
+	case "all_strict":
+		return nil
+	case "exact":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s SearchPagesTagsMatch) Validate() error {
 	switch s {
 	case "any":
 		return nil
@@ -4811,6 +5080,34 @@ func (s *UpdateNodeRequest) Validate() error {
 	}
 
 	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.MaxTokens.Get(); ok {
+			if err := func() error {
+				if err := (validate.Int{
+					MinSet:        true,
+					Min:           256,
+					MaxSet:        true,
+					Max:           8192,
+					MinExclusive:  false,
+					MaxExclusive:  false,
+					MultipleOfSet: false,
+					MultipleOf:    0,
+					Pattern:       nil,
+				}).Validate(int64(value)); err != nil {
+					return errors.Wrap(err, "int")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "max_tokens",
+			Error: err,
+		})
+	}
 	if err := func() error {
 		if value, ok := s.Trigger.Get(); ok {
 			if err := func() error {

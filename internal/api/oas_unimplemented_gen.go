@@ -144,6 +144,8 @@ func (UnimplementedHandler) CreateDirective(ctx context.Context, req *CreateDire
 //
 // Create a folder, optionally nested under a parent folder.
 //
+// Deprecated: schema marks this operation as deprecated.
+//
 // POST /v1/default/banks/{bank_id}/knowledge-base/folders
 func (UnimplementedHandler) CreateKnowledgeFolder(ctx context.Context, req *CreateFolderRequest, params CreateKnowledgeFolderParams) (r CreateKnowledgeFolderRes, _ error) {
 	return r, ht.ErrNotImplemented
@@ -153,6 +155,8 @@ func (UnimplementedHandler) CreateKnowledgeFolder(ctx context.Context, req *Crea
 //
 // Create a page (a mental model + tree node). Content is generated asynchronously; use the returned
 // operation_id to track completion.
+//
+// Deprecated: schema marks this operation as deprecated.
 //
 // POST /v1/default/banks/{bank_id}/knowledge-base/pages
 func (UnimplementedHandler) CreateKnowledgePage(ctx context.Context, req *CreatePageRequest, params CreateKnowledgePageParams) (r CreateKnowledgePageRes, _ error) {
@@ -177,6 +181,29 @@ func (UnimplementedHandler) CreateMentalModel(ctx context.Context, req *CreateMe
 //
 // PUT /v1/default/banks/{bank_id}
 func (UnimplementedHandler) CreateOrUpdateBank(ctx context.Context, req *CreateBankRequest, params CreateOrUpdateBankParams) (r CreateOrUpdateBankRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// CreatePage implements create_page operation.
+//
+// Create a page (a mental model + tree node). Content is generated asynchronously; use the returned
+// operation_id to track completion.
+//
+// Deprecated: schema marks this operation as deprecated.
+//
+// POST /v1/default/banks/{bank_id}/pages
+func (UnimplementedHandler) CreatePage(ctx context.Context, req *CreatePageRequest, params CreatePageParams) (r CreatePageRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// CreatePageFolder implements create_page_folder operation.
+//
+// Create a folder, optionally nested under a parent folder.
+//
+// Deprecated: schema marks this operation as deprecated.
+//
+// POST /v1/default/banks/{bank_id}/pages/folders
+func (UnimplementedHandler) CreatePageFolder(ctx context.Context, req *CreateFolderRequest, params CreatePageFolderParams) (r CreatePageFolderRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -240,6 +267,8 @@ func (UnimplementedHandler) DeleteDocument(ctx context.Context, params DeleteDoc
 //
 // Delete a folder or page and its whole subtree (pages' mental models are removed too).
 //
+// Deprecated: schema marks this operation as deprecated.
+//
 // DELETE /v1/default/banks/{bank_id}/knowledge-base/nodes/{node_id}
 func (UnimplementedHandler) DeleteKnowledgeNode(ctx context.Context, params DeleteKnowledgeNodeParams) (r DeleteKnowledgeNodeRes, _ error) {
 	return r, ht.ErrNotImplemented
@@ -260,6 +289,17 @@ func (UnimplementedHandler) DeleteMentalModel(ctx context.Context, params Delete
 //
 // DELETE /v1/default/banks/{bank_id}/operations/{operation_id}/delete
 func (UnimplementedHandler) DeleteOperation(ctx context.Context, params DeleteOperationParams) (r DeleteOperationRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// DeletePageNode implements delete_page_node operation.
+//
+// Delete a folder or page and its whole subtree (pages' mental models are removed too).
+//
+// Deprecated: schema marks this operation as deprecated.
+//
+// DELETE /v1/default/banks/{bank_id}/pages/nodes/{node_id}
+func (UnimplementedHandler) DeletePageNode(ctx context.Context, params DeletePageNodeParams) (r DeletePageNodeRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -383,8 +423,21 @@ func (UnimplementedHandler) ExportDocumentsSyncRemoved(ctx context.Context, para
 //
 // Return a portable markdown bundle: a nested index.md, one .md per page, and history logs.
 //
+// Deprecated: schema marks this operation as deprecated.
+//
 // GET /v1/default/banks/{bank_id}/knowledge-base/export
 func (UnimplementedHandler) ExportKnowledgeBase(ctx context.Context, params ExportKnowledgeBaseParams) (r ExportKnowledgeBaseRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ExportPages implements export_pages operation.
+//
+// Return a portable markdown bundle: a nested index.md, one .md per page, and history logs.
+//
+// Deprecated: schema marks this operation as deprecated.
+//
+// GET /v1/default/banks/{bank_id}/pages/export
+func (UnimplementedHandler) ExportPages(ctx context.Context, params ExportPagesParams) (r ExportPagesRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -578,6 +631,8 @@ func (UnimplementedHandler) GetGraph(ctx context.Context, params GetGraphParams)
 //
 // Return the knowledge base as a nested tree of folders and pages.
 //
+// Deprecated: schema marks this operation as deprecated.
+//
 // GET /v1/default/banks/{bank_id}/knowledge-base/tree
 func (UnimplementedHandler) GetKnowledgeBaseTree(ctx context.Context, params GetKnowledgeBaseTreeParams) (r GetKnowledgeBaseTreeRes, _ error) {
 	return r, ht.ErrNotImplemented
@@ -586,6 +641,8 @@ func (UnimplementedHandler) GetKnowledgeBaseTree(ctx context.Context, params Get
 // GetKnowledgePage implements get_knowledge_page operation.
 //
 // Return a single page as a markdown document (frontmatter + markdown body).
+//
+// Deprecated: schema marks this operation as deprecated.
 //
 // GET /v1/default/banks/{bank_id}/knowledge-base/pages/{page_id}
 func (UnimplementedHandler) GetKnowledgePage(ctx context.Context, params GetKnowledgePageParams) (r GetKnowledgePageRes, _ error) {
@@ -657,6 +714,28 @@ func (UnimplementedHandler) GetObservationHistory(ctx context.Context, params Ge
 //
 // GET /v1/default/banks/{bank_id}/operations/{operation_id}
 func (UnimplementedHandler) GetOperationStatus(ctx context.Context, params GetOperationStatusParams) (r GetOperationStatusRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetPage implements get_page operation.
+//
+// Return a single page as a markdown document (frontmatter + markdown body).
+//
+// Deprecated: schema marks this operation as deprecated.
+//
+// GET /v1/default/banks/{bank_id}/pages/{page_id}
+func (UnimplementedHandler) GetPage(ctx context.Context, params GetPageParams) (r GetPageRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetPageTree implements get_page_tree operation.
+//
+// Return the knowledge base as a nested tree of folders and pages.
+//
+// Deprecated: schema marks this operation as deprecated.
+//
+// GET /v1/default/banks/{bank_id}/pages/tree
+func (UnimplementedHandler) GetPageTree(ctx context.Context, params GetPageTreeParams) (r GetPageTreeRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1082,8 +1161,22 @@ func (UnimplementedHandler) RetryOperation(ctx context.Context, params RetryOper
 // Doc-level hybrid search across a bank's knowledge pages: a full-text (BM25) match and a
 // vector-similarity match, Reciprocal-Rank-Fusion fused. No reranker — tuned for latency.
 //
+// Deprecated: schema marks this operation as deprecated.
+//
 // GET /v1/default/banks/{bank_id}/knowledge-base/search
 func (UnimplementedHandler) SearchKnowledgeBase(ctx context.Context, params SearchKnowledgeBaseParams) (r SearchKnowledgeBaseRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// SearchPages implements search_pages operation.
+//
+// Doc-level hybrid search across a bank's knowledge pages: a full-text (BM25) match and a
+// vector-similarity match, Reciprocal-Rank-Fusion fused. No reranker — tuned for latency.
+//
+// Deprecated: schema marks this operation as deprecated.
+//
+// GET /v1/default/banks/{bank_id}/pages/search
+func (UnimplementedHandler) SearchPages(ctx context.Context, params SearchPagesParams) (r SearchPagesRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1202,6 +1295,8 @@ func (UnimplementedHandler) UpdateDocument(ctx context.Context, req *UpdateDocum
 // `source_query` schedules an async refresh so the page rebuilds against the new question. `trigger`
 // is applied as a patch: the fields you send are updated and the rest keep the page's current values.
 //
+// Deprecated: schema marks this operation as deprecated.
+//
 // PATCH /v1/default/banks/{bank_id}/knowledge-base/nodes/{node_id}
 func (UnimplementedHandler) UpdateKnowledgeNode(ctx context.Context, req *UpdateNodeRequest, params UpdateKnowledgeNodeParams) (r UpdateKnowledgeNodeRes, _ error) {
 	return r, ht.ErrNotImplemented
@@ -1224,6 +1319,20 @@ func (UnimplementedHandler) UpdateMemory(ctx context.Context, req *UpdateMemoryR
 //
 // PATCH /v1/default/banks/{bank_id}/mental-models/{mental_model_id}
 func (UnimplementedHandler) UpdateMentalModel(ctx context.Context, req *UpdateMentalModelRequest, params UpdateMentalModelParams) (r UpdateMentalModelRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdatePageNode implements update_page_node operation.
+//
+// Rename a node (set `name`), move it under another folder (set `parent_id`, null for the root),
+// and/or update a page's options (`source_query`, `tags`, `max_tokens`, `trigger`). Changing
+// `source_query` schedules an async refresh so the page rebuilds against the new question. `trigger`
+// is applied as a patch: the fields you send are updated and the rest keep the page's current values.
+//
+// Deprecated: schema marks this operation as deprecated.
+//
+// PATCH /v1/default/banks/{bank_id}/pages/nodes/{node_id}
+func (UnimplementedHandler) UpdatePageNode(ctx context.Context, req *UpdateNodeRequest, params UpdatePageNodeParams) (r UpdatePageNodeRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

@@ -6,9 +6,9 @@
 
 ## 功能特性
 
-- **101 / 101 OpenAPI 操作全覆盖**：规范化后的上游 v1.2.0 契约中每一个操作都有生成 Handler 和 Go 实现。
+- **109 / 109 OpenAPI 操作全覆盖**：规范化后的上游 v1.2.1 契约中每一个操作都有生成 Handler 和 Go 实现。
 - **REST 与 MCP 同端口**：`/v1/...` REST 路由和 `/mcp/{bank}/` Streamable HTTP MCP 共用同一套实现，工具调用与 API 调用行为一致。
-- **完整的 Agent Memory 工作流**：retain、recall、reflect、consolidation、entities、temporal 和 semantic links、directives、bank aliases、operations、Knowledge Base、webhooks、transfer/import/export、文件保留。
+- **完整的 Agent Memory 工作流**：retain、recall、reflect、consolidation、entities、temporal 和 semantic links、directives、bank aliases、operations、Pages（保留旧 Knowledge Base 别名）、webhooks、transfer/import/export、文件保留。
 - **PostgreSQL + pgvector 存储**：提供与上游 schema 兼容的 PostgreSQL 后端，支持生产部署和既有 Hindsight 数据迁移。
 - **真实语义召回**：支持任意 OpenAI 兼容 embeddings 服务（TEI 可用），向量写入 pgvector，并与关键词召回通过 RRF 融合。
 - **存储后端可插拔**：生产使用 PostgreSQL，测试或本地评估可使用进程内存储。
@@ -94,6 +94,8 @@ POST   /v1/default/banks/{bank_id}/reflect
 POST   /v1/default/banks/{bank_id}/consolidate
 GET    /v1/default/banks
 GET    /v1/default/banks/{bank_id}/tags
+GET    /v1/default/banks/{bank_id}/pages/tree
+POST   /v1/default/banks/{bank_id}/pages
 ```
 
 MCP 服务地址：
@@ -102,7 +104,7 @@ MCP 服务地址：
 http://127.0.0.1:8890/mcp/{bank}/
 ```
 
-MCP 目录当前有 36 个工具，包括 `retain`、`sync_retain`、`recall`、`reflect`。MCP 调用会在进程内桥接到同一套 REST Handler，因此功能要么在两个入口同时可用，要么明确报告不支持。
+MCP 目录当前有 43 个工具，包括 `retain`、`sync_retain`、`recall`、`reflect` 和 v1.2.1 Pages 别名。MCP 调用会在进程内桥接到同一套 REST Handler，因此功能要么在两个入口同时可用，要么明确报告不支持。
 
 ## 数据与迁移
 
@@ -140,6 +142,9 @@ pwsh scripts/check.ps1
 ```
 
 `internal/api` 中的生成代码有意提交到仓库，普通构建不需要重新生成。如果确实修改了 `openapi.go.json`，请重新生成并完整执行检查。
+
+v1.2.1 的 `/pages/...` 是正式 Pages API。原 `/knowledge-base/...` 继续作为
+deprecated 别名提供，预计到上游 2.x 才移除。
 
 ## 配置
 

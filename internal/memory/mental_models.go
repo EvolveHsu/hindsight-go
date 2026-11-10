@@ -10,16 +10,18 @@ import (
 
 // MentalModel is the lite mental model row.
 type MentalModel struct {
-	ID            string
-	BankID        string
-	Name          string
-	SourceQuery   string
-	Content       string
-	Tags          []string
-	MaxTokens     int
-	LastRefreshed string
-	LastSeen      string
-	CreatedAt     string
+	ID                  string
+	BankID              string
+	Name                string
+	SourceQuery         string
+	Content             string
+	Tags                []string
+	MaxTokens           int
+	LastRefreshed       string
+	LastSeen            string
+	LastRefreshFailedAt string
+	CreatedAt           string
+	IsPage              bool
 }
 
 // CreateMentalModel stores a new model definition (content empty until refresh).

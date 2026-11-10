@@ -455,6 +455,68 @@ func encodeCreateOrUpdateBankResponse(response CreateOrUpdateBankRes, w http.Res
 	}
 }
 
+func encodeCreatePageResponse(response CreatePageRes, w http.ResponseWriter, span trace.Span) error {
+	switch response := response.(type) {
+	case *CreatePageResponse:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(201)
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *HTTPValidationError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(422)
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	default:
+		return errors.Errorf("unexpected response type: %T", response)
+	}
+}
+
+func encodeCreatePageFolderResponse(response CreatePageFolderRes, w http.ResponseWriter, span trace.Span) error {
+	switch response := response.(type) {
+	case *PageNode:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(201)
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *HTTPValidationError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(422)
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	default:
+		return errors.Errorf("unexpected response type: %T", response)
+	}
+}
+
 func encodeCreateWebhookResponse(response CreateWebhookRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
 	case *WebhookResponse:
@@ -675,6 +737,37 @@ func encodeDeleteMentalModelResponse(response DeleteMentalModelRes, w http.Respo
 func encodeDeleteOperationResponse(response DeleteOperationRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
 	case *DeleteOperationResponse:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(200)
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *HTTPValidationError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(422)
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	default:
+		return errors.Errorf("unexpected response type: %T", response)
+	}
+}
+
+func encodeDeletePageNodeResponse(response DeletePageNodeRes, w http.ResponseWriter, span trace.Span) error {
+	switch response := response.(type) {
+	case *DeletePageNodeOKApplicationJSON:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
 
@@ -978,6 +1071,42 @@ func encodeExportKnowledgeBaseResponse(response ExportKnowledgeBaseRes, w http.R
 		return nil
 
 	case *ExportKnowledgeBaseNotFound:
+		w.WriteHeader(404)
+
+		return nil
+
+	case *HTTPValidationError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(422)
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	default:
+		return errors.Errorf("unexpected response type: %T", response)
+	}
+}
+
+func encodeExportPagesResponse(response ExportPagesRes, w http.ResponseWriter, span trace.Span) error {
+	switch response := response.(type) {
+	case *PageBundleResponse:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(200)
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *ExportPagesNotFound:
 		w.WriteHeader(404)
 
 		return nil
@@ -1695,6 +1824,73 @@ func encodeGetOperationStatusResponse(response GetOperationStatusRes, w http.Res
 		if _, err := e.WriteTo(w); err != nil {
 			return errors.Wrap(err, "write")
 		}
+
+		return nil
+
+	case *HTTPValidationError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(422)
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	default:
+		return errors.Errorf("unexpected response type: %T", response)
+	}
+}
+
+func encodeGetPageResponse(response GetPageRes, w http.ResponseWriter, span trace.Span) error {
+	switch response := response.(type) {
+	case *PageResponse:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(200)
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *HTTPValidationError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(422)
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	default:
+		return errors.Errorf("unexpected response type: %T", response)
+	}
+}
+
+func encodeGetPageTreeResponse(response GetPageTreeRes, w http.ResponseWriter, span trace.Span) error {
+	switch response := response.(type) {
+	case *PageTreeResponse:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(200)
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *GetPageTreeNotFound:
+		w.WriteHeader(404)
 
 		return nil
 
@@ -2804,6 +3000,42 @@ func encodeSearchKnowledgeBaseResponse(response SearchKnowledgeBaseRes, w http.R
 	}
 }
 
+func encodeSearchPagesResponse(response SearchPagesRes, w http.ResponseWriter, span trace.Span) error {
+	switch response := response.(type) {
+	case *PageSearchResponse:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(200)
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *SearchPagesNotFound:
+		w.WriteHeader(404)
+
+		return nil
+
+	case *HTTPValidationError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(422)
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	default:
+		return errors.Errorf("unexpected response type: %T", response)
+	}
+}
+
 func encodeSetBankAliasPrimaryResponse(response SetBankAliasPrimaryRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
 	case *BankAliasesResponse:
@@ -3117,6 +3349,37 @@ func encodeUpdateMemoryResponse(response UpdateMemoryRes, w http.ResponseWriter,
 func encodeUpdateMentalModelResponse(response UpdateMentalModelRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
 	case *MentalModelResponse:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(200)
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *HTTPValidationError:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(422)
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	default:
+		return errors.Errorf("unexpected response type: %T", response)
+	}
+}
+
+func encodeUpdatePageNodeResponse(response UpdatePageNodeRes, w http.ResponseWriter, span trace.Span) error {
+	switch response := response.(type) {
+	case *PageNode:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
 

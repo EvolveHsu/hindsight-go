@@ -1,6 +1,6 @@
 // Package server holds the thin HTTP handlers for hindsight-go.
 //
-// The embedded generated Handler covers all 99 operations; handlers implemented
+// The embedded generated Handler covers all 109 operations; handlers implemented
 // here override the monitoring surface first (health/live/ready/version/metrics),
 // which is also what the upstream deployment probes rely on. Everything else
 // still returns 501 through the generated UnimplementedHandler, so the server
@@ -23,11 +23,11 @@ import (
 )
 
 // Version is the semantic version of this Go implementation.
-const Version = "0.1.3"
+const Version = "0.1.4"
 
 // UpstreamAPIVersion mirrors the upstream OpenAPI info.version the generated
 // types were frozen from.
-const UpstreamAPIVersion = "1.2.0"
+const UpstreamAPIVersion = "1.2.1"
 
 // startedAt backs the liveness uptime field.
 var startedAt = time.Now()

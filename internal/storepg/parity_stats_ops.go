@@ -83,7 +83,12 @@ SELECT
 	}
 	var lastConsolidated, lastWrite *time.Time
 	var createdAt, updatedAt, lastDocument *time.Time
-	var pending, failed int
+	var pending, failed, paused int
+	pausedExpr := "0"
+	if s.upstream {
+		pausedExpr = `(SELECT count(*) FROM mental_models mm
+			WHERE mm.bank_id=$1 AND mm.last_refresh_failed_at IS NOT NULL)`
+	}
 	if err := s.pool.QueryRow(ctx, fmt.Sprintf(`
 SELECT
   (SELECT created_at FROM banks WHERE bank_id=$1),
@@ -92,8 +97,9 @@ SELECT
   (SELECT max(COALESCE(updated_at, created_at)) FROM %[1]s WHERE bank_id=$1),
   (SELECT max(updated_at) FROM documents WHERE bank_id=$1),
   (SELECT count(*) FROM %[1]s WHERE bank_id=$1 AND fact_type IN ('world','experience') AND consolidated_at IS NULL AND consolidation_failed_at IS NULL),
-  (SELECT count(*) FROM %[1]s WHERE bank_id=$1 AND consolidation_failed_at IS NOT NULL)`, s.unitsTable()), bankID).
-		Scan(&createdAt, &updatedAt, &lastConsolidated, &lastWrite, &lastDocument, &pending, &failed); err != nil {
+  (SELECT count(*) FROM %[1]s WHERE bank_id=$1 AND consolidation_failed_at IS NOT NULL),
+  %[2]s`, s.unitsTable(), pausedExpr), bankID).
+		Scan(&createdAt, &updatedAt, &lastConsolidated, &lastWrite, &lastDocument, &pending, &failed, &paused); err != nil {
 		if createdAt != nil {
 			out.CreatedAt = createdAt.UTC().Format(time.RFC3339)
 		}
@@ -113,6 +119,7 @@ SELECT
 	}
 	out.PendingConsolidation = pending
 	out.FailedConsolidation = failed
+	out.PausedMentalModels = paused
 	return out, nil
 }
 

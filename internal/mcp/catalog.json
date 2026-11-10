@@ -3457,5 +3457,1118 @@
         "tags": []
       }
     }
+  },
+  {
+    "name": "get_page_tree",
+    "description": "Browse the Pages as a nested tree of folders and pages.\n\nStart here to discover what the bank documents: each page is a living\nmarkdown document synthesized from the bank's memories, and folders\ngroup them. Use get_page to read a page's content, or\nsearch_pages when you know what you are looking for.\n\nPages report `is_stale`: false means the page is provably up to date;\ntrue means something was written since its last refresh, so it MAY be\nout of date.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    },
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    }
+  },
+  {
+    "name": "search_pages",
+    "description": "Find pages by relevance (hybrid keyword + semantic search).\n\nSearches page names and content, returning ranked pages with a short\nsnippet each. Read a hit in full with get_page. This searches\nthe curated Pages only — use recall to search raw memories.\n\nArgs:\n    query: What to search for\n    limit: Maximum pages to return (1-50, default: 10)",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "query": {
+          "type": "string"
+        },
+        "limit": {
+          "default": 10,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "query"
+      ],
+      "type": "object"
+    },
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    }
+  },
+  {
+    "name": "get_page",
+    "description": "Read a page as a markdown document.\n\nReturns the page's YAML frontmatter (id, type, title, description,\ntags, timestamp) followed by its synthesized markdown body. Discover\npage ids with get_page_tree or search_pages.\n\nArgs:\n    page_id: The ID of the page to read (a `kp-...` node id)",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "page_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "page_id"
+      ],
+      "type": "object"
+    },
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    }
+  },
+  {
+    "name": "create_page_folder",
+    "description": "Create a folder in the Pages.\n\nFolders group pages; they hold no content of their own.\n\nArgs:\n    name: Folder name\n    parent_id: Optional parent folder id (a `kf-...` node id). Omit to create at the top level.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "parent_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object"
+    },
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    }
+  },
+  {
+    "name": "create_page",
+    "description": "Create a page — a living document answering a question.\n\nThe page's content is synthesized from the bank's memories by running\nsource_query, asynchronously: use the returned operation_id to track\ncompletion, then read it with get_page. By default the page\nkeeps itself current, rebuilding after each consolidation.\n\nEXAMPLES:\n- name=\"Deployment Runbook\", source_query=\"How is this service deployed and rolled back?\"\n- name=\"Team Preferences\", source_query=\"What tools and conventions does the team prefer?\"\n\nArgs:\n    name: Page name (must be unique within its folder)\n    source_query: The question this page answers and rebuilds itself from\n    parent_id: Optional parent folder id (a `kf-...` node id). Omit to create at the top level.\n    tags: Optional tags scoping which memories the page is built from\n    max_tokens: Maximum tokens for the generated content (default: 4096)\n    trigger: Refresh policy for this page — when it rebuilds itself (mode,\n        refresh_after_consolidation, refresh_cron) and what it rebuilds from\n        (fact_types, tags_match, tag_groups, exclude_mental_models,\n        recall_max_tokens, ...). Omitted fields keep the knowledge-page\n        defaults: incremental (delta) rebuilds from consolidated observations\n        after each consolidation, ignoring sibling pages. Set refresh_cron\n        instead to move the page onto a fixed UTC schedule.\n    refresh_after_consolidation: Legacy shorthand for trigger.refresh_after_consolidation.",
+    "inputSchema": {
+      "$defs": {
+        "Budget": {
+          "description": "Budget levels for recall/reflect operations.",
+          "enum": [
+            "low",
+            "mid",
+            "high"
+          ],
+          "type": "string"
+        },
+        "MentalModelTriggerInput": {
+          "additionalProperties": false,
+          "description": "The refresh policy of a mental model or knowledge page, as an MCP tool input.\n\nMirrors the HTTP ``MentalModelTrigger`` field for field — an agent that read\nthe API docs must not have a call rejected for naming a setting that exists.\n``tests/test_mcp_tools.py::test_trigger_input_covers_every_http_trigger_field``\nfails if the two drift apart.\n\nThe one deliberate difference is that every field is optional with no default:\nthe HTTP model fills unset fields with its own defaults, which makes a partial\ntrigger silently reset the rest, while these tools send only what the caller\nactually set (``model_dump(exclude_unset=True)``) and the engine merges that\nover the stored trigger. Passing an explicit ``null`` still clears a setting.",
+          "properties": {
+            "mode": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "full",
+                    "delta"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Refresh mode. 'full' regenerates the content from scratch on each refresh; 'delta' makes surgical edits to the existing content, preserving unchanged sections byte-for-byte. Delta falls back to a full regeneration when there is no existing content or the source_query changed."
+            },
+            "refresh_after_consolidation": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Refresh automatically after observations are consolidated. Mutually exclusive with refresh_cron."
+            },
+            "refresh_cron": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "UTC five-field cron schedule, e.g. '0 3 * * *' for daily at 03:00 UTC. A scheduled refresh runs only when the model is stale, so an unchanged scope costs no LLM call. Mutually exclusive with refresh_after_consolidation. null = no schedule."
+            },
+            "min_refresh_interval_seconds": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Minimum seconds between two AUTOMATIC refreshes. A trigger that arrives sooner is queued and parked until the window expires, and further triggers fold into that one queued refresh, so a burst of retains costs one refresh. Explicit refreshes ignore it. 0 disables the floor; null falls back to the bank/global setting."
+            },
+            "fact_types": {
+              "anyOf": [
+                {
+                  "items": {
+                    "enum": [
+                      "world",
+                      "experience",
+                      "observation"
+                    ],
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Fact types to retrieve during refresh; null includes all of world, experience and observation."
+            },
+            "exclude_mental_models": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Exclude ALL mental models from the refresh's reflect loop, so a model never reflects on its siblings."
+            },
+            "exclude_mental_model_ids": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Exclude specific mental models from the refresh's reflect loop, by ID."
+            },
+            "tags_match": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "any",
+                    "all",
+                    "any_strict",
+                    "all_strict",
+                    "exact"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "How this model's tags select memories during refresh: any, all, any_strict, all_strict, or exact. Unset means 'all_strict' for a tagged model and 'any' for an untagged one."
+            },
+            "tag_groups": {
+              "anyOf": [
+                {
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/TagGroupLeaf"
+                      },
+                      {
+                        "$ref": "#/$defs/TagGroupAnd"
+                      },
+                      {
+                        "$ref": "#/$defs/TagGroupOr"
+                      },
+                      {
+                        "$ref": "#/$defs/TagGroupNot"
+                      }
+                    ]
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Compound boolean tag expressions (nested and/or/not) used during refresh INSTEAD of the model's flat tags. When set, the model's own tags are not used for filtering."
+            },
+            "include_chunks": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Override whether the refresh's internal recall returns raw chunk text. null = bank/global default."
+            },
+            "recall_max_tokens": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Override the token budget for facts from the refresh's internal recall. null = bank/global default."
+            },
+            "recall_chunks_max_tokens": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Override the token budget for raw chunks from the refresh's internal recall. null = bank/global default."
+            },
+            "budget": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Budget"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "How many agent steps a refresh may spend, as a multiple of the server's reflect iteration limit: 'low' halves it, 'mid' keeps it, 'high' doubles it. null = mid."
+            },
+            "reflect_search_observations_max_tokens": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Override the token budget for the refresh's search_observations calls. Lowering it drops the lowest-ranked observations and shrinks the reflect context. null = the shipped 5000."
+            },
+            "reflect_search_observations_include_entities": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Override whether search_observations attaches resolved entity names, which can be over half the tool payload. null = enabled."
+            },
+            "response_schema": {
+              "anyOf": [
+                {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "JSON Schema for structured output. Each refresh then also stores a parsed result under reflect_response.structured_output, alongside the markdown content."
+            },
+            "keep_trace": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Record how each refresh reached its result under reflect_response.trace (mode and why, resolved scope and window, facts retrieved vs used, tool and LLM calls, delta operations). Only the latest refresh's trace is kept. This is the only way to diagnose a cron- or consolidation-driven refresh, since nobody watches those run."
+            }
+          },
+          "type": "object"
+        },
+        "TagGroupAnd": {
+          "description": "Compound AND group: all child filters must match.",
+          "properties": {
+            "and": {
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/TagGroupLeaf"
+                  },
+                  {
+                    "$ref": "#/$defs/TagGroupAnd"
+                  },
+                  {
+                    "$ref": "#/$defs/TagGroupOr"
+                  },
+                  {
+                    "$ref": "#/$defs/TagGroupNot"
+                  }
+                ]
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "and"
+          ],
+          "type": "object"
+        },
+        "TagGroupLeaf": {
+          "description": "A leaf tag filter: matches memories by tag list and match mode.",
+          "properties": {
+            "tags": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "match": {
+              "default": "any_strict",
+              "enum": [
+                "any",
+                "all",
+                "any_strict",
+                "all_strict",
+                "exact"
+              ],
+              "type": "string"
+            },
+            "resolve": {
+              "default": "exact",
+              "enum": [
+                "exact",
+                "fuzzy"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "tags"
+          ],
+          "type": "object"
+        },
+        "TagGroupNot": {
+          "description": "Compound NOT group: child filter must NOT match.",
+          "properties": {
+            "not": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/TagGroupLeaf"
+                },
+                {
+                  "$ref": "#/$defs/TagGroupAnd"
+                },
+                {
+                  "$ref": "#/$defs/TagGroupOr"
+                },
+                {
+                  "$ref": "#/$defs/TagGroupNot"
+                }
+              ]
+            }
+          },
+          "required": [
+            "not"
+          ],
+          "type": "object"
+        },
+        "TagGroupOr": {
+          "description": "Compound OR group: at least one child filter must match.",
+          "properties": {
+            "or": {
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/TagGroupLeaf"
+                  },
+                  {
+                    "$ref": "#/$defs/TagGroupAnd"
+                  },
+                  {
+                    "$ref": "#/$defs/TagGroupOr"
+                  },
+                  {
+                    "$ref": "#/$defs/TagGroupNot"
+                  }
+                ]
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "or"
+          ],
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "source_query": {
+          "type": "string"
+        },
+        "parent_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "tags": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "max_tokens": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "trigger": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MentalModelTriggerInput"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "refresh_after_consolidation": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "name",
+        "source_query"
+      ],
+      "type": "object"
+    },
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    }
+  },
+  {
+    "name": "update_page_node",
+    "description": "Rename or move a folder/page, and/or update a page's options.\n\nOnly the arguments you pass are changed; everything else keeps its\ncurrent value. Changing source_query schedules an async refresh so the\npage rebuilds against the new question.\n\nArgs:\n    node_id: The ID of the folder (`kf-...`) or page (`kp-...`) to update\n    name: New name for the node\n    parent_id: Folder id to move the node into, or \"root\" to move it to the top level\n    source_query: Pages only — the new question the page answers\n    tags: Pages only — replacement tag list (pass [] to clear)\n    max_tokens: Pages only — new maximum tokens for the generated content\n    trigger: Pages only — refresh policy fields to change: mode,\n        refresh_after_consolidation, refresh_cron, fact_types, tags_match,\n        tag_groups, exclude_mental_models, recall_max_tokens, and so on. This\n        is a PATCH: fields you omit keep their current values, so putting a\n        page on a cron schedule does not reset its delta mode or its\n        observation-only scope.\n    refresh_after_consolidation: Pages only — legacy shorthand for\n        trigger.refresh_after_consolidation",
+    "inputSchema": {
+      "$defs": {
+        "Budget": {
+          "description": "Budget levels for recall/reflect operations.",
+          "enum": [
+            "low",
+            "mid",
+            "high"
+          ],
+          "type": "string"
+        },
+        "MentalModelTriggerInput": {
+          "additionalProperties": false,
+          "description": "The refresh policy of a mental model or knowledge page, as an MCP tool input.\n\nMirrors the HTTP ``MentalModelTrigger`` field for field — an agent that read\nthe API docs must not have a call rejected for naming a setting that exists.\n``tests/test_mcp_tools.py::test_trigger_input_covers_every_http_trigger_field``\nfails if the two drift apart.\n\nThe one deliberate difference is that every field is optional with no default:\nthe HTTP model fills unset fields with its own defaults, which makes a partial\ntrigger silently reset the rest, while these tools send only what the caller\nactually set (``model_dump(exclude_unset=True)``) and the engine merges that\nover the stored trigger. Passing an explicit ``null`` still clears a setting.",
+          "properties": {
+            "mode": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "full",
+                    "delta"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Refresh mode. 'full' regenerates the content from scratch on each refresh; 'delta' makes surgical edits to the existing content, preserving unchanged sections byte-for-byte. Delta falls back to a full regeneration when there is no existing content or the source_query changed."
+            },
+            "refresh_after_consolidation": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Refresh automatically after observations are consolidated. Mutually exclusive with refresh_cron."
+            },
+            "refresh_cron": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "UTC five-field cron schedule, e.g. '0 3 * * *' for daily at 03:00 UTC. A scheduled refresh runs only when the model is stale, so an unchanged scope costs no LLM call. Mutually exclusive with refresh_after_consolidation. null = no schedule."
+            },
+            "min_refresh_interval_seconds": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Minimum seconds between two AUTOMATIC refreshes. A trigger that arrives sooner is queued and parked until the window expires, and further triggers fold into that one queued refresh, so a burst of retains costs one refresh. Explicit refreshes ignore it. 0 disables the floor; null falls back to the bank/global setting."
+            },
+            "fact_types": {
+              "anyOf": [
+                {
+                  "items": {
+                    "enum": [
+                      "world",
+                      "experience",
+                      "observation"
+                    ],
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Fact types to retrieve during refresh; null includes all of world, experience and observation."
+            },
+            "exclude_mental_models": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Exclude ALL mental models from the refresh's reflect loop, so a model never reflects on its siblings."
+            },
+            "exclude_mental_model_ids": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Exclude specific mental models from the refresh's reflect loop, by ID."
+            },
+            "tags_match": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "any",
+                    "all",
+                    "any_strict",
+                    "all_strict",
+                    "exact"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "How this model's tags select memories during refresh: any, all, any_strict, all_strict, or exact. Unset means 'all_strict' for a tagged model and 'any' for an untagged one."
+            },
+            "tag_groups": {
+              "anyOf": [
+                {
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/TagGroupLeaf"
+                      },
+                      {
+                        "$ref": "#/$defs/TagGroupAnd"
+                      },
+                      {
+                        "$ref": "#/$defs/TagGroupOr"
+                      },
+                      {
+                        "$ref": "#/$defs/TagGroupNot"
+                      }
+                    ]
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Compound boolean tag expressions (nested and/or/not) used during refresh INSTEAD of the model's flat tags. When set, the model's own tags are not used for filtering."
+            },
+            "include_chunks": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Override whether the refresh's internal recall returns raw chunk text. null = bank/global default."
+            },
+            "recall_max_tokens": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Override the token budget for facts from the refresh's internal recall. null = bank/global default."
+            },
+            "recall_chunks_max_tokens": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Override the token budget for raw chunks from the refresh's internal recall. null = bank/global default."
+            },
+            "budget": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Budget"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "How many agent steps a refresh may spend, as a multiple of the server's reflect iteration limit: 'low' halves it, 'mid' keeps it, 'high' doubles it. null = mid."
+            },
+            "reflect_search_observations_max_tokens": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Override the token budget for the refresh's search_observations calls. Lowering it drops the lowest-ranked observations and shrinks the reflect context. null = the shipped 5000."
+            },
+            "reflect_search_observations_include_entities": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Override whether search_observations attaches resolved entity names, which can be over half the tool payload. null = enabled."
+            },
+            "response_schema": {
+              "anyOf": [
+                {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "JSON Schema for structured output. Each refresh then also stores a parsed result under reflect_response.structured_output, alongside the markdown content."
+            },
+            "keep_trace": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Record how each refresh reached its result under reflect_response.trace (mode and why, resolved scope and window, facts retrieved vs used, tool and LLM calls, delta operations). Only the latest refresh's trace is kept. This is the only way to diagnose a cron- or consolidation-driven refresh, since nobody watches those run."
+            }
+          },
+          "type": "object"
+        },
+        "TagGroupAnd": {
+          "description": "Compound AND group: all child filters must match.",
+          "properties": {
+            "and": {
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/TagGroupLeaf"
+                  },
+                  {
+                    "$ref": "#/$defs/TagGroupAnd"
+                  },
+                  {
+                    "$ref": "#/$defs/TagGroupOr"
+                  },
+                  {
+                    "$ref": "#/$defs/TagGroupNot"
+                  }
+                ]
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "and"
+          ],
+          "type": "object"
+        },
+        "TagGroupLeaf": {
+          "description": "A leaf tag filter: matches memories by tag list and match mode.",
+          "properties": {
+            "tags": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "match": {
+              "default": "any_strict",
+              "enum": [
+                "any",
+                "all",
+                "any_strict",
+                "all_strict",
+                "exact"
+              ],
+              "type": "string"
+            },
+            "resolve": {
+              "default": "exact",
+              "enum": [
+                "exact",
+                "fuzzy"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "tags"
+          ],
+          "type": "object"
+        },
+        "TagGroupNot": {
+          "description": "Compound NOT group: child filter must NOT match.",
+          "properties": {
+            "not": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/TagGroupLeaf"
+                },
+                {
+                  "$ref": "#/$defs/TagGroupAnd"
+                },
+                {
+                  "$ref": "#/$defs/TagGroupOr"
+                },
+                {
+                  "$ref": "#/$defs/TagGroupNot"
+                }
+              ]
+            }
+          },
+          "required": [
+            "not"
+          ],
+          "type": "object"
+        },
+        "TagGroupOr": {
+          "description": "Compound OR group: at least one child filter must match.",
+          "properties": {
+            "or": {
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/TagGroupLeaf"
+                  },
+                  {
+                    "$ref": "#/$defs/TagGroupAnd"
+                  },
+                  {
+                    "$ref": "#/$defs/TagGroupOr"
+                  },
+                  {
+                    "$ref": "#/$defs/TagGroupNot"
+                  }
+                ]
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "or"
+          ],
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "node_id": {
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "parent_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "source_query": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "tags": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "max_tokens": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "trigger": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MentalModelTriggerInput"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "refresh_after_consolidation": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "node_id"
+      ],
+      "type": "object"
+    },
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    }
+  },
+  {
+    "name": "delete_page_node",
+    "description": "Delete a Pages folder or page and everything under it.\n\nDeleting a folder also deletes its whole subtree, and each deleted page\ntakes its backing mental model with it. This cannot be undone.\n\nArgs:\n    node_id: The ID of the folder (`kf-...`) or page (`kp-...`) to delete",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "node_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "node_id"
+      ],
+      "type": "object"
+    },
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "fastmcp": {
+        "tags": []
+      }
+    }
   }
 ]

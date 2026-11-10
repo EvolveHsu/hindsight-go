@@ -164,6 +164,15 @@ func (s *Store) Chunk(ctx context.Context, chunkID string) (*model.ChunkInfo, er
 // UpdateDocumentTags replaces the document's tags, its units' tags and drops
 // observations derived from those units.
 func (s *Store) UpdateDocumentTags(ctx context.Context, bankID, docID string, tags []string) (bool, error) {
+	return s.patchDocumentTags(ctx, bankID, docID, tags, nil, nil)
+}
+
+// PatchDocumentTags applies the v1.2.1 incremental document tag modes.
+func (s *Store) PatchDocumentTags(ctx context.Context, bankID, docID string, replace, add, remove []string) (bool, error) {
+	return s.patchDocumentTags(ctx, bankID, docID, replace, add, remove)
+}
+
+func (s *Store) patchDocumentTags(ctx context.Context, bankID, docID string, replace, add, remove []string) (bool, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	key := bankID + "/" + docID
@@ -171,11 +180,12 @@ func (s *Store) UpdateDocumentTags(ctx context.Context, bankID, docID string, ta
 	if !ok {
 		return false, nil
 	}
-	d.Tags = normalize(tags)
+	tags := normalize(model.ApplyDocumentTagPatch(d.Tags, replace, add, remove))
+	d.Tags = tags
 	sourceIDs := map[string]bool{}
 	for _, uid := range s.byDoc[key] {
 		if u := s.units[uid]; u != nil {
-			u.Tags = normalize(tags)
+			u.Tags = tags
 			if u.FactType != model.FactObservation {
 				sourceIDs[uid] = true
 			}

@@ -413,6 +413,9 @@ func buildCall(bank, name string, args map[string]any) (restCall, error) {
 	case "get_knowledge_base_tree":
 		return restCall{method: http.MethodGet, path: base + "/knowledge-base/tree"}, nil
 
+	case "get_page_tree":
+		return restCall{method: http.MethodGet, path: base + "/pages/tree"}, nil
+
 	case "search_knowledge_base":
 		phrase, err := requireString(args, "query")
 		if err != nil {
@@ -422,6 +425,15 @@ func buildCall(bank, name string, args map[string]any) (restCall, error) {
 		addQuery(values, "limit", args["limit"])
 		return restCall{method: http.MethodGet, path: base + "/knowledge-base/search", query: values}, nil
 
+	case "search_pages":
+		phrase, err := requireString(args, "query")
+		if err != nil {
+			return restCall{}, err
+		}
+		values := url.Values{"q": []string{phrase}}
+		addQuery(values, "limit", args["limit"])
+		return restCall{method: http.MethodGet, path: base + "/pages/search", query: values}, nil
+
 	case "get_knowledge_page":
 		id, err := requireString(args, "page_id")
 		if err != nil {
@@ -429,12 +441,26 @@ func buildCall(bank, name string, args map[string]any) (restCall, error) {
 		}
 		return restCall{method: http.MethodGet, path: base + "/knowledge-base/pages/" + url.PathEscape(id)}, nil
 
+	case "get_page":
+		id, err := requireString(args, "page_id")
+		if err != nil {
+			return restCall{}, err
+		}
+		return restCall{method: http.MethodGet, path: base + "/pages/" + url.PathEscape(id)}, nil
+
 	case "create_knowledge_folder":
 		body := pick(args, "name", "parent_id")
 		if _, err := requireString(args, "name"); err != nil {
 			return restCall{}, err
 		}
 		return restCall{method: http.MethodPost, path: base + "/knowledge-base/folders", body: body}, nil
+
+	case "create_page_folder":
+		body := pick(args, "name", "parent_id")
+		if _, err := requireString(args, "name"); err != nil {
+			return restCall{}, err
+		}
+		return restCall{method: http.MethodPost, path: base + "/pages/folders", body: body}, nil
 
 	case "create_knowledge_page":
 		body := pick(args, "name", "source_query", "parent_id", "tags", "max_tokens")
@@ -449,6 +475,19 @@ func buildCall(bank, name string, args map[string]any) (restCall, error) {
 		}
 		return restCall{method: http.MethodPost, path: base + "/knowledge-base/pages", body: body}, nil
 
+	case "create_page":
+		body := pick(args, "name", "source_query", "parent_id", "tags", "max_tokens")
+		if _, err := requireString(args, "name"); err != nil {
+			return restCall{}, err
+		}
+		if _, err := requireString(args, "source_query"); err != nil {
+			return restCall{}, err
+		}
+		if trigger := triggerArg(args); trigger != nil {
+			body["trigger"] = trigger
+		}
+		return restCall{method: http.MethodPost, path: base + "/pages", body: body}, nil
+
 	case "update_knowledge_node":
 		id, err := requireString(args, "node_id")
 		if err != nil {
@@ -460,12 +499,30 @@ func buildCall(bank, name string, args map[string]any) (restCall, error) {
 		}
 		return restCall{method: http.MethodPatch, path: base + "/knowledge-base/nodes/" + url.PathEscape(id), body: body}, nil
 
+	case "update_page_node":
+		id, err := requireString(args, "node_id")
+		if err != nil {
+			return restCall{}, err
+		}
+		body := pick(args, "name", "parent_id", "source_query", "tags", "max_tokens")
+		if trigger := triggerArg(args); trigger != nil {
+			body["trigger"] = trigger
+		}
+		return restCall{method: http.MethodPatch, path: base + "/pages/nodes/" + url.PathEscape(id), body: body}, nil
+
 	case "delete_knowledge_node":
 		id, err := requireString(args, "node_id")
 		if err != nil {
 			return restCall{}, err
 		}
 		return restCall{method: http.MethodDelete, path: base + "/knowledge-base/nodes/" + url.PathEscape(id)}, nil
+
+	case "delete_page_node":
+		id, err := requireString(args, "node_id")
+		if err != nil {
+			return restCall{}, err
+		}
+		return restCall{method: http.MethodDelete, path: base + "/pages/nodes/" + url.PathEscape(id)}, nil
 	}
 
 	return restCall{}, fmt.Errorf("tool %q has no REST mapping", name)

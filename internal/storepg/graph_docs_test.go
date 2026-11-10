@@ -226,6 +226,17 @@ func TestUpstreamDocumentChunksAndTags(t *testing.T) {
 		t.Fatalf("unit tags = %v", unitTags)
 	}
 
+	ok, err = s.PatchDocumentTags(ctx, "b", "doc1", nil, []string{"final", "fresh"}, []string{"fresh"})
+	if err != nil || !ok {
+		t.Fatalf("PatchDocumentTags = %v, %v", ok, err)
+	}
+	if err := s.pool.QueryRow(ctx, `SELECT tags::text[] FROM documents WHERE id = 'doc1' AND bank_id = 'b'`).Scan(&docTags); err != nil {
+		t.Fatalf("read patched document tags: %v", err)
+	}
+	if strings.Join(docTags, ",") != "final,fresh" {
+		t.Fatalf("patched document tags = %v", docTags)
+	}
+
 	res, err := s.ReprocessDocument(ctx, "b", "doc1")
 	// The retag dropped the derived observation, so two units are left.
 	if err != nil || res == nil || res.ItemsCount != 2 || res.OperationID == "" {

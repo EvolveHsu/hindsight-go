@@ -6,9 +6,9 @@ A Go implementation of the [Hindsight](https://github.com/vectorize-io/hindsight
 
 ## Features
 
-- **101 / 101 OpenAPI operations**: every operation in the normalized upstream v1.2.0 contract has a generated handler and a Go implementation.
+- **109 / 109 OpenAPI operations**: every operation in the normalized upstream v1.2.1 contract has a generated handler and a Go implementation.
 - **REST + MCP on one port**: `/v1/...` REST routes and `/mcp/{bank}/` Streamable HTTP MCP share the same implementation, so tool calls and API calls behave identically.
-- **Agent memory workflow**: retain, recall, reflect, consolidation, entities, temporal and semantic links, directives, bank aliases, operations, knowledge base, webhooks, transfer/import/export, and file retention.
+- **Agent memory workflow**: retain, recall, reflect, consolidation, entities, temporal and semantic links, directives, bank aliases, operations, Pages (with deprecated Knowledge Base aliases), webhooks, transfer/import/export, and file retention.
 - **PostgreSQL + pgvector storage**: an upstream-schema-compatible PostgreSQL backend is included for durable deployments and migration from existing Hindsight data.
 - **Real semantic recall**: embeddings are generated through any OpenAI-compatible embeddings endpoint (TEI works well), stored in pgvector, and fused with keyword results using Reciprocal Rank Fusion.
 - **Pluggable storage**: use PostgreSQL for production, or the in-process backend for tests and local evaluation.
@@ -94,6 +94,8 @@ POST   /v1/default/banks/{bank_id}/reflect
 POST   /v1/default/banks/{bank_id}/consolidate
 GET    /v1/default/banks
 GET    /v1/default/banks/{bank_id}/tags
+GET    /v1/default/banks/{bank_id}/pages/tree
+POST   /v1/default/banks/{bank_id}/pages
 ```
 
 MCP is served at:
@@ -102,7 +104,7 @@ MCP is served at:
 http://127.0.0.1:8890/mcp/{bank}/
 ```
 
-The MCP catalog currently contains 36 tools, including `retain`, `sync_retain`, `recall`, and `reflect`. MCP calls are bridged in process to the same REST handlers, so a feature is either available consistently on both surfaces or reports an explicit not-supported result.
+The MCP catalog currently contains 43 tools, including `retain`, `sync_retain`, `recall`, `reflect`, and the v1.2.1 Pages aliases. MCP calls are bridged in process to the same REST handlers, so a feature is either available consistently on both surfaces or reports an explicit not-supported result.
 
 ## Data And Migration
 
@@ -140,6 +142,10 @@ pwsh scripts/check.ps1
 ```
 
 The generated API package in `internal/api` is committed intentionally so a normal build does not require regeneration. If you intentionally change `openapi.go.json`, regenerate it and run the full check.
+
+The v1.2.1 `/pages/...` routes are the canonical Pages API. The previous
+`/knowledge-base/...` routes remain available as deprecated aliases until the
+upstream 2.x cleanup.
 
 ## Configuration
 

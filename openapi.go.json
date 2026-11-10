@@ -10,7 +10,7 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "1.2.0"
+    "version": "1.2.1"
   },
   "paths": {
     "/health": {
@@ -2163,7 +2163,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/v1/default/banks/{bank_id}/knowledge-base/folders": {
@@ -2216,7 +2217,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/v1/default/banks/{bank_id}/knowledge-base/pages": {
@@ -2269,7 +2271,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/v1/default/banks/{bank_id}/knowledge-base/export": {
@@ -2315,7 +2318,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/v1/default/banks/{bank_id}/knowledge-base/search": {
@@ -2440,7 +2444,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/v1/default/banks/{bank_id}/knowledge-base/pages/{page_id}": {
@@ -2492,7 +2497,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/v1/default/banks/{bank_id}/knowledge-base/nodes/{node_id}": {
@@ -2554,7 +2560,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       },
       "delete": {
         "tags": [
@@ -2602,7 +2609,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/v1/default/banks/{bank_id}/directives": {
@@ -6732,6 +6740,552 @@
           }
         }
       }
+    },
+    "/v1/default/banks/{bank_id}/pages/tree": {
+      "get": {
+        "tags": [
+          "Knowledge Base"
+        ],
+        "summary": "Get the knowledge-base tree",
+        "description": "Return the knowledge base as a nested tree of folders and pages.",
+        "operationId": "get_page_tree",
+        "parameters": [
+          {
+            "name": "bank_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Bank Id"
+            }
+          },
+          {
+            "name": "tags",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Only return pages carrying these tags (matched per `tags_match`, like recall).",
+              "title": "Tags"
+            },
+            "description": "Only return pages carrying these tags (matched per `tags_match`, like recall)."
+          },
+          {
+            "name": "tags_match",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "any",
+                "all",
+                "any_strict",
+                "all_strict",
+                "exact"
+              ],
+              "type": "string",
+              "description": "How `tags` match a page's tags: any, all, any_strict, all_strict, exact. 'any'/'all' also return untagged pages; the _strict modes and 'exact' do not.",
+              "default": "any",
+              "title": "Tags Match"
+            },
+            "description": "How `tags` match a page's tags: any, all, any_strict, all_strict, exact. 'any'/'all' also return untagged pages; the _strict modes and 'exact' do not."
+          },
+          {
+            "name": "tag_groups",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "JSON-encoded compound tag filter, same shape as recall's `tag_groups`, e.g. `[{\"or\":[{\"tags\":[\"user:kate\"],\"match\":\"all_strict\"},{\"tags\":[\"team\"]}]}]`. Top-level groups are AND-ed, and AND-ed with `tags`.",
+              "title": "Tag Groups"
+            },
+            "description": "JSON-encoded compound tag filter, same shape as recall's `tag_groups`, e.g. `[{\"or\":[{\"tags\":[\"user:kate\"],\"match\":\"all_strict\"},{\"tags\":[\"team\"]}]}]`. Top-level groups are AND-ed, and AND-ed with `tags`."
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageTreeResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The bank does not exist."
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/v1/default/banks/{bank_id}/pages/folders": {
+      "post": {
+        "tags": [
+          "Knowledge Base"
+        ],
+        "summary": "Create a knowledge-base folder",
+        "description": "Create a folder, optionally nested under a parent folder.",
+        "operationId": "create_page_folder",
+        "parameters": [
+          {
+            "name": "bank_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Bank Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFolderRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageNode"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/v1/default/banks/{bank_id}/pages": {
+      "post": {
+        "tags": [
+          "Knowledge Base"
+        ],
+        "summary": "Create a knowledge-base page",
+        "description": "Create a page (a mental model + tree node). Content is generated asynchronously; use the returned operation_id to track completion.",
+        "operationId": "create_page",
+        "parameters": [
+          {
+            "name": "bank_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Bank Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePageRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatePageResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/v1/default/banks/{bank_id}/pages/export": {
+      "get": {
+        "tags": [
+          "Knowledge Base"
+        ],
+        "summary": "Export the knowledge base as a markdown bundle",
+        "description": "Return a portable markdown bundle: a nested index.md, one <id>.md per page, and history logs.",
+        "operationId": "export_pages",
+        "parameters": [
+          {
+            "name": "bank_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Bank Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageBundleResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The bank does not exist."
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/v1/default/banks/{bank_id}/pages/search": {
+      "get": {
+        "tags": [
+          "Knowledge Base"
+        ],
+        "summary": "Hybrid search over knowledge pages (BM25 + vector)",
+        "description": "Doc-level hybrid search across a bank's knowledge pages: a full-text (BM25) match and a vector-similarity match, Reciprocal-Rank-Fusion fused. No reranker — tuned for latency.",
+        "operationId": "search_pages",
+        "parameters": [
+          {
+            "name": "bank_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Bank Id"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Search query",
+              "title": "Q"
+            },
+            "description": "Search query"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "description": "Maximum results to return",
+              "default": 10,
+              "title": "Limit"
+            },
+            "description": "Maximum results to return"
+          },
+          {
+            "name": "tags",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Only return pages carrying these tags (matched per `tags_match`, like recall).",
+              "title": "Tags"
+            },
+            "description": "Only return pages carrying these tags (matched per `tags_match`, like recall)."
+          },
+          {
+            "name": "tags_match",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "any",
+                "all",
+                "any_strict",
+                "all_strict",
+                "exact"
+              ],
+              "type": "string",
+              "description": "How `tags` match a page's tags: any, all, any_strict, all_strict, exact. 'any'/'all' also return untagged pages; the _strict modes and 'exact' do not.",
+              "default": "any",
+              "title": "Tags Match"
+            },
+            "description": "How `tags` match a page's tags: any, all, any_strict, all_strict, exact. 'any'/'all' also return untagged pages; the _strict modes and 'exact' do not."
+          },
+          {
+            "name": "tag_groups",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "JSON-encoded compound tag filter, same shape as recall's `tag_groups`, e.g. `[{\"or\":[{\"tags\":[\"user:kate\"],\"match\":\"all_strict\"},{\"tags\":[\"team\"]}]}]`. Top-level groups are AND-ed, and AND-ed with `tags`.",
+              "title": "Tag Groups"
+            },
+            "description": "JSON-encoded compound tag filter, same shape as recall's `tag_groups`, e.g. `[{\"or\":[{\"tags\":[\"user:kate\"],\"match\":\"all_strict\"},{\"tags\":[\"team\"]}]}]`. Top-level groups are AND-ed, and AND-ed with `tags`."
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageSearchResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The bank does not exist."
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/v1/default/banks/{bank_id}/pages/{page_id}": {
+      "get": {
+        "tags": [
+          "Knowledge Base"
+        ],
+        "summary": "Get a knowledge-base page",
+        "description": "Return a single page as a markdown document (frontmatter + markdown body).",
+        "operationId": "get_page",
+        "parameters": [
+          {
+            "name": "bank_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Bank Id"
+            }
+          },
+          {
+            "name": "page_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Page Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/v1/default/banks/{bank_id}/pages/nodes/{node_id}": {
+      "patch": {
+        "tags": [
+          "Knowledge Base"
+        ],
+        "summary": "Rename/move a knowledge-base node or update a page's options",
+        "description": "Rename a node (set `name`), move it under another folder (set `parent_id`, null for the root), and/or update a page's options (`source_query`, `tags`, `max_tokens`, `trigger`). Changing `source_query` schedules an async refresh so the page rebuilds against the new question. `trigger` is applied as a patch: the fields you send are updated and the rest keep the page's current values.",
+        "operationId": "update_page_node",
+        "parameters": [
+          {
+            "name": "bank_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Bank Id"
+            }
+          },
+          {
+            "name": "node_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Node Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateNodeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageNode"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      },
+      "delete": {
+        "tags": [
+          "Knowledge Base"
+        ],
+        "summary": "Delete a knowledge-base node",
+        "description": "Delete a folder or page and its whole subtree (pages' mental models are removed too).",
+        "operationId": "delete_page_node",
+        "parameters": [
+          {
+            "name": "bank_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Bank Id"
+            }
+          },
+          {
+            "name": "node_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Node Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
     }
   },
   "components": {
@@ -7389,6 +7943,12 @@
             "title": "Total Observations",
             "description": "Total number of observations",
             "default": 0
+          },
+          "paused_mental_models": {
+            "type": "integer",
+            "title": "Paused Mental Models",
+            "description": "Number of mental models whose last refresh failed, so the automatic triggers (`refresh_after_consolidation`, `refresh_cron`, `full_refresh_cron`) skip them until an explicit refresh succeeds. Their content stops updating, so alert on this being above 0. Each model's `last_refresh_failed_at` says which ones, and its history says why.",
+            "default": 0
           }
         },
         "type": "object",
@@ -7402,7 +7962,8 @@
           "links_by_fact_type",
           "links_breakdown",
           "pending_operations",
-          "failed_operations"
+          "failed_operations",
+          "paused_mental_models"
         ],
         "title": "BankStatsResponse",
         "description": "Response model for bank statistics endpoint.",
@@ -7611,9 +8172,10 @@
           },
           "knowledge_page_default_trigger": {
             "title": "Knowledge Page Default Trigger",
-            "description": "Trigger fields merged over the built-in knowledge-page default when a page is created (e.g. {\"refresh_cron\": \"0 * * * *\"}). A trigger sent with the create request still wins.",
+            "description": "Deprecated alias of page_default_trigger. Remove in 2.x.",
             "additionalProperties": true,
-            "type": "object"
+            "type": "object",
+            "deprecated": true
           },
           "reflect_default_options": {
             "title": "Reflect Default Options",
@@ -7723,6 +8285,12 @@
             "description": "Memory Defense policy for this bank (validated against the DefensePolicy schema on write)",
             "additionalProperties": true,
             "type": "object"
+          },
+          "page_default_trigger": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Trigger fields merged over the built-in page default when a page is created (e.g. {\"refresh_cron\": \"0 * * * *\"}). A trigger sent with the create request still wins.",
+            "title": "Page Default Trigger"
           }
         },
         "type": "object",
@@ -8798,7 +9366,9 @@
           },
           "max_tokens": {
             "title": "Max Tokens",
-            "type": "integer"
+            "type": "integer",
+            "minimum": 256,
+            "maximum": 8192
           },
           "trigger": {
             "$ref": "#/components/schemas/MentalModelTrigger-Input"
@@ -12296,6 +12866,17 @@
             "title": "Is Stale",
             "description": "True when memories matching this mental model's tag/fact_type scope have been written since last_memory_seen_at — the same check that decides whether a scheduled refresh does any work, so a model flagged here is one a refresh would actually rewrite. Populated on both the single read and the list. Deletions are not observed: removing an in-scope memory leaves no write behind, so it does not raise this flag.",
             "type": "boolean"
+          },
+          "is_knowledge_page": {
+            "type": "boolean",
+            "deprecated": true,
+            "description": "Deprecated: use is_page.",
+            "title": "Is Knowledge Page"
+          },
+          "is_page": {
+            "type": "boolean",
+            "description": "True when this model holds a page's content rather than being a standalone mental model. Set by the list and get endpoints.",
+            "title": "Is Page"
           }
         },
         "type": "object",
@@ -14108,6 +14689,7 @@
               "refresh_failed_empty_candidate",
               "refresh_failed_delta_not_applied",
               "refresh_failed_structured_output",
+              "refresh_failed_candidate_rejected",
               "refresh_failed_error"
             ],
             "title": "Outcome",
@@ -14124,6 +14706,7 @@
               "delta_ops_all_skipped",
               "delta_not_applied",
               "structured_output_failed",
+              "candidate_rejected",
               "retrieval_failed",
               "no_answer",
               "unexpected_error"
@@ -14778,11 +15361,27 @@
         "properties": {
           "tags": {
             "title": "Tags",
-            "description": "The complete new set of tags for the document and its memory units — this REPLACES the existing tags rather than adding to them, so omitting a tag drops it and `[]` clears them all. Triggers observation invalidation and re-consolidation.",
+            "description": "The complete new set of tags for the document and its memory units — this REPLACES the existing tags rather than adding to them, so omitting a tag drops it and `[]` clears them all. Triggers observation invalidation and re-consolidation. To change only some tags, use `add_tags` / `remove_tags` instead.",
             "items": {
               "type": "string"
             },
             "type": "array"
+          },
+          "add_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tags to add to the document, keeping the ones it has. Cannot be combined with `tags`.",
+            "title": "Add Tags"
+          },
+          "remove_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tags to remove from the document, keeping the rest (applied before `add_tags`). Cannot be combined with `tags`. Tags a memory carries from an entity label group with `tag: true` stay on that memory.",
+            "title": "Remove Tags"
           }
         },
         "type": "object",
@@ -14939,7 +15538,9 @@
           },
           "max_tokens": {
             "title": "Max Tokens",
-            "type": "integer"
+            "type": "integer",
+            "minimum": 256,
+            "maximum": 8192
           },
           "trigger": {
             "description": "Refresh settings to change. Applied as a patch: only the fields present in this object are updated, and the rest keep the page's current values — so moving a page onto a schedule does not reset how it refreshes. Setting refresh_cron clears refresh_after_consolidation and vice versa, since a page refreshes on one or the other, never both.",
@@ -15550,6 +16151,285 @@
         "type": "object",
         "title": "RerankOptions",
         "description": "What the decision-model reranker does beyond ordering. Each field left unset (null) uses the\nbank/global config; neither has any effect unless a decision model is set up for recall."
+      },
+      "CreatePageResponse": {
+        "properties": {
+          "page_id": {
+            "type": "string",
+            "title": "Page Id"
+          },
+          "mental_model_id": {
+            "type": "string",
+            "title": "Mental Model Id"
+          },
+          "operation_id": {
+            "title": "Operation Id",
+            "type": "string"
+          }
+        },
+        "type": "object",
+        "required": [
+          "page_id",
+          "mental_model_id"
+        ],
+        "title": "CreateKnowledgePageResponse",
+        "description": "Result of creating a page: the node id, its mental model, and the refresh op."
+      },
+      "PageNode": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "folder",
+              "page"
+            ],
+            "title": "Kind"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "parent_id": {
+            "title": "Parent Id",
+            "type": "string"
+          },
+          "mental_model_id": {
+            "title": "Mental Model Id",
+            "description": "Backing mental model id (pages only).",
+            "type": "string"
+          },
+          "managed": {
+            "type": "boolean",
+            "title": "Managed",
+            "description": "Client-set flag: true = system-owned, false = hand-authored.",
+            "default": false
+          },
+          "description": {
+            "title": "Description",
+            "description": "Page source query (the page's `description`).",
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags",
+            "default": []
+          },
+          "timestamp": {
+            "title": "Timestamp",
+            "description": "Last refresh (page) or last update (folder).",
+            "type": "string"
+          },
+          "is_stale": {
+            "title": "Is Stale",
+            "description": "Pages only, populated by the tree endpoint. True when a memory in *this page's* scope — its tags and fact types — has been written since the page last read the memories. That is the same check a scheduled refresh runs before spending an LLM call, so a flagged page is one a refresh would actually rewrite. Deletions are not observed: removing an in-scope memory leaves no write behind, so it does not raise this flag.",
+            "type": "boolean"
+          },
+          "last_refresh_failed_at": {
+            "title": "Last Refresh Failed At",
+            "description": "Pages only: when this page's most recent refresh failed, in ISO format, or null when the last one succeeded. While it is set the page does not rebuild itself on its trigger — see the same field on the mental model. An explicit refresh still runs.",
+            "type": "string"
+          },
+          "trigger": {
+            "description": "Pages only: the page's refresh settings — when it rebuilds itself (`refresh_after_consolidation` or `refresh_cron`), in which mode, and over which facts. This is the EFFECTIVE policy: a setting the page never stored is reported at its default, so compare the fields you care about rather than the whole object against a patch you sent. Absent on folders, which have no backing mental model, and on a page with no trigger stored.",
+            "$ref": "#/components/schemas/MentalModelTrigger-Output"
+          },
+          "children": {
+            "items": {
+              "$ref": "#/components/schemas/PageNode"
+            },
+            "type": "array",
+            "title": "Children",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "name"
+        ],
+        "title": "KnowledgeNode",
+        "description": "A node in the knowledge-base tree — a folder or a page.\n\nPages carry ``description``/``tags`` from their backing mental model. The\nknowledge base is client-managed (CRUD); ``managed`` lets a client tag a node\nas system-owned vs. hand-authored."
+      },
+      "PageBundleFile": {
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content"
+          }
+        },
+        "type": "object",
+        "required": [
+          "path",
+          "content"
+        ],
+        "title": "KnowledgePageBundleFile",
+        "description": "One file in a portable markdown bundle."
+      },
+      "PageBundleResponse": {
+        "properties": {
+          "files": {
+            "items": {
+              "$ref": "#/components/schemas/PageBundleFile"
+            },
+            "type": "array",
+            "title": "Files"
+          }
+        },
+        "type": "object",
+        "required": [
+          "files"
+        ],
+        "title": "KnowledgePageBundleResponse",
+        "description": "A portable markdown bundle — a flat set of markdown files (index + pages + logs)."
+      },
+      "PageResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "description": "Page type — from a `type:<x>` tag, else 'knowledge-page'."
+          },
+          "description": {
+            "title": "Description",
+            "description": "The source query that rebuilds the page.",
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags",
+            "default": []
+          },
+          "timestamp": {
+            "title": "Timestamp",
+            "description": "Last refresh time (falls back to creation).",
+            "type": "string"
+          },
+          "body": {
+            "title": "Body",
+            "description": "The page's synthesized markdown body, exactly as stored. Empty until a refresh writes one — unlike `markdown`, which says so in words. Build a UI's own empty state off this field; read `markdown` to show the document itself.",
+            "type": "string"
+          },
+          "markdown": {
+            "type": "string",
+            "title": "Markdown",
+            "description": "The full markdown document: YAML frontmatter + markdown body. A page with no body yet renders 'No content yet.' as its body rather than frontmatter alone, which reads as a page that failed to render. The notice is added here on the way out; the stored body in `body` stays empty, and the export bundle keeps the bare document."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "type",
+          "markdown"
+        ],
+        "title": "KnowledgePageResponse",
+        "description": "A page rendered as a markdown document."
+      },
+      "PageSearchResponse": {
+        "properties": {
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/PageSearchResult"
+            },
+            "type": "array",
+            "title": "Results"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "results",
+          "total"
+        ],
+        "title": "KnowledgePageSearchResponse",
+        "description": "Ranked knowledge-page search results (BM25 + vector, RRF-fused)."
+      },
+      "PageSearchResult": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "mental_model_id": {
+            "title": "Mental Model Id",
+            "type": "string"
+          },
+          "source_query": {
+            "title": "Source Query",
+            "description": "The question the page answers.",
+            "type": "string"
+          },
+          "snippet": {
+            "type": "string",
+            "title": "Snippet",
+            "description": "The page's opening text. A page whose body is still empty says so in words — 'No content yet.' — rather than coming back blank, so a caller can tell an unwritten page from a page whose snippet simply did not render. The marker is produced on the way out; the stored body stays empty and out of the search index."
+          },
+          "score": {
+            "type": "number",
+            "title": "Score",
+            "description": "Rank-fusion score in 0..1, where 1.0 means every search arm placed this page first. It reflects where the page ranked for this query, not how well its text matched, so it is only comparable within one result set."
+          },
+          "updated_at": {
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "snippet",
+          "score"
+        ],
+        "title": "KnowledgePageSearchResult",
+        "description": "One hybrid-search hit: a page and its fused relevance score."
+      },
+      "PageTreeResponse": {
+        "properties": {
+          "roots": {
+            "items": {
+              "$ref": "#/components/schemas/PageNode"
+            },
+            "type": "array",
+            "title": "Roots"
+          }
+        },
+        "type": "object",
+        "required": [
+          "roots"
+        ],
+        "title": "KnowledgeTreeResponse",
+        "description": "The knowledge base as a nested folder/page tree."
       }
     }
   }

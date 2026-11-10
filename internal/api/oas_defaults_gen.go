@@ -40,6 +40,10 @@ func (s *BankStatsResponse) setDefaults() {
 		val := int(0)
 		s.TotalObservations.SetTo(val)
 	}
+	{
+		val := int(0)
+		s.PausedMentalModels = val
+	}
 }
 
 // setDefaults set default value of fields.
@@ -596,7 +600,7 @@ func (s *MentalModelTraceToolCall) setDefaults() {
 // setDefaults set default value of fields.
 func (s *MentalModelTriggerInput) setDefaults() {
 	{
-		val := Budget("mid")
+		val := Budget("low")
 		s.Budget.SetTo(val)
 	}
 	{
@@ -620,7 +624,7 @@ func (s *MentalModelTriggerInput) setDefaults() {
 // setDefaults set default value of fields.
 func (s *MentalModelTriggerOutput) setDefaults() {
 	{
-		val := Budget("mid")
+		val := Budget("low")
 		s.Budget.SetTo(val)
 	}
 	{
@@ -646,6 +650,30 @@ func (s *ObservationIdSample) setDefaults() {
 	{
 		val := int(0)
 		s.Count.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *PageNode) setDefaults() {
+	{
+		val := bool(false)
+		s.Managed.SetTo(val)
+	}
+	{
+		var defaultVal0 []string
+		s.Tags = defaultVal0
+	}
+	{
+		var defaultVal0 []PageNode
+		s.Children = defaultVal0
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *PageResponse) setDefaults() {
+	{
+		var defaultVal0 []string
+		s.Tags = defaultVal0
 	}
 }
 
@@ -688,7 +716,7 @@ func (s *RecallRequest) setDefaults() {
 		s.PreferObservations.SetTo(val)
 	}
 	{
-		val := Budget("mid")
+		val := Budget("low")
 		s.Budget.SetTo(val)
 	}
 	{
@@ -724,7 +752,7 @@ func (s *ReflectBasedOn) setDefaults() {
 // setDefaults set default value of fields.
 func (s *ReflectRequest) setDefaults() {
 	{
-		val := Budget("mid")
+		val := Budget("low")
 		s.Budget.SetTo(val)
 	}
 	{

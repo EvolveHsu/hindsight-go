@@ -88,6 +88,9 @@ func (e *Engine) CreateOrUpdateBank(ctx context.Context, req *api.CreateBankRequ
 	if params.BankID == "" {
 		return nil, badRequest("bank_id is required")
 	}
+	if err := validateURLID(params.BankID, "Bank id", true); err != nil {
+		return nil, err
+	}
 	// PUT is PATCH plus an implicit create: a missing bank is created first,
 	// and an existing bank keeps the fields the request did not mention.
 	if _, err := e.store.EnsureBank(ctx, params.BankID, "", ""); err != nil {

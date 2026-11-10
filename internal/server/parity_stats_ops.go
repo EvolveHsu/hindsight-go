@@ -42,16 +42,17 @@ func (e *Engine) GetAgentStats(ctx context.Context, params api.GetAgentStatsPara
 		return nil, internal(err)
 	}
 	out := &api.BankStatsResponse{
-		BankID:            params.BankID,
-		TotalNodes:        stats.TotalNodes,
-		TotalLinks:        stats.TotalLinks,
-		TotalDocuments:    stats.TotalDocuments,
-		NodesByFactType:   api.BankStatsResponseNodesByFactType(stats.NodesByFactType),
-		LinksByLinkType:   api.BankStatsResponseLinksByLinkType(stats.LinksByLinkType),
-		LinksByFactType:   api.BankStatsResponseLinksByFactType{},
-		LinksBreakdown:    api.BankStatsResponseLinksBreakdown{},
-		PendingOperations: stats.OperationsByStatus["pending"] + stats.OperationsByStatus["processing"],
-		FailedOperations:  stats.OperationsByStatus["failed"],
+		BankID:             params.BankID,
+		TotalNodes:         stats.TotalNodes,
+		TotalLinks:         stats.TotalLinks,
+		TotalDocuments:     stats.TotalDocuments,
+		NodesByFactType:    api.BankStatsResponseNodesByFactType(stats.NodesByFactType),
+		LinksByLinkType:    api.BankStatsResponseLinksByLinkType(stats.LinksByLinkType),
+		LinksByFactType:    api.BankStatsResponseLinksByFactType{},
+		LinksBreakdown:     api.BankStatsResponseLinksBreakdown{},
+		PendingOperations:  stats.OperationsByStatus["pending"] + stats.OperationsByStatus["processing"],
+		FailedOperations:   stats.OperationsByStatus["failed"],
+		PausedMentalModels: stats.PausedMentalModels,
 	}
 	if len(stats.OperationsByStatus) > 0 {
 		out.OperationsByStatus = api.OptBankStatsResponseOperationsByStatus{

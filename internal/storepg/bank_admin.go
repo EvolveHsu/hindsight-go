@@ -289,6 +289,14 @@ func (s *Store) SetBankAliasPrimary(ctx context.Context, bankID, alias string, p
 	return tag.RowsAffected() > 0, nil
 }
 
+// BankAliasExists reports whether alias already belongs to any bank.
+func (s *Store) BankAliasExists(ctx context.Context, alias string) (bool, error) {
+	var exists bool
+	err := s.pool.QueryRow(ctx,
+		"SELECT EXISTS(SELECT 1 FROM bank_aliases WHERE alias = $1)", alias).Scan(&exists)
+	return exists, err
+}
+
 // encodeConfig marshals an override map for a jsonb parameter; nil stays an
 // empty object so the merge never nulls the column.
 func encodeConfig(cfg map[string]any) ([]byte, error) {

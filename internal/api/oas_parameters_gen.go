@@ -1463,6 +1463,136 @@ func decodeCreateOrUpdateBankParams(args [1]string, argsEscaped bool, r *http.Re
 	return params, nil
 }
 
+// CreatePageParams is parameters of create_page operation.
+type CreatePageParams struct {
+	BankID string
+}
+
+func unpackCreatePageParams(packed middleware.Parameters) (params CreatePageParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "bank_id",
+			In:   "path",
+		}
+		params.BankID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeCreatePageParams(args [1]string, argsEscaped bool, r *http.Request) (params CreatePageParams, _ error) {
+	// Decode path: bank_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "bank_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.BankID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "bank_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// CreatePageFolderParams is parameters of create_page_folder operation.
+type CreatePageFolderParams struct {
+	BankID string
+}
+
+func unpackCreatePageFolderParams(packed middleware.Parameters) (params CreatePageFolderParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "bank_id",
+			In:   "path",
+		}
+		params.BankID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeCreatePageFolderParams(args [1]string, argsEscaped bool, r *http.Request) (params CreatePageFolderParams, _ error) {
+	// Decode path: bank_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "bank_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.BankID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "bank_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // CreateWebhookParams is parameters of create_webhook operation.
 type CreateWebhookParams struct {
 	BankID string
@@ -2294,6 +2424,124 @@ func decodeDeleteOperationParams(args [2]string, argsEscaped bool, r *http.Reque
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "operation_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// DeletePageNodeParams is parameters of delete_page_node operation.
+type DeletePageNodeParams struct {
+	BankID string
+	NodeID string
+}
+
+func unpackDeletePageNodeParams(packed middleware.Parameters) (params DeletePageNodeParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "bank_id",
+			In:   "path",
+		}
+		params.BankID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "node_id",
+			In:   "path",
+		}
+		params.NodeID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeDeletePageNodeParams(args [2]string, argsEscaped bool, r *http.Request) (params DeletePageNodeParams, _ error) {
+	// Decode path: bank_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "bank_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.BankID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "bank_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: node_id.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "node_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.NodeID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "node_id",
 			In:   "path",
 			Err:  err,
 		}
@@ -3341,6 +3589,71 @@ func unpackExportKnowledgeBaseParams(packed middleware.Parameters) (params Expor
 }
 
 func decodeExportKnowledgeBaseParams(args [1]string, argsEscaped bool, r *http.Request) (params ExportKnowledgeBaseParams, _ error) {
+	// Decode path: bank_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "bank_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.BankID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "bank_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ExportPagesParams is parameters of export_pages operation.
+type ExportPagesParams struct {
+	BankID string
+}
+
+func unpackExportPagesParams(packed middleware.Parameters) (params ExportPagesParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "bank_id",
+			In:   "path",
+		}
+		params.BankID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeExportPagesParams(args [1]string, argsEscaped bool, r *http.Request) (params ExportPagesParams, _ error) {
 	// Decode path: bank_id.
 	if err := func() error {
 		param := args[0]
@@ -6956,6 +7269,372 @@ func decodeGetOperationStatusParams(args [2]string, argsEscaped bool, r *http.Re
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "include_payload",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetPageParams is parameters of get_page operation.
+type GetPageParams struct {
+	BankID string
+	PageID string
+}
+
+func unpackGetPageParams(packed middleware.Parameters) (params GetPageParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "bank_id",
+			In:   "path",
+		}
+		params.BankID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "page_id",
+			In:   "path",
+		}
+		params.PageID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetPageParams(args [2]string, argsEscaped bool, r *http.Request) (params GetPageParams, _ error) {
+	// Decode path: bank_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "bank_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.BankID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "bank_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: page_id.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "page_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.PageID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "page_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetPageTreeParams is parameters of get_page_tree operation.
+type GetPageTreeParams struct {
+	BankID string
+	// Only return pages carrying these tags (matched per `tags_match`, like recall).
+	Tags []string `json:",omitempty"`
+	// How `tags` match a page's tags: any, all, any_strict, all_strict, exact. 'any'/'all' also return
+	// untagged pages; the _strict modes and 'exact' do not.
+	TagsMatch OptGetPageTreeTagsMatch `json:",omitempty,omitzero"`
+	// JSON-encoded compound tag filter, same shape as recall's `tag_groups`, e.g.
+	// `[{"or":[{"tags":["user:kate"],"match":"all_strict"},{"tags":["team"]}]}]`. Top-level groups are
+	// AND-ed, and AND-ed with `tags`.
+	TagGroups OptString `json:",omitempty,omitzero"`
+}
+
+func unpackGetPageTreeParams(packed middleware.Parameters) (params GetPageTreeParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "bank_id",
+			In:   "path",
+		}
+		params.BankID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "tags",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Tags = v.([]string)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "tags_match",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.TagsMatch = v.(OptGetPageTreeTagsMatch)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "tag_groups",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.TagGroups = v.(OptString)
+		}
+	}
+	return params
+}
+
+func decodeGetPageTreeParams(args [1]string, argsEscaped bool, r *http.Request) (params GetPageTreeParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode path: bank_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "bank_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.BankID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "bank_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode query: tags.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "tags",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				params.Tags = nil
+				return d.DecodeArray(func(d uri.Decoder) error {
+					var paramsDotTagsVal string
+					if err := func() error {
+						val, err := d.DecodeValue()
+						if err != nil {
+							return err
+						}
+
+						c, err := conv.ToString(val)
+						if err != nil {
+							return err
+						}
+
+						paramsDotTagsVal = c
+						return nil
+					}(); err != nil {
+						return err
+					}
+					params.Tags = append(params.Tags, paramsDotTagsVal)
+					return nil
+				})
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "tags",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: tags_match.
+	{
+		val := GetPageTreeTagsMatch("any")
+		params.TagsMatch.SetTo(val)
+	}
+	// Decode query: tags_match.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "tags_match",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotTagsMatchVal GetPageTreeTagsMatch
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotTagsMatchVal = GetPageTreeTagsMatch(c)
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.TagsMatch.SetTo(paramsDotTagsMatchVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.TagsMatch.Get(); ok {
+					if err := func() error {
+						if err := value.Validate(); err != nil {
+							return err
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "tags_match",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: tag_groups.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "tag_groups",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotTagGroupsVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotTagGroupsVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.TagGroups.SetTo(paramsDotTagGroupsVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "tag_groups",
 			In:   "query",
 			Err:  err,
 		}
@@ -15258,6 +15937,401 @@ func decodeSearchKnowledgeBaseParams(args [1]string, argsEscaped bool, r *http.R
 	return params, nil
 }
 
+// SearchPagesParams is parameters of search_pages operation.
+type SearchPagesParams struct {
+	BankID string
+	// Search query.
+	Q string
+	// Maximum results to return.
+	Limit OptInt `json:",omitempty,omitzero"`
+	// Only return pages carrying these tags (matched per `tags_match`, like recall).
+	Tags []string `json:",omitempty"`
+	// How `tags` match a page's tags: any, all, any_strict, all_strict, exact. 'any'/'all' also return
+	// untagged pages; the _strict modes and 'exact' do not.
+	TagsMatch OptSearchPagesTagsMatch `json:",omitempty,omitzero"`
+	// JSON-encoded compound tag filter, same shape as recall's `tag_groups`, e.g.
+	// `[{"or":[{"tags":["user:kate"],"match":"all_strict"},{"tags":["team"]}]}]`. Top-level groups are
+	// AND-ed, and AND-ed with `tags`.
+	TagGroups OptString `json:",omitempty,omitzero"`
+}
+
+func unpackSearchPagesParams(packed middleware.Parameters) (params SearchPagesParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "bank_id",
+			In:   "path",
+		}
+		params.BankID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "q",
+			In:   "query",
+		}
+		params.Q = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "limit",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Limit = v.(OptInt)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "tags",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Tags = v.([]string)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "tags_match",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.TagsMatch = v.(OptSearchPagesTagsMatch)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "tag_groups",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.TagGroups = v.(OptString)
+		}
+	}
+	return params
+}
+
+func decodeSearchPagesParams(args [1]string, argsEscaped bool, r *http.Request) (params SearchPagesParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode path: bank_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "bank_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.BankID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "bank_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode query: q.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "q",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Q = c
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:     1,
+					MinLengthSet:  true,
+					MaxLength:     0,
+					MaxLengthSet:  false,
+					Email:         false,
+					Hostname:      false,
+					Regex:         nil,
+					MinNumeric:    0,
+					MinNumericSet: false,
+					MaxNumeric:    0,
+					MaxNumericSet: false,
+				}).Validate(string(params.Q)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "q",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: limit.
+	{
+		val := int(10)
+		params.Limit.SetTo(val)
+	}
+	// Decode query: limit.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotLimitVal int
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotLimitVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Limit.SetTo(paramsDotLimitVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Limit.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        true,
+							Min:           1,
+							MaxSet:        true,
+							Max:           50,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+							Pattern:       nil,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "limit",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: tags.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "tags",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				params.Tags = nil
+				return d.DecodeArray(func(d uri.Decoder) error {
+					var paramsDotTagsVal string
+					if err := func() error {
+						val, err := d.DecodeValue()
+						if err != nil {
+							return err
+						}
+
+						c, err := conv.ToString(val)
+						if err != nil {
+							return err
+						}
+
+						paramsDotTagsVal = c
+						return nil
+					}(); err != nil {
+						return err
+					}
+					params.Tags = append(params.Tags, paramsDotTagsVal)
+					return nil
+				})
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "tags",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: tags_match.
+	{
+		val := SearchPagesTagsMatch("any")
+		params.TagsMatch.SetTo(val)
+	}
+	// Decode query: tags_match.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "tags_match",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotTagsMatchVal SearchPagesTagsMatch
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotTagsMatchVal = SearchPagesTagsMatch(c)
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.TagsMatch.SetTo(paramsDotTagsMatchVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.TagsMatch.Get(); ok {
+					if err := func() error {
+						if err := value.Validate(); err != nil {
+							return err
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "tags_match",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: tag_groups.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "tag_groups",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotTagGroupsVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotTagGroupsVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.TagGroups.SetTo(paramsDotTagGroupsVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "tag_groups",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // SetBankAliasPrimaryParams is parameters of set_bank_alias_primary operation.
 type SetBankAliasPrimaryParams struct {
 	BankID string
@@ -16284,6 +17358,124 @@ func decodeUpdateMentalModelParams(args [2]string, argsEscaped bool, r *http.Req
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "mental_model_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// UpdatePageNodeParams is parameters of update_page_node operation.
+type UpdatePageNodeParams struct {
+	BankID string
+	NodeID string
+}
+
+func unpackUpdatePageNodeParams(packed middleware.Parameters) (params UpdatePageNodeParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "bank_id",
+			In:   "path",
+		}
+		params.BankID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "node_id",
+			In:   "path",
+		}
+		params.NodeID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeUpdatePageNodeParams(args [2]string, argsEscaped bool, r *http.Request) (params UpdatePageNodeParams, _ error) {
+	// Decode path: bank_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "bank_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.BankID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "bank_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: node_id.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "node_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.NodeID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "node_id",
 			In:   "path",
 			Err:  err,
 		}

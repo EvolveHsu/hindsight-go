@@ -75,7 +75,7 @@ services:
       - hindsight-llm
 
   hindsight-control-plane:
-    image: ghcr.io/vectorize-io/hindsight-control-plane:1.1.0
+    image: ghcr.io/vectorize-io/hindsight-control-plane:1.2.1
     container_name: hindsight-control-plane
     restart: unless-stopped
     ports:

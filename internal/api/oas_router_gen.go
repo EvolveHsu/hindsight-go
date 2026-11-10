@@ -18,43 +18,43 @@ var (
 	rn20AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
-	rn28AllowedHeaders = map[string]string{
+	rn30AllowedHeaders = map[string]string{
 		"PATCH": "Content-Type",
 	}
 	rn3AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
-	rn58AllowedHeaders = map[string]string{
+	rn64AllowedHeaders = map[string]string{
 		"PATCH": "Content-Type",
 	}
-	rn118AllowedHeaders = map[string]string{
+	rn128AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
-	rn103AllowedHeaders = map[string]string{
+	rn112AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
 	rn21AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
-	rn30AllowedHeaders = map[string]string{
+	rn32AllowedHeaders = map[string]string{
 		"PATCH": "Content-Type",
 	}
-	rn49AllowedHeaders = map[string]string{
+	rn54AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
-	rn33AllowedHeaders = map[string]string{
+	rn35AllowedHeaders = map[string]string{
 		"PATCH": "Content-Type",
 	}
-	rn51AllowedHeaders = map[string]string{
+	rn57AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
-	rn84AllowedHeaders = map[string]string{
+	rn93AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
 	rn22AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
-	rn35AllowedHeaders = map[string]string{
+	rn37AllowedHeaders = map[string]string{
 		"PATCH": "Content-Type",
 	}
 	rn24AllowedHeaders = map[string]string{
@@ -63,10 +63,10 @@ var (
 	rn8AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
-	rn42AllowedHeaders = map[string]string{
+	rn47AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
-	rn106AllowedHeaders = map[string]string{
+	rn115AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
 	rn10AllowedHeaders = map[string]string{
@@ -78,25 +78,34 @@ var (
 	rn14AllowedHeaders = map[string]string{
 		"PATCH": "Content-Type",
 	}
-	rn110AllowedHeaders = map[string]string{
-		"POST": "Content-Type",
-	}
-	rn59AllowedHeaders = map[string]string{
-		"PUT": "Content-Type",
-	}
-	rn105AllowedHeaders = map[string]string{
-		"POST": "Content-Type",
-	}
-	rn109AllowedHeaders = map[string]string{
-		"POST": "Content-Type",
-	}
-	rn86AllowedHeaders = map[string]string{
+	rn119AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
 	rn26AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
-	rn38AllowedHeaders = map[string]string{
+	rn27AllowedHeaders = map[string]string{
+		"POST": "Content-Type",
+	}
+	rn41AllowedHeaders = map[string]string{
+		"PATCH": "Content-Type",
+	}
+	rn66AllowedHeaders = map[string]string{
+		"PUT": "Content-Type",
+	}
+	rn114AllowedHeaders = map[string]string{
+		"POST": "Content-Type",
+	}
+	rn118AllowedHeaders = map[string]string{
+		"POST": "Content-Type",
+	}
+	rn95AllowedHeaders = map[string]string{
+		"POST": "Content-Type",
+	}
+	rn28AllowedHeaders = map[string]string{
+		"POST": "Content-Type",
+	}
+	rn43AllowedHeaders = map[string]string{
 		"PATCH": "Content-Type",
 	}
 )
@@ -482,7 +491,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 													default:
 														s.notAllowed(w, r, notAllowedParams{
 															allowedMethods: "DELETE,PATCH",
-															allowedHeaders: rn28AllowedHeaders,
+															allowedHeaders: rn30AllowedHeaders,
 															acceptPost:     "",
 															acceptPatch:    "application/json",
 														})
@@ -734,7 +743,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 													default:
 														s.notAllowed(w, r, notAllowedParams{
 															allowedMethods: "DELETE,GET,PATCH",
-															allowedHeaders: rn58AllowedHeaders,
+															allowedHeaders: rn64AllowedHeaders,
 															acceptPost:     "",
 															acceptPatch:    "application/json",
 														})
@@ -773,7 +782,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 														default:
 															s.notAllowed(w, r, notAllowedParams{
 																allowedMethods: "POST",
-																allowedHeaders: rn118AllowedHeaders,
+																allowedHeaders: rn128AllowedHeaders,
 																acceptPost:     "application/json",
 																acceptPatch:    "",
 															})
@@ -812,7 +821,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 															default:
 																s.notAllowed(w, r, notAllowedParams{
 																	allowedMethods: "POST",
-																	allowedHeaders: rn103AllowedHeaders,
+																	allowedHeaders: rn112AllowedHeaders,
 																	acceptPost:     "application/json",
 																	acceptPatch:    "",
 																})
@@ -936,7 +945,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 													default:
 														s.notAllowed(w, r, notAllowedParams{
 															allowedMethods: "DELETE,GET,PATCH",
-															allowedHeaders: rn30AllowedHeaders,
+															allowedHeaders: rn32AllowedHeaders,
 															acceptPost:     "",
 															acceptPatch:    "application/json",
 														})
@@ -980,7 +989,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 													default:
 														s.notAllowed(w, r, notAllowedParams{
 															allowedMethods: "GET,POST",
-															allowedHeaders: rn49AllowedHeaders,
+															allowedHeaders: rn54AllowedHeaders,
 															acceptPost:     "multipart/form-data",
 															acceptPatch:    "",
 														})
@@ -1081,7 +1090,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 														default:
 															s.notAllowed(w, r, notAllowedParams{
 																allowedMethods: "DELETE,GET,PATCH",
-																allowedHeaders: rn33AllowedHeaders,
+																allowedHeaders: rn35AllowedHeaders,
 																acceptPost:     "",
 																acceptPatch:    "application/json",
 															})
@@ -1382,7 +1391,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 											default:
 												s.notAllowed(w, r, notAllowedParams{
 													allowedMethods: "POST",
-													allowedHeaders: rn51AllowedHeaders,
+													allowedHeaders: rn57AllowedHeaders,
 													acceptPost:     "multipart/form-data",
 													acceptPatch:    "",
 												})
@@ -1463,7 +1472,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 											default:
 												s.notAllowed(w, r, notAllowedParams{
 													allowedMethods: "POST",
-													allowedHeaders: rn84AllowedHeaders,
+													allowedHeaders: rn93AllowedHeaders,
 													acceptPost:     "application/json",
 													acceptPatch:    "",
 												})
@@ -1571,7 +1580,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 												default:
 													s.notAllowed(w, r, notAllowedParams{
 														allowedMethods: "DELETE,PATCH",
-														allowedHeaders: rn35AllowedHeaders,
+														allowedHeaders: rn37AllowedHeaders,
 														acceptPost:     "",
 														acceptPatch:    "application/json",
 													})
@@ -1828,7 +1837,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 														default:
 															s.notAllowed(w, r, notAllowedParams{
 																allowedMethods: "POST",
-																allowedHeaders: rn42AllowedHeaders,
+																allowedHeaders: rn47AllowedHeaders,
 																acceptPost:     "application/json",
 																acceptPatch:    "",
 															})
@@ -1884,7 +1893,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 														default:
 															s.notAllowed(w, r, notAllowedParams{
 																allowedMethods: "POST",
-																allowedHeaders: rn106AllowedHeaders,
+																allowedHeaders: rn115AllowedHeaders,
 																acceptPost:     "application/json",
 																acceptPatch:    "",
 															})
@@ -2193,7 +2202,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 															default:
 																s.notAllowed(w, r, notAllowedParams{
 																	allowedMethods: "POST",
-																	allowedHeaders: rn110AllowedHeaders,
+																	allowedHeaders: rn119AllowedHeaders,
 																	acceptPost:     "application/json",
 																	acceptPatch:    "",
 																})
@@ -2420,9 +2429,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 										}
 
-									case 'p': // Prefix: "pro"
+									case 'p': // Prefix: "p"
 
-										if l := len("pro"); len(elem) >= l && elem[0:l] == "pro" {
+										if l := len("p"); len(elem) >= l && elem[0:l] == "p" {
 											elem = elem[l:]
 										} else {
 											break
@@ -2432,62 +2441,301 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 											break
 										}
 										switch elem[0] {
-										case 'f': // Prefix: "file"
+										case 'a': // Prefix: "ages"
 
-											if l := len("file"); len(elem) >= l && elem[0:l] == "file" {
+											if l := len("ages"); len(elem) >= l && elem[0:l] == "ages" {
 												elem = elem[l:]
 											} else {
 												break
 											}
 
 											if len(elem) == 0 {
-												// Leaf node.
-												switch r.Method {
-												case "GET":
-													s.handleGetBankProfileRequest([1]string{
-														args[0],
-													}, elemIsEscaped, w, r)
-												case "PUT":
-													s.handleUpdateBankDispositionRequest([1]string{
-														args[0],
-													}, elemIsEscaped, w, r)
-												default:
-													s.notAllowed(w, r, notAllowedParams{
-														allowedMethods: "GET,PUT",
-														allowedHeaders: rn59AllowedHeaders,
-														acceptPost:     "",
-														acceptPatch:    "",
-													})
-												}
-
-												return
-											}
-
-										case 'm': // Prefix: "mpts/preview"
-
-											if l := len("mpts/preview"); len(elem) >= l && elem[0:l] == "mpts/preview" {
-												elem = elem[l:]
-											} else {
-												break
-											}
-
-											if len(elem) == 0 {
-												// Leaf node.
 												switch r.Method {
 												case "POST":
-													s.handlePreviewPromptRequest([1]string{
+													s.handleCreatePageRequest([1]string{
 														args[0],
 													}, elemIsEscaped, w, r)
 												default:
 													s.notAllowed(w, r, notAllowedParams{
 														allowedMethods: "POST",
-														allowedHeaders: rn105AllowedHeaders,
+														allowedHeaders: rn26AllowedHeaders,
 														acceptPost:     "application/json",
 														acceptPatch:    "",
 													})
 												}
 
 												return
+											}
+											switch elem[0] {
+											case '/': // Prefix: "/"
+
+												if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+													elem = elem[l:]
+												} else {
+													break
+												}
+
+												if len(elem) == 0 {
+													break
+												}
+												switch elem[0] {
+												case 'e': // Prefix: "export"
+													origElem := elem
+													if l := len("export"); len(elem) >= l && elem[0:l] == "export" {
+														elem = elem[l:]
+													} else {
+														break
+													}
+
+													if len(elem) == 0 {
+														// Leaf node.
+														switch r.Method {
+														case "GET":
+															s.handleExportPagesRequest([1]string{
+																args[0],
+															}, elemIsEscaped, w, r)
+														default:
+															s.notAllowed(w, r, notAllowedParams{
+																allowedMethods: "GET",
+																allowedHeaders: nil,
+																acceptPost:     "",
+																acceptPatch:    "",
+															})
+														}
+
+														return
+													}
+
+													elem = origElem
+												case 'f': // Prefix: "folders"
+													origElem := elem
+													if l := len("folders"); len(elem) >= l && elem[0:l] == "folders" {
+														elem = elem[l:]
+													} else {
+														break
+													}
+
+													if len(elem) == 0 {
+														// Leaf node.
+														switch r.Method {
+														case "POST":
+															s.handleCreatePageFolderRequest([1]string{
+																args[0],
+															}, elemIsEscaped, w, r)
+														default:
+															s.notAllowed(w, r, notAllowedParams{
+																allowedMethods: "POST",
+																allowedHeaders: rn27AllowedHeaders,
+																acceptPost:     "application/json",
+																acceptPatch:    "",
+															})
+														}
+
+														return
+													}
+
+													elem = origElem
+												case 'n': // Prefix: "nodes/"
+													origElem := elem
+													if l := len("nodes/"); len(elem) >= l && elem[0:l] == "nodes/" {
+														elem = elem[l:]
+													} else {
+														break
+													}
+
+													// Param: "node_id"
+													// Leaf parameter, slashes are prohibited
+													idx := strings.IndexByte(elem, '/')
+													if idx >= 0 {
+														break
+													}
+													args[1] = elem
+													elem = ""
+
+													if len(elem) == 0 {
+														// Leaf node.
+														switch r.Method {
+														case "DELETE":
+															s.handleDeletePageNodeRequest([2]string{
+																args[0],
+																args[1],
+															}, elemIsEscaped, w, r)
+														case "PATCH":
+															s.handleUpdatePageNodeRequest([2]string{
+																args[0],
+																args[1],
+															}, elemIsEscaped, w, r)
+														default:
+															s.notAllowed(w, r, notAllowedParams{
+																allowedMethods: "DELETE,PATCH",
+																allowedHeaders: rn41AllowedHeaders,
+																acceptPost:     "",
+																acceptPatch:    "application/json",
+															})
+														}
+
+														return
+													}
+
+													elem = origElem
+												case 's': // Prefix: "search"
+													origElem := elem
+													if l := len("search"); len(elem) >= l && elem[0:l] == "search" {
+														elem = elem[l:]
+													} else {
+														break
+													}
+
+													if len(elem) == 0 {
+														// Leaf node.
+														switch r.Method {
+														case "GET":
+															s.handleSearchPagesRequest([1]string{
+																args[0],
+															}, elemIsEscaped, w, r)
+														default:
+															s.notAllowed(w, r, notAllowedParams{
+																allowedMethods: "GET",
+																allowedHeaders: nil,
+																acceptPost:     "",
+																acceptPatch:    "",
+															})
+														}
+
+														return
+													}
+
+													elem = origElem
+												case 't': // Prefix: "tree"
+													origElem := elem
+													if l := len("tree"); len(elem) >= l && elem[0:l] == "tree" {
+														elem = elem[l:]
+													} else {
+														break
+													}
+
+													if len(elem) == 0 {
+														// Leaf node.
+														switch r.Method {
+														case "GET":
+															s.handleGetPageTreeRequest([1]string{
+																args[0],
+															}, elemIsEscaped, w, r)
+														default:
+															s.notAllowed(w, r, notAllowedParams{
+																allowedMethods: "GET",
+																allowedHeaders: nil,
+																acceptPost:     "",
+																acceptPatch:    "",
+															})
+														}
+
+														return
+													}
+
+													elem = origElem
+												}
+												// Param: "page_id"
+												// Leaf parameter, slashes are prohibited
+												idx := strings.IndexByte(elem, '/')
+												if idx >= 0 {
+													break
+												}
+												args[1] = elem
+												elem = ""
+
+												if len(elem) == 0 {
+													// Leaf node.
+													switch r.Method {
+													case "GET":
+														s.handleGetPageRequest([2]string{
+															args[0],
+															args[1],
+														}, elemIsEscaped, w, r)
+													default:
+														s.notAllowed(w, r, notAllowedParams{
+															allowedMethods: "GET",
+															allowedHeaders: nil,
+															acceptPost:     "",
+															acceptPatch:    "",
+														})
+													}
+
+													return
+												}
+
+											}
+
+										case 'r': // Prefix: "ro"
+
+											if l := len("ro"); len(elem) >= l && elem[0:l] == "ro" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												break
+											}
+											switch elem[0] {
+											case 'f': // Prefix: "file"
+
+												if l := len("file"); len(elem) >= l && elem[0:l] == "file" {
+													elem = elem[l:]
+												} else {
+													break
+												}
+
+												if len(elem) == 0 {
+													// Leaf node.
+													switch r.Method {
+													case "GET":
+														s.handleGetBankProfileRequest([1]string{
+															args[0],
+														}, elemIsEscaped, w, r)
+													case "PUT":
+														s.handleUpdateBankDispositionRequest([1]string{
+															args[0],
+														}, elemIsEscaped, w, r)
+													default:
+														s.notAllowed(w, r, notAllowedParams{
+															allowedMethods: "GET,PUT",
+															allowedHeaders: rn66AllowedHeaders,
+															acceptPost:     "",
+															acceptPatch:    "",
+														})
+													}
+
+													return
+												}
+
+											case 'm': // Prefix: "mpts/preview"
+
+												if l := len("mpts/preview"); len(elem) >= l && elem[0:l] == "mpts/preview" {
+													elem = elem[l:]
+												} else {
+													break
+												}
+
+												if len(elem) == 0 {
+													// Leaf node.
+													switch r.Method {
+													case "POST":
+														s.handlePreviewPromptRequest([1]string{
+															args[0],
+														}, elemIsEscaped, w, r)
+													default:
+														s.notAllowed(w, r, notAllowedParams{
+															allowedMethods: "POST",
+															allowedHeaders: rn114AllowedHeaders,
+															acceptPost:     "application/json",
+															acceptPatch:    "",
+														})
+													}
+
+													return
+												}
+
 											}
 
 										}
@@ -2510,7 +2758,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 											default:
 												s.notAllowed(w, r, notAllowedParams{
 													allowedMethods: "POST",
-													allowedHeaders: rn109AllowedHeaders,
+													allowedHeaders: rn118AllowedHeaders,
 													acceptPost:     "application/json",
 													acceptPatch:    "",
 												})
@@ -2670,7 +2918,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 													default:
 														s.notAllowed(w, r, notAllowedParams{
 															allowedMethods: "POST",
-															allowedHeaders: rn86AllowedHeaders,
+															allowedHeaders: rn95AllowedHeaders,
 															acceptPost:     "multipart/form-data",
 															acceptPatch:    "",
 														})
@@ -2704,7 +2952,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 											default:
 												s.notAllowed(w, r, notAllowedParams{
 													allowedMethods: "GET,POST",
-													allowedHeaders: rn26AllowedHeaders,
+													allowedHeaders: rn28AllowedHeaders,
 													acceptPost:     "application/json",
 													acceptPatch:    "",
 												})
@@ -2745,7 +2993,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 												default:
 													s.notAllowed(w, r, notAllowedParams{
 														allowedMethods: "DELETE,PATCH",
-														allowedHeaders: rn38AllowedHeaders,
+														allowedHeaders: rn43AllowedHeaders,
 														acceptPost:     "",
 														acceptPatch:    "application/json",
 													})
@@ -5207,9 +5455,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 
 										}
 
-									case 'p': // Prefix: "pro"
+									case 'p': // Prefix: "p"
 
-										if l := len("pro"); len(elem) >= l && elem[0:l] == "pro" {
+										if l := len("p"); len(elem) >= l && elem[0:l] == "p" {
 											elem = elem[l:]
 										} else {
 											break
@@ -5219,63 +5467,290 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 											break
 										}
 										switch elem[0] {
-										case 'f': // Prefix: "file"
+										case 'a': // Prefix: "ages"
 
-											if l := len("file"); len(elem) >= l && elem[0:l] == "file" {
+											if l := len("ages"); len(elem) >= l && elem[0:l] == "ages" {
 												elem = elem[l:]
 											} else {
 												break
 											}
 
 											if len(elem) == 0 {
-												// Leaf node.
-												switch method {
-												case "GET":
-													r.name = GetBankProfileOperation
-													r.summary = "Get memory bank profile (removed — use GET .../config)"
-													r.operationID = "get_bank_profile"
-													r.operationGroup = ""
-													r.pathPattern = "/v1/default/banks/{bank_id}/profile"
-													r.args = args
-													r.count = 1
-													return r, true
-												case "PUT":
-													r.name = UpdateBankDispositionOperation
-													r.summary = "Update memory bank disposition (removed — use PATCH .../config)"
-													r.operationID = "update_bank_disposition"
-													r.operationGroup = ""
-													r.pathPattern = "/v1/default/banks/{bank_id}/profile"
-													r.args = args
-													r.count = 1
-													return r, true
-												default:
-													return
-												}
-											}
-
-										case 'm': // Prefix: "mpts/preview"
-
-											if l := len("mpts/preview"); len(elem) >= l && elem[0:l] == "mpts/preview" {
-												elem = elem[l:]
-											} else {
-												break
-											}
-
-											if len(elem) == 0 {
-												// Leaf node.
 												switch method {
 												case "POST":
-													r.name = PreviewPromptOperation
-													r.summary = "Preview an operation's prompts (no LLM call)"
-													r.operationID = "preview_prompt"
+													r.name = CreatePageOperation
+													r.summary = "Create a knowledge-base page"
+													r.operationID = "create_page"
 													r.operationGroup = ""
-													r.pathPattern = "/v1/default/banks/{bank_id}/prompts/preview"
+													r.pathPattern = "/v1/default/banks/{bank_id}/pages"
 													r.args = args
 													r.count = 1
 													return r, true
 												default:
 													return
 												}
+											}
+											switch elem[0] {
+											case '/': // Prefix: "/"
+
+												if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+													elem = elem[l:]
+												} else {
+													break
+												}
+
+												if len(elem) == 0 {
+													break
+												}
+												switch elem[0] {
+												case 'e': // Prefix: "export"
+													origElem := elem
+													if l := len("export"); len(elem) >= l && elem[0:l] == "export" {
+														elem = elem[l:]
+													} else {
+														break
+													}
+
+													if len(elem) == 0 {
+														// Leaf node.
+														switch method {
+														case "GET":
+															r.name = ExportPagesOperation
+															r.summary = "Export the knowledge base as a markdown bundle"
+															r.operationID = "export_pages"
+															r.operationGroup = ""
+															r.pathPattern = "/v1/default/banks/{bank_id}/pages/export"
+															r.args = args
+															r.count = 1
+															return r, true
+														default:
+															return
+														}
+													}
+
+													elem = origElem
+												case 'f': // Prefix: "folders"
+													origElem := elem
+													if l := len("folders"); len(elem) >= l && elem[0:l] == "folders" {
+														elem = elem[l:]
+													} else {
+														break
+													}
+
+													if len(elem) == 0 {
+														// Leaf node.
+														switch method {
+														case "POST":
+															r.name = CreatePageFolderOperation
+															r.summary = "Create a knowledge-base folder"
+															r.operationID = "create_page_folder"
+															r.operationGroup = ""
+															r.pathPattern = "/v1/default/banks/{bank_id}/pages/folders"
+															r.args = args
+															r.count = 1
+															return r, true
+														default:
+															return
+														}
+													}
+
+													elem = origElem
+												case 'n': // Prefix: "nodes/"
+													origElem := elem
+													if l := len("nodes/"); len(elem) >= l && elem[0:l] == "nodes/" {
+														elem = elem[l:]
+													} else {
+														break
+													}
+
+													// Param: "node_id"
+													// Leaf parameter, slashes are prohibited
+													idx := strings.IndexByte(elem, '/')
+													if idx >= 0 {
+														break
+													}
+													args[1] = elem
+													elem = ""
+
+													if len(elem) == 0 {
+														// Leaf node.
+														switch method {
+														case "DELETE":
+															r.name = DeletePageNodeOperation
+															r.summary = "Delete a knowledge-base node"
+															r.operationID = "delete_page_node"
+															r.operationGroup = ""
+															r.pathPattern = "/v1/default/banks/{bank_id}/pages/nodes/{node_id}"
+															r.args = args
+															r.count = 2
+															return r, true
+														case "PATCH":
+															r.name = UpdatePageNodeOperation
+															r.summary = "Rename/move a knowledge-base node or update a page's options"
+															r.operationID = "update_page_node"
+															r.operationGroup = ""
+															r.pathPattern = "/v1/default/banks/{bank_id}/pages/nodes/{node_id}"
+															r.args = args
+															r.count = 2
+															return r, true
+														default:
+															return
+														}
+													}
+
+													elem = origElem
+												case 's': // Prefix: "search"
+													origElem := elem
+													if l := len("search"); len(elem) >= l && elem[0:l] == "search" {
+														elem = elem[l:]
+													} else {
+														break
+													}
+
+													if len(elem) == 0 {
+														// Leaf node.
+														switch method {
+														case "GET":
+															r.name = SearchPagesOperation
+															r.summary = "Hybrid search over knowledge pages (BM25 + vector)"
+															r.operationID = "search_pages"
+															r.operationGroup = ""
+															r.pathPattern = "/v1/default/banks/{bank_id}/pages/search"
+															r.args = args
+															r.count = 1
+															return r, true
+														default:
+															return
+														}
+													}
+
+													elem = origElem
+												case 't': // Prefix: "tree"
+													origElem := elem
+													if l := len("tree"); len(elem) >= l && elem[0:l] == "tree" {
+														elem = elem[l:]
+													} else {
+														break
+													}
+
+													if len(elem) == 0 {
+														// Leaf node.
+														switch method {
+														case "GET":
+															r.name = GetPageTreeOperation
+															r.summary = "Get the knowledge-base tree"
+															r.operationID = "get_page_tree"
+															r.operationGroup = ""
+															r.pathPattern = "/v1/default/banks/{bank_id}/pages/tree"
+															r.args = args
+															r.count = 1
+															return r, true
+														default:
+															return
+														}
+													}
+
+													elem = origElem
+												}
+												// Param: "page_id"
+												// Leaf parameter, slashes are prohibited
+												idx := strings.IndexByte(elem, '/')
+												if idx >= 0 {
+													break
+												}
+												args[1] = elem
+												elem = ""
+
+												if len(elem) == 0 {
+													// Leaf node.
+													switch method {
+													case "GET":
+														r.name = GetPageOperation
+														r.summary = "Get a knowledge-base page"
+														r.operationID = "get_page"
+														r.operationGroup = ""
+														r.pathPattern = "/v1/default/banks/{bank_id}/pages/{page_id}"
+														r.args = args
+														r.count = 2
+														return r, true
+													default:
+														return
+													}
+												}
+
+											}
+
+										case 'r': // Prefix: "ro"
+
+											if l := len("ro"); len(elem) >= l && elem[0:l] == "ro" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												break
+											}
+											switch elem[0] {
+											case 'f': // Prefix: "file"
+
+												if l := len("file"); len(elem) >= l && elem[0:l] == "file" {
+													elem = elem[l:]
+												} else {
+													break
+												}
+
+												if len(elem) == 0 {
+													// Leaf node.
+													switch method {
+													case "GET":
+														r.name = GetBankProfileOperation
+														r.summary = "Get memory bank profile (removed — use GET .../config)"
+														r.operationID = "get_bank_profile"
+														r.operationGroup = ""
+														r.pathPattern = "/v1/default/banks/{bank_id}/profile"
+														r.args = args
+														r.count = 1
+														return r, true
+													case "PUT":
+														r.name = UpdateBankDispositionOperation
+														r.summary = "Update memory bank disposition (removed — use PATCH .../config)"
+														r.operationID = "update_bank_disposition"
+														r.operationGroup = ""
+														r.pathPattern = "/v1/default/banks/{bank_id}/profile"
+														r.args = args
+														r.count = 1
+														return r, true
+													default:
+														return
+													}
+												}
+
+											case 'm': // Prefix: "mpts/preview"
+
+												if l := len("mpts/preview"); len(elem) >= l && elem[0:l] == "mpts/preview" {
+													elem = elem[l:]
+												} else {
+													break
+												}
+
+												if len(elem) == 0 {
+													// Leaf node.
+													switch method {
+													case "POST":
+														r.name = PreviewPromptOperation
+														r.summary = "Preview an operation's prompts (no LLM call)"
+														r.operationID = "preview_prompt"
+														r.operationGroup = ""
+														r.pathPattern = "/v1/default/banks/{bank_id}/prompts/preview"
+														r.args = args
+														r.count = 1
+														return r, true
+													default:
+														return
+													}
+												}
+
 											}
 
 										}

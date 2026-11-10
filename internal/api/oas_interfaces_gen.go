@@ -57,6 +57,14 @@ type CreateOrUpdateBankRes interface {
 	createOrUpdateBankRes()
 }
 
+type CreatePageFolderRes interface {
+	createPageFolderRes()
+}
+
+type CreatePageRes interface {
+	createPageRes()
+}
+
 type CreateWebhookRes interface {
 	createWebhookRes()
 }
@@ -87,6 +95,10 @@ type DeleteMentalModelRes interface {
 
 type DeleteOperationRes interface {
 	deleteOperationRes()
+}
+
+type DeletePageNodeRes interface {
+	deletePageNodeRes()
 }
 
 type DeleteWebhookRes interface {
@@ -123,6 +135,10 @@ type ExportDocumentsSyncRemovedRes interface {
 
 type ExportKnowledgeBaseRes interface {
 	exportKnowledgeBaseRes()
+}
+
+type ExportPagesRes interface {
+	exportPagesRes()
 }
 
 type FileRetainRes interface {
@@ -207,6 +223,14 @@ type GetObservationHistoryRes interface {
 
 type GetOperationStatusRes interface {
 	getOperationStatusRes()
+}
+
+type GetPageRes interface {
+	getPageRes()
+}
+
+type GetPageTreeRes interface {
+	getPageTreeRes()
 }
 
 type ImportBankTemplateRes interface {
@@ -333,6 +357,10 @@ type SearchKnowledgeBaseRes interface {
 	searchKnowledgeBaseRes()
 }
 
+type SearchPagesRes interface {
+	searchPagesRes()
+}
+
 type SetBankAliasPrimaryRes interface {
 	setBankAliasPrimaryRes()
 }
@@ -375,6 +403,10 @@ type UpdateMemoryRes interface {
 
 type UpdateMentalModelRes interface {
 	updateMentalModelRes()
+}
+
+type UpdatePageNodeRes interface {
+	updatePageNodeRes()
 }
 
 type UpdateWebhookRes interface {

@@ -82,6 +82,33 @@ func TestUpdateBankMissingIs404(t *testing.T) {
 	}
 }
 
+func TestURLIDValidation(t *testing.T) {
+	long := ""
+	for len([]byte(long)) <= 192 {
+		long += "界"
+	}
+	for _, tc := range []struct {
+		value string
+		bad   bool
+	}{
+		{value: "team-notes"},
+		{value: "团队-notes"},
+		{value: "", bad: true},
+		{value: "team/notes", bad: true},
+		{value: "team\nnotes", bad: true},
+		{value: "_internal", bad: true},
+		{value: long, bad: true},
+	} {
+		err := validateURLID(tc.value, "Bank id", true)
+		if tc.bad && err == nil {
+			t.Errorf("validateURLID(%q) succeeded, want error", tc.value)
+		}
+		if !tc.bad && err != nil {
+			t.Errorf("validateURLID(%q) = %v", tc.value, err)
+		}
+	}
+}
+
 // TestBankConfigUpdateResetAndCredentialGuard covers the config endpoints the
 // console uses and the credential write refusal that mirrors upstream.
 func TestBankConfigUpdateResetAndCredentialGuard(t *testing.T) {

@@ -36,6 +36,7 @@ type BankAliasSource interface {
 	CreateBankAlias(ctx context.Context, bankID, alias string, primary bool) error
 	DeleteBankAlias(ctx context.Context, bankID, alias string) (bool, error)
 	SetBankAliasPrimary(ctx context.Context, bankID, alias string, primary bool) (bool, error)
+	BankAliasExists(ctx context.Context, alias string) (bool, error)
 }
 
 func conflict(format string, a ...any) error {
@@ -516,19 +517,28 @@ func credentialConfigKey(name string) bool {
 	return false
 }
 
-// validateAlias applies the upstream bank-id rules to an alias: non-empty, at
-// most 192 bytes of UTF-8, no control characters, and never the literal "root".
+// validateAlias applies the upstream bank-id rules to an alias.
 func validateAlias(alias string) error {
-	if alias == "" {
-		return badRequest("alias must not be empty")
+	return validateURLID(alias, "Alias", true)
+}
+
+func validateURLID(value, label string, rejectLeadingUnderscore bool) error {
+	if value == "" {
+		return badRequest("%s must not be empty", label)
 	}
-	if len(alias) > 192 {
-		return badRequest("alias is too long: at most 192 bytes of UTF-8 are allowed")
+	if len([]byte(value)) > 192 {
+		return badRequest("%s is too long: at most 192 bytes of UTF-8 are allowed", label)
 	}
-	for _, r := range alias {
+	for _, r := range value {
 		if unicode.IsControl(r) {
-			return badRequest("alias must not contain control characters")
+			return badRequest("%s must not contain control characters", label)
 		}
+	}
+	if strings.Contains(value, "/") {
+		return badRequest("%s must not contain '/': it would split the URL path", label)
+	}
+	if rejectLeadingUnderscore && strings.HasPrefix(value, "_") {
+		return badRequest("%s must not start with '_'", label)
 	}
 	return nil
 }

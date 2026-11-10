@@ -307,14 +307,16 @@ var (
 
 // MentalModel is a stored, auto-refreshed reflect result.
 type MentalModel struct {
-	ID            string
-	BankID        string
-	Name          string
-	SourceQuery   string
-	Content       string
-	Tags          []string
-	MaxTokens     int
-	LastRefreshed string
-	LastSeen      string
-	CreatedAt     string
+	ID                  string
+	BankID              string
+	Name                string
+	SourceQuery         string
+	Content             string
+	Tags                []string
+	MaxTokens           int
+	LastRefreshed       string
+	LastSeen            string
+	LastRefreshFailedAt string
+	CreatedAt           string
+	IsPage              bool
 }

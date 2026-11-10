@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 
 	"github.com/EvolveHsu/hindsight-go/internal/model"
 )
@@ -137,13 +138,55 @@ func (s *Store) Chunk(ctx context.Context, chunkID string) (*model.ChunkInfo, er
 // memory units and drops the observations derived from those units so they are
 // re-consolidated under the new scope. Returns false when the document is gone.
 func (s *Store) UpdateDocumentTags(ctx context.Context, bankID, docID string, tags []string) (bool, error) {
+	return s.updateDocumentTags(ctx, s.pool, bankID, docID, tags)
+}
+
+// PatchDocumentTags applies add/remove operations atomically. A non-nil
+// replace means full replacement; otherwise removals are applied before
+// additions. Returns false when the document is gone.
+func (s *Store) PatchDocumentTags(ctx context.Context, bankID, docID string, replace, add, remove []string) (bool, error) {
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return false, err
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	var current []string
+	err = tx.QueryRow(ctx, `
+SELECT COALESCE(tags::text[], '{}')
+FROM documents
+WHERE id = $1 AND bank_id = $2
+FOR UPDATE`, docID, bankID).Scan(&current)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	next := model.ApplyDocumentTagPatch(current, replace, add, remove)
+	found, err := s.updateDocumentTags(ctx, tx, bankID, docID, next)
+	if err != nil || !found {
+		return found, err
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+type documentTagExecutor interface {
+	Exec(context.Context, string, ...any) (pgconn.CommandTag, error)
+	QueryRow(context.Context, string, ...any) pgx.Row
+}
+
+func (s *Store) updateDocumentTags(ctx context.Context, q documentTagExecutor, bankID, docID string, tags []string) (bool, error) {
 	ut := s.unitsTable()
 	tags = normalizeTags(tags)
 
 	var found bool
 	if s.upstream {
 		var id string
-		err := s.pool.QueryRow(ctx,
+		err := q.QueryRow(ctx,
 			"UPDATE documents SET tags = $3::varchar[], updated_at = now() WHERE id = $1 AND bank_id = $2 RETURNING id",
 			docID, bankID, tags).Scan(&id)
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -156,7 +199,7 @@ func (s *Store) UpdateDocumentTags(ctx context.Context, bankID, docID string, ta
 		// Observations built on this document's facts no longer match the new
 		// tag scope; upstream invalidates and re-consolidates them.
 		srcCol := s.sourceIDsColumn()
-		if _, err := s.pool.Exec(ctx, fmt.Sprintf(`
+		if _, err := q.Exec(ctx, fmt.Sprintf(`
 			DELETE FROM %[1]s
 			WHERE bank_id = $1 AND fact_type = 'observation' AND %[2]s && (
 				SELECT COALESCE(array_agg(id), '{}'::uuid[]) FROM %[1]s
@@ -164,7 +207,7 @@ func (s *Store) UpdateDocumentTags(ctx context.Context, bankID, docID string, ta
 			)`, ut, srcCol), bankID, docID); err != nil {
 			return false, err
 		}
-		if _, err := s.pool.Exec(ctx,
+		if _, err := q.Exec(ctx,
 			fmt.Sprintf("UPDATE %s SET tags = $3::varchar[], updated_at = now() WHERE document_id = $1 AND bank_id = $2", ut),
 			docID, bankID, tags); err != nil {
 			return false, err
@@ -173,7 +216,7 @@ func (s *Store) UpdateDocumentTags(ctx context.Context, bankID, docID string, ta
 	}
 
 	var id string
-	err := s.pool.QueryRow(ctx,
+	err := q.QueryRow(ctx,
 		"UPDATE documents SET tags = $3 WHERE id = $1 AND bank_id = $2 RETURNING id", docID, bankID, tags).Scan(&id)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return false, nil
@@ -182,7 +225,7 @@ func (s *Store) UpdateDocumentTags(ctx context.Context, bankID, docID string, ta
 		return false, err
 	}
 	found = true
-	if _, err := s.pool.Exec(ctx, fmt.Sprintf(`
+	if _, err := q.Exec(ctx, fmt.Sprintf(`
 		DELETE FROM %[1]s
 		WHERE bank_id = $1 AND fact_type = 'observation' AND source_fact_ids && (
 			SELECT COALESCE(array_agg(id), '{}'::text[]) FROM %[1]s
@@ -190,7 +233,7 @@ func (s *Store) UpdateDocumentTags(ctx context.Context, bankID, docID string, ta
 		)`, ut), bankID, docID); err != nil {
 		return false, err
 	}
-	if _, err := s.pool.Exec(ctx,
+	if _, err := q.Exec(ctx,
 		fmt.Sprintf("UPDATE %s SET tags = $3 WHERE document_id = $1 AND bank_id = $2", ut), docID, bankID, tags); err != nil {
 		return false, err
 	}

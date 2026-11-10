@@ -322,10 +322,15 @@ func (e *Engine) ImportBankTransfer(ctx context.Context, req *api.BodyImportBank
 	if strings.TrimSpace(target) == "" {
 		return nil, badRequest("archive names no source bank and no target_bank_id was given")
 	}
+	if err := validateURLID(target, "Target bank id", true); err != nil {
+		return nil, err
+	}
 	if existing, err := e.store.GetBank(ctx, target); err != nil {
 		return nil, internal(err)
 	} else if existing != nil {
 		return nil, badRequest("Target bank '%s' already exists; restore requires a fresh bank id", target)
+	} else if err := e.rejectAliasCollision(ctx, target); err != nil {
+		return nil, err
 	}
 	if _, err := e.store.EnsureBank(ctx, target, "", ""); err != nil {
 		return nil, internal(err)
@@ -664,6 +669,9 @@ func (e *Engine) ImportBankTemplate(ctx context.Context, req *api.BankTemplateMa
 			byID[m.ID] = m
 		}
 		for _, row := range req.MentalModels {
+			if err := validateURLID(row.ID, "Mental model id", false); err != nil {
+				return nil, err
+			}
 			if _, ok := byID[row.ID]; ok {
 				updated, err := mms.UpdateMentalModel(ctx, params.BankID, row.ID, func(m *model.MentalModel) {
 					m.Name = row.Name
@@ -846,6 +854,9 @@ func (e *Engine) CloneBank(ctx context.Context, params api.CloneBankParams) (api
 	if target == "" {
 		return nil, badRequest("target_bank_id is required")
 	}
+	if err := validateURLID(target, "Target bank id", true); err != nil {
+		return nil, err
+	}
 	if target == params.BankID {
 		return nil, badRequest("Bank '%s' cannot be cloned onto itself", params.BankID)
 	}
@@ -858,6 +869,8 @@ func (e *Engine) CloneBank(ctx context.Context, params api.CloneBankParams) (api
 		return nil, internal(err)
 	} else if existing != nil {
 		return nil, badRequest("Target bank '%s' already exists; a clone needs a fresh bank id", target)
+	} else if err := e.rejectAliasCollision(ctx, target); err != nil {
+		return nil, err
 	}
 	includeData := params.IncludeData.Or(true)
 	includeConfig := params.IncludeBankConfig.Or(true)
@@ -900,4 +913,19 @@ func (e *Engine) CloneBank(ctx context.Context, params api.CloneBankParams) (api
 		"target_bank_id": target, "documents_imported": restored, "documents_skipped": skipped,
 	})
 	return &api.BankTransferSubmitResponse{OperationID: opID, Status: api.OptString{Set: true, Value: "completed"}}, nil
+}
+
+func (e *Engine) rejectAliasCollision(ctx context.Context, target string) error {
+	src, err := e.bankAliasSource()
+	if err != nil {
+		return err
+	}
+	exists, err := src.BankAliasExists(ctx, target)
+	if err != nil {
+		return internal(err)
+	}
+	if exists {
+		return conflict("target bank %q already names an alias", target)
+	}
+	return nil
 }

@@ -110,12 +110,16 @@ type Handler interface {
 	//
 	// Create a folder, optionally nested under a parent folder.
 	//
+	// Deprecated: schema marks this operation as deprecated.
+	//
 	// POST /v1/default/banks/{bank_id}/knowledge-base/folders
 	CreateKnowledgeFolder(ctx context.Context, req *CreateFolderRequest, params CreateKnowledgeFolderParams) (CreateKnowledgeFolderRes, error)
 	// CreateKnowledgePage implements create_knowledge_page operation.
 	//
 	// Create a page (a mental model + tree node). Content is generated asynchronously; use the returned
 	// operation_id to track completion.
+	//
+	// Deprecated: schema marks this operation as deprecated.
 	//
 	// POST /v1/default/banks/{bank_id}/knowledge-base/pages
 	CreateKnowledgePage(ctx context.Context, req *CreatePageRequest, params CreateKnowledgePageParams) (CreateKnowledgePageRes, error)
@@ -134,6 +138,23 @@ type Handler interface {
 	//
 	// PUT /v1/default/banks/{bank_id}
 	CreateOrUpdateBank(ctx context.Context, req *CreateBankRequest, params CreateOrUpdateBankParams) (CreateOrUpdateBankRes, error)
+	// CreatePage implements create_page operation.
+	//
+	// Create a page (a mental model + tree node). Content is generated asynchronously; use the returned
+	// operation_id to track completion.
+	//
+	// Deprecated: schema marks this operation as deprecated.
+	//
+	// POST /v1/default/banks/{bank_id}/pages
+	CreatePage(ctx context.Context, req *CreatePageRequest, params CreatePageParams) (CreatePageRes, error)
+	// CreatePageFolder implements create_page_folder operation.
+	//
+	// Create a folder, optionally nested under a parent folder.
+	//
+	// Deprecated: schema marks this operation as deprecated.
+	//
+	// POST /v1/default/banks/{bank_id}/pages/folders
+	CreatePageFolder(ctx context.Context, req *CreateFolderRequest, params CreatePageFolderParams) (CreatePageFolderRes, error)
 	// CreateWebhook implements create_webhook operation.
 	//
 	// Register a webhook endpoint to receive event notifications for this bank.
@@ -179,6 +200,8 @@ type Handler interface {
 	//
 	// Delete a folder or page and its whole subtree (pages' mental models are removed too).
 	//
+	// Deprecated: schema marks this operation as deprecated.
+	//
 	// DELETE /v1/default/banks/{bank_id}/knowledge-base/nodes/{node_id}
 	DeleteKnowledgeNode(ctx context.Context, params DeleteKnowledgeNodeParams) (DeleteKnowledgeNodeRes, error)
 	// DeleteMentalModel implements delete_mental_model operation.
@@ -193,6 +216,14 @@ type Handler interface {
 	//
 	// DELETE /v1/default/banks/{bank_id}/operations/{operation_id}/delete
 	DeleteOperation(ctx context.Context, params DeleteOperationParams) (DeleteOperationRes, error)
+	// DeletePageNode implements delete_page_node operation.
+	//
+	// Delete a folder or page and its whole subtree (pages' mental models are removed too).
+	//
+	// Deprecated: schema marks this operation as deprecated.
+	//
+	// DELETE /v1/default/banks/{bank_id}/pages/nodes/{node_id}
+	DeletePageNode(ctx context.Context, params DeletePageNodeParams) (DeletePageNodeRes, error)
 	// DeleteWebhook implements delete_webhook operation.
 	//
 	// Remove a registered webhook.
@@ -289,8 +320,18 @@ type Handler interface {
 	//
 	// Return a portable markdown bundle: a nested index.md, one .md per page, and history logs.
 	//
+	// Deprecated: schema marks this operation as deprecated.
+	//
 	// GET /v1/default/banks/{bank_id}/knowledge-base/export
 	ExportKnowledgeBase(ctx context.Context, params ExportKnowledgeBaseParams) (ExportKnowledgeBaseRes, error)
+	// ExportPages implements export_pages operation.
+	//
+	// Return a portable markdown bundle: a nested index.md, one .md per page, and history logs.
+	//
+	// Deprecated: schema marks this operation as deprecated.
+	//
+	// GET /v1/default/banks/{bank_id}/pages/export
+	ExportPages(ctx context.Context, params ExportPagesParams) (ExportPagesRes, error)
 	// FileRetain implements file_retain operation.
 	//
 	// Upload files (PDF, DOCX, etc.), convert them to markdown, and retain as memories.
@@ -439,11 +480,15 @@ type Handler interface {
 	//
 	// Return the knowledge base as a nested tree of folders and pages.
 	//
+	// Deprecated: schema marks this operation as deprecated.
+	//
 	// GET /v1/default/banks/{bank_id}/knowledge-base/tree
 	GetKnowledgeBaseTree(ctx context.Context, params GetKnowledgeBaseTreeParams) (GetKnowledgeBaseTreeRes, error)
 	// GetKnowledgePage implements get_knowledge_page operation.
 	//
 	// Return a single page as a markdown document (frontmatter + markdown body).
+	//
+	// Deprecated: schema marks this operation as deprecated.
 	//
 	// GET /v1/default/banks/{bank_id}/knowledge-base/pages/{page_id}
 	GetKnowledgePage(ctx context.Context, params GetKnowledgePageParams) (GetKnowledgePageRes, error)
@@ -494,6 +539,22 @@ type Handler interface {
 	//
 	// GET /v1/default/banks/{bank_id}/operations/{operation_id}
 	GetOperationStatus(ctx context.Context, params GetOperationStatusParams) (GetOperationStatusRes, error)
+	// GetPage implements get_page operation.
+	//
+	// Return a single page as a markdown document (frontmatter + markdown body).
+	//
+	// Deprecated: schema marks this operation as deprecated.
+	//
+	// GET /v1/default/banks/{bank_id}/pages/{page_id}
+	GetPage(ctx context.Context, params GetPageParams) (GetPageRes, error)
+	// GetPageTree implements get_page_tree operation.
+	//
+	// Return the knowledge base as a nested tree of folders and pages.
+	//
+	// Deprecated: schema marks this operation as deprecated.
+	//
+	// GET /v1/default/banks/{bank_id}/pages/tree
+	GetPageTree(ctx context.Context, params GetPageTreeParams) (GetPageTreeRes, error)
 	// GetReadiness implements get_readiness operation.
 	//
 	// Returns 200 when the API can serve traffic (database reachable), 503 otherwise. Identical to
@@ -814,8 +875,19 @@ type Handler interface {
 	// Doc-level hybrid search across a bank's knowledge pages: a full-text (BM25) match and a
 	// vector-similarity match, Reciprocal-Rank-Fusion fused. No reranker — tuned for latency.
 	//
+	// Deprecated: schema marks this operation as deprecated.
+	//
 	// GET /v1/default/banks/{bank_id}/knowledge-base/search
 	SearchKnowledgeBase(ctx context.Context, params SearchKnowledgeBaseParams) (SearchKnowledgeBaseRes, error)
+	// SearchPages implements search_pages operation.
+	//
+	// Doc-level hybrid search across a bank's knowledge pages: a full-text (BM25) match and a
+	// vector-similarity match, Reciprocal-Rank-Fusion fused. No reranker — tuned for latency.
+	//
+	// Deprecated: schema marks this operation as deprecated.
+	//
+	// GET /v1/default/banks/{bank_id}/pages/search
+	SearchPages(ctx context.Context, params SearchPagesParams) (SearchPagesRes, error)
 	// SetBankAliasPrimary implements set_bank_alias_primary operation.
 	//
 	// Present the bank under one of its aliases. Purely cosmetic: the bank keeps its own `bank_id`, which
@@ -907,6 +979,8 @@ type Handler interface {
 	// `source_query` schedules an async refresh so the page rebuilds against the new question. `trigger`
 	// is applied as a patch: the fields you send are updated and the rest keep the page's current values.
 	//
+	// Deprecated: schema marks this operation as deprecated.
+	//
 	// PATCH /v1/default/banks/{bank_id}/knowledge-base/nodes/{node_id}
 	UpdateKnowledgeNode(ctx context.Context, req *UpdateNodeRequest, params UpdateKnowledgeNodeParams) (UpdateKnowledgeNodeRes, error)
 	// UpdateMemory implements update_memory operation.
@@ -923,6 +997,17 @@ type Handler interface {
 	//
 	// PATCH /v1/default/banks/{bank_id}/mental-models/{mental_model_id}
 	UpdateMentalModel(ctx context.Context, req *UpdateMentalModelRequest, params UpdateMentalModelParams) (UpdateMentalModelRes, error)
+	// UpdatePageNode implements update_page_node operation.
+	//
+	// Rename a node (set `name`), move it under another folder (set `parent_id`, null for the root),
+	// and/or update a page's options (`source_query`, `tags`, `max_tokens`, `trigger`). Changing
+	// `source_query` schedules an async refresh so the page rebuilds against the new question. `trigger`
+	// is applied as a patch: the fields you send are updated and the rest keep the page's current values.
+	//
+	// Deprecated: schema marks this operation as deprecated.
+	//
+	// PATCH /v1/default/banks/{bank_id}/pages/nodes/{node_id}
+	UpdatePageNode(ctx context.Context, req *UpdateNodeRequest, params UpdatePageNodeParams) (UpdatePageNodeRes, error)
 	// UpdateWebhook implements update_webhook operation.
 	//
 	// Update one or more fields of a registered webhook. Only provided fields are changed.

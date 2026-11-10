@@ -129,12 +129,16 @@ type Invoker interface {
 	//
 	// Create a folder, optionally nested under a parent folder.
 	//
+	// Deprecated: schema marks this operation as deprecated.
+	//
 	// POST /v1/default/banks/{bank_id}/knowledge-base/folders
 	CreateKnowledgeFolder(ctx context.Context, request *CreateFolderRequest, params CreateKnowledgeFolderParams) (CreateKnowledgeFolderRes, error)
 	// CreateKnowledgePage invokes create_knowledge_page operation.
 	//
 	// Create a page (a mental model + tree node). Content is generated asynchronously; use the returned
 	// operation_id to track completion.
+	//
+	// Deprecated: schema marks this operation as deprecated.
 	//
 	// POST /v1/default/banks/{bank_id}/knowledge-base/pages
 	CreateKnowledgePage(ctx context.Context, request *CreatePageRequest, params CreateKnowledgePageParams) (CreateKnowledgePageRes, error)
@@ -153,6 +157,23 @@ type Invoker interface {
 	//
 	// PUT /v1/default/banks/{bank_id}
 	CreateOrUpdateBank(ctx context.Context, request *CreateBankRequest, params CreateOrUpdateBankParams) (CreateOrUpdateBankRes, error)
+	// CreatePage invokes create_page operation.
+	//
+	// Create a page (a mental model + tree node). Content is generated asynchronously; use the returned
+	// operation_id to track completion.
+	//
+	// Deprecated: schema marks this operation as deprecated.
+	//
+	// POST /v1/default/banks/{bank_id}/pages
+	CreatePage(ctx context.Context, request *CreatePageRequest, params CreatePageParams) (CreatePageRes, error)
+	// CreatePageFolder invokes create_page_folder operation.
+	//
+	// Create a folder, optionally nested under a parent folder.
+	//
+	// Deprecated: schema marks this operation as deprecated.
+	//
+	// POST /v1/default/banks/{bank_id}/pages/folders
+	CreatePageFolder(ctx context.Context, request *CreateFolderRequest, params CreatePageFolderParams) (CreatePageFolderRes, error)
 	// CreateWebhook invokes create_webhook operation.
 	//
 	// Register a webhook endpoint to receive event notifications for this bank.
@@ -198,6 +219,8 @@ type Invoker interface {
 	//
 	// Delete a folder or page and its whole subtree (pages' mental models are removed too).
 	//
+	// Deprecated: schema marks this operation as deprecated.
+	//
 	// DELETE /v1/default/banks/{bank_id}/knowledge-base/nodes/{node_id}
 	DeleteKnowledgeNode(ctx context.Context, params DeleteKnowledgeNodeParams) (DeleteKnowledgeNodeRes, error)
 	// DeleteMentalModel invokes delete_mental_model operation.
@@ -212,6 +235,14 @@ type Invoker interface {
 	//
 	// DELETE /v1/default/banks/{bank_id}/operations/{operation_id}/delete
 	DeleteOperation(ctx context.Context, params DeleteOperationParams) (DeleteOperationRes, error)
+	// DeletePageNode invokes delete_page_node operation.
+	//
+	// Delete a folder or page and its whole subtree (pages' mental models are removed too).
+	//
+	// Deprecated: schema marks this operation as deprecated.
+	//
+	// DELETE /v1/default/banks/{bank_id}/pages/nodes/{node_id}
+	DeletePageNode(ctx context.Context, params DeletePageNodeParams) (DeletePageNodeRes, error)
 	// DeleteWebhook invokes delete_webhook operation.
 	//
 	// Remove a registered webhook.
@@ -308,8 +339,18 @@ type Invoker interface {
 	//
 	// Return a portable markdown bundle: a nested index.md, one .md per page, and history logs.
 	//
+	// Deprecated: schema marks this operation as deprecated.
+	//
 	// GET /v1/default/banks/{bank_id}/knowledge-base/export
 	ExportKnowledgeBase(ctx context.Context, params ExportKnowledgeBaseParams) (ExportKnowledgeBaseRes, error)
+	// ExportPages invokes export_pages operation.
+	//
+	// Return a portable markdown bundle: a nested index.md, one .md per page, and history logs.
+	//
+	// Deprecated: schema marks this operation as deprecated.
+	//
+	// GET /v1/default/banks/{bank_id}/pages/export
+	ExportPages(ctx context.Context, params ExportPagesParams) (ExportPagesRes, error)
 	// FileRetain invokes file_retain operation.
 	//
 	// Upload files (PDF, DOCX, etc.), convert them to markdown, and retain as memories.
@@ -458,11 +499,15 @@ type Invoker interface {
 	//
 	// Return the knowledge base as a nested tree of folders and pages.
 	//
+	// Deprecated: schema marks this operation as deprecated.
+	//
 	// GET /v1/default/banks/{bank_id}/knowledge-base/tree
 	GetKnowledgeBaseTree(ctx context.Context, params GetKnowledgeBaseTreeParams) (GetKnowledgeBaseTreeRes, error)
 	// GetKnowledgePage invokes get_knowledge_page operation.
 	//
 	// Return a single page as a markdown document (frontmatter + markdown body).
+	//
+	// Deprecated: schema marks this operation as deprecated.
 	//
 	// GET /v1/default/banks/{bank_id}/knowledge-base/pages/{page_id}
 	GetKnowledgePage(ctx context.Context, params GetKnowledgePageParams) (GetKnowledgePageRes, error)
@@ -513,6 +558,22 @@ type Invoker interface {
 	//
 	// GET /v1/default/banks/{bank_id}/operations/{operation_id}
 	GetOperationStatus(ctx context.Context, params GetOperationStatusParams) (GetOperationStatusRes, error)
+	// GetPage invokes get_page operation.
+	//
+	// Return a single page as a markdown document (frontmatter + markdown body).
+	//
+	// Deprecated: schema marks this operation as deprecated.
+	//
+	// GET /v1/default/banks/{bank_id}/pages/{page_id}
+	GetPage(ctx context.Context, params GetPageParams) (GetPageRes, error)
+	// GetPageTree invokes get_page_tree operation.
+	//
+	// Return the knowledge base as a nested tree of folders and pages.
+	//
+	// Deprecated: schema marks this operation as deprecated.
+	//
+	// GET /v1/default/banks/{bank_id}/pages/tree
+	GetPageTree(ctx context.Context, params GetPageTreeParams) (GetPageTreeRes, error)
 	// GetReadiness invokes get_readiness operation.
 	//
 	// Returns 200 when the API can serve traffic (database reachable), 503 otherwise. Identical to
@@ -833,8 +894,19 @@ type Invoker interface {
 	// Doc-level hybrid search across a bank's knowledge pages: a full-text (BM25) match and a
 	// vector-similarity match, Reciprocal-Rank-Fusion fused. No reranker — tuned for latency.
 	//
+	// Deprecated: schema marks this operation as deprecated.
+	//
 	// GET /v1/default/banks/{bank_id}/knowledge-base/search
 	SearchKnowledgeBase(ctx context.Context, params SearchKnowledgeBaseParams) (SearchKnowledgeBaseRes, error)
+	// SearchPages invokes search_pages operation.
+	//
+	// Doc-level hybrid search across a bank's knowledge pages: a full-text (BM25) match and a
+	// vector-similarity match, Reciprocal-Rank-Fusion fused. No reranker — tuned for latency.
+	//
+	// Deprecated: schema marks this operation as deprecated.
+	//
+	// GET /v1/default/banks/{bank_id}/pages/search
+	SearchPages(ctx context.Context, params SearchPagesParams) (SearchPagesRes, error)
 	// SetBankAliasPrimary invokes set_bank_alias_primary operation.
 	//
 	// Present the bank under one of its aliases. Purely cosmetic: the bank keeps its own `bank_id`, which
@@ -926,6 +998,8 @@ type Invoker interface {
 	// `source_query` schedules an async refresh so the page rebuilds against the new question. `trigger`
 	// is applied as a patch: the fields you send are updated and the rest keep the page's current values.
 	//
+	// Deprecated: schema marks this operation as deprecated.
+	//
 	// PATCH /v1/default/banks/{bank_id}/knowledge-base/nodes/{node_id}
 	UpdateKnowledgeNode(ctx context.Context, request *UpdateNodeRequest, params UpdateKnowledgeNodeParams) (UpdateKnowledgeNodeRes, error)
 	// UpdateMemory invokes update_memory operation.
@@ -942,6 +1016,17 @@ type Invoker interface {
 	//
 	// PATCH /v1/default/banks/{bank_id}/mental-models/{mental_model_id}
 	UpdateMentalModel(ctx context.Context, request *UpdateMentalModelRequest, params UpdateMentalModelParams) (UpdateMentalModelRes, error)
+	// UpdatePageNode invokes update_page_node operation.
+	//
+	// Rename a node (set `name`), move it under another folder (set `parent_id`, null for the root),
+	// and/or update a page's options (`source_query`, `tags`, `max_tokens`, `trigger`). Changing
+	// `source_query` schedules an async refresh so the page rebuilds against the new question. `trigger`
+	// is applied as a patch: the fields you send are updated and the rest keep the page's current values.
+	//
+	// Deprecated: schema marks this operation as deprecated.
+	//
+	// PATCH /v1/default/banks/{bank_id}/pages/nodes/{node_id}
+	UpdatePageNode(ctx context.Context, request *UpdateNodeRequest, params UpdatePageNodeParams) (UpdatePageNodeRes, error)
 	// UpdateWebhook invokes update_webhook operation.
 	//
 	// Update one or more fields of a registered webhook. Only provided fields are changed.
@@ -2212,6 +2297,8 @@ func (c *Client) sendCreateDirective(ctx context.Context, request *CreateDirecti
 //
 // Create a folder, optionally nested under a parent folder.
 //
+// Deprecated: schema marks this operation as deprecated.
+//
 // POST /v1/default/banks/{bank_id}/knowledge-base/folders
 func (c *Client) CreateKnowledgeFolder(ctx context.Context, request *CreateFolderRequest, params CreateKnowledgeFolderParams) (CreateKnowledgeFolderRes, error) {
 	res, err := c.sendCreateKnowledgeFolder(ctx, request, params)
@@ -2314,6 +2401,8 @@ func (c *Client) sendCreateKnowledgeFolder(ctx context.Context, request *CreateF
 //
 // Create a page (a mental model + tree node). Content is generated asynchronously; use the returned
 // operation_id to track completion.
+//
+// Deprecated: schema marks this operation as deprecated.
 //
 // POST /v1/default/banks/{bank_id}/knowledge-base/pages
 func (c *Client) CreateKnowledgePage(ctx context.Context, request *CreatePageRequest, params CreateKnowledgePageParams) (CreateKnowledgePageRes, error) {
@@ -2612,6 +2701,215 @@ func (c *Client) sendCreateOrUpdateBank(ctx context.Context, request *CreateBank
 
 	stage = "DecodeResponse"
 	result, err := decodeCreateOrUpdateBankResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// CreatePage invokes create_page operation.
+//
+// Create a page (a mental model + tree node). Content is generated asynchronously; use the returned
+// operation_id to track completion.
+//
+// Deprecated: schema marks this operation as deprecated.
+//
+// POST /v1/default/banks/{bank_id}/pages
+func (c *Client) CreatePage(ctx context.Context, request *CreatePageRequest, params CreatePageParams) (CreatePageRes, error) {
+	res, err := c.sendCreatePage(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendCreatePage(ctx context.Context, request *CreatePageRequest, params CreatePageParams) (res CreatePageRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("create_page"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/v1/default/banks/{bank_id}/pages"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, CreatePageOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v1/default/banks/"
+	{
+		// Encode "bank_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "bank_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BankID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/pages"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeCreatePageRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeCreatePageResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// CreatePageFolder invokes create_page_folder operation.
+//
+// Create a folder, optionally nested under a parent folder.
+//
+// Deprecated: schema marks this operation as deprecated.
+//
+// POST /v1/default/banks/{bank_id}/pages/folders
+func (c *Client) CreatePageFolder(ctx context.Context, request *CreateFolderRequest, params CreatePageFolderParams) (CreatePageFolderRes, error) {
+	res, err := c.sendCreatePageFolder(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendCreatePageFolder(ctx context.Context, request *CreateFolderRequest, params CreatePageFolderParams) (res CreatePageFolderRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("create_page_folder"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/v1/default/banks/{bank_id}/pages/folders"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, CreatePageFolderOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v1/default/banks/"
+	{
+		// Encode "bank_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "bank_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BankID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/pages/folders"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeCreatePageFolderRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeCreatePageFolderResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -3185,6 +3483,8 @@ func (c *Client) sendDeleteDocument(ctx context.Context, params DeleteDocumentPa
 //
 // Delete a folder or page and its whole subtree (pages' mental models are removed too).
 //
+// Deprecated: schema marks this operation as deprecated.
+//
 // DELETE /v1/default/banks/{bank_id}/knowledge-base/nodes/{node_id}
 func (c *Client) DeleteKnowledgeNode(ctx context.Context, params DeleteKnowledgeNodeParams) (DeleteKnowledgeNodeRes, error) {
 	res, err := c.sendDeleteKnowledgeNode(ctx, params)
@@ -3526,6 +3826,125 @@ func (c *Client) sendDeleteOperation(ctx context.Context, params DeleteOperation
 
 	stage = "DecodeResponse"
 	result, err := decodeDeleteOperationResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DeletePageNode invokes delete_page_node operation.
+//
+// Delete a folder or page and its whole subtree (pages' mental models are removed too).
+//
+// Deprecated: schema marks this operation as deprecated.
+//
+// DELETE /v1/default/banks/{bank_id}/pages/nodes/{node_id}
+func (c *Client) DeletePageNode(ctx context.Context, params DeletePageNodeParams) (DeletePageNodeRes, error) {
+	res, err := c.sendDeletePageNode(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendDeletePageNode(ctx context.Context, params DeletePageNodeParams) (res DeletePageNodeRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("delete_page_node"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
+		semconv.URLTemplateKey.String("/v1/default/banks/{bank_id}/pages/nodes/{node_id}"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, DeletePageNodeOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/v1/default/banks/"
+	{
+		// Encode "bank_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "bank_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BankID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/pages/nodes/"
+	{
+		// Encode "node_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "node_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.NodeID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeDeletePageNodeResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -4557,6 +4976,8 @@ func (c *Client) sendExportDocumentsSyncRemoved(ctx context.Context, params Expo
 //
 // Return a portable markdown bundle: a nested index.md, one .md per page, and history logs.
 //
+// Deprecated: schema marks this operation as deprecated.
+//
 // GET /v1/default/banks/{bank_id}/knowledge-base/export
 func (c *Client) ExportKnowledgeBase(ctx context.Context, params ExportKnowledgeBaseParams) (ExportKnowledgeBaseRes, error) {
 	res, err := c.sendExportKnowledgeBase(ctx, params)
@@ -4645,6 +5066,107 @@ func (c *Client) sendExportKnowledgeBase(ctx context.Context, params ExportKnowl
 
 	stage = "DecodeResponse"
 	result, err := decodeExportKnowledgeBaseResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ExportPages invokes export_pages operation.
+//
+// Return a portable markdown bundle: a nested index.md, one .md per page, and history logs.
+//
+// Deprecated: schema marks this operation as deprecated.
+//
+// GET /v1/default/banks/{bank_id}/pages/export
+func (c *Client) ExportPages(ctx context.Context, params ExportPagesParams) (ExportPagesRes, error) {
+	res, err := c.sendExportPages(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendExportPages(ctx context.Context, params ExportPagesParams) (res ExportPagesRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("export_pages"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/default/banks/{bank_id}/pages/export"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ExportPagesOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v1/default/banks/"
+	{
+		// Encode "bank_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "bank_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BankID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/pages/export"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeExportPagesResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -6547,6 +7069,8 @@ func (c *Client) sendGetGraph(ctx context.Context, params GetGraphParams) (res G
 //
 // Return the knowledge base as a nested tree of folders and pages.
 //
+// Deprecated: schema marks this operation as deprecated.
+//
 // GET /v1/default/banks/{bank_id}/knowledge-base/tree
 func (c *Client) GetKnowledgeBaseTree(ctx context.Context, params GetKnowledgeBaseTreeParams) (GetKnowledgeBaseTreeRes, error) {
 	res, err := c.sendGetKnowledgeBaseTree(ctx, params)
@@ -6709,6 +7233,8 @@ func (c *Client) sendGetKnowledgeBaseTree(ctx context.Context, params GetKnowled
 // GetKnowledgePage invokes get_knowledge_page operation.
 //
 // Return a single page as a markdown document (frontmatter + markdown body).
+//
+// Deprecated: schema marks this operation as deprecated.
 //
 // GET /v1/default/banks/{bank_id}/knowledge-base/pages/{page_id}
 func (c *Client) GetKnowledgePage(ctx context.Context, params GetKnowledgePageParams) (GetKnowledgePageRes, error) {
@@ -7667,6 +8193,290 @@ func (c *Client) sendGetOperationStatus(ctx context.Context, params GetOperation
 
 	stage = "DecodeResponse"
 	result, err := decodeGetOperationStatusResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetPage invokes get_page operation.
+//
+// Return a single page as a markdown document (frontmatter + markdown body).
+//
+// Deprecated: schema marks this operation as deprecated.
+//
+// GET /v1/default/banks/{bank_id}/pages/{page_id}
+func (c *Client) GetPage(ctx context.Context, params GetPageParams) (GetPageRes, error) {
+	res, err := c.sendGetPage(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetPage(ctx context.Context, params GetPageParams) (res GetPageRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("get_page"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/default/banks/{bank_id}/pages/{page_id}"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, GetPageOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/v1/default/banks/"
+	{
+		// Encode "bank_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "bank_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BankID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/pages/"
+	{
+		// Encode "page_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "page_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.PageID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetPageResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetPageTree invokes get_page_tree operation.
+//
+// Return the knowledge base as a nested tree of folders and pages.
+//
+// Deprecated: schema marks this operation as deprecated.
+//
+// GET /v1/default/banks/{bank_id}/pages/tree
+func (c *Client) GetPageTree(ctx context.Context, params GetPageTreeParams) (GetPageTreeRes, error) {
+	res, err := c.sendGetPageTree(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetPageTree(ctx context.Context, params GetPageTreeParams) (res GetPageTreeRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("get_page_tree"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/default/banks/{bank_id}/pages/tree"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, GetPageTreeOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v1/default/banks/"
+	{
+		// Encode "bank_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "bank_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BankID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/pages/tree"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "tags" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "tags",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if params.Tags != nil {
+				return e.EncodeArray(func(e uri.Encoder) error {
+					for i, item := range params.Tags {
+						if err := func() error {
+							return e.EncodeValue(conv.StringToString(item))
+						}(); err != nil {
+							return errors.Wrapf(err, "[%d]", i)
+						}
+					}
+					return nil
+				})
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "tags_match" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "tags_match",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.TagsMatch.Get(); ok {
+				return e.EncodeValue(conv.StringToString(string(val)))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "tag_groups" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "tag_groups",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.TagGroups.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetPageTreeResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -12815,6 +13625,8 @@ func (c *Client) sendRetryOperation(ctx context.Context, params RetryOperationPa
 // Doc-level hybrid search across a bank's knowledge pages: a full-text (BM25) match and a
 // vector-similarity match, Reciprocal-Rank-Fusion fused. No reranker — tuned for latency.
 //
+// Deprecated: schema marks this operation as deprecated.
+//
 // GET /v1/default/banks/{bank_id}/knowledge-base/search
 func (c *Client) SearchKnowledgeBase(ctx context.Context, params SearchKnowledgeBaseParams) (SearchKnowledgeBaseRes, error) {
 	res, err := c.sendSearchKnowledgeBase(ctx, params)
@@ -12998,6 +13810,203 @@ func (c *Client) sendSearchKnowledgeBase(ctx context.Context, params SearchKnowl
 
 	stage = "DecodeResponse"
 	result, err := decodeSearchKnowledgeBaseResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// SearchPages invokes search_pages operation.
+//
+// Doc-level hybrid search across a bank's knowledge pages: a full-text (BM25) match and a
+// vector-similarity match, Reciprocal-Rank-Fusion fused. No reranker — tuned for latency.
+//
+// Deprecated: schema marks this operation as deprecated.
+//
+// GET /v1/default/banks/{bank_id}/pages/search
+func (c *Client) SearchPages(ctx context.Context, params SearchPagesParams) (SearchPagesRes, error) {
+	res, err := c.sendSearchPages(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendSearchPages(ctx context.Context, params SearchPagesParams) (res SearchPagesRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("search_pages"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/default/banks/{bank_id}/pages/search"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, SearchPagesOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v1/default/banks/"
+	{
+		// Encode "bank_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "bank_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BankID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/pages/search"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "q" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "q",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.StringToString(params.Q))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "limit" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Limit.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "tags" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "tags",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if params.Tags != nil {
+				return e.EncodeArray(func(e uri.Encoder) error {
+					for i, item := range params.Tags {
+						if err := func() error {
+							return e.EncodeValue(conv.StringToString(item))
+						}(); err != nil {
+							return errors.Wrapf(err, "[%d]", i)
+						}
+					}
+					return nil
+				})
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "tags_match" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "tags_match",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.TagsMatch.Get(); ok {
+				return e.EncodeValue(conv.StringToString(string(val)))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "tag_groups" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "tag_groups",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.TagGroups.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeSearchPagesResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -13914,6 +14923,8 @@ func (c *Client) sendUpdateDocument(ctx context.Context, request *UpdateDocument
 // `source_query` schedules an async refresh so the page rebuilds against the new question. `trigger`
 // is applied as a patch: the fields you send are updated and the rest keep the page's current values.
 //
+// Deprecated: schema marks this operation as deprecated.
+//
 // PATCH /v1/default/banks/{bank_id}/knowledge-base/nodes/{node_id}
 func (c *Client) UpdateKnowledgeNode(ctx context.Context, request *UpdateNodeRequest, params UpdateKnowledgeNodeParams) (UpdateKnowledgeNodeRes, error) {
 	res, err := c.sendUpdateKnowledgeNode(ctx, request, params)
@@ -14265,6 +15276,131 @@ func (c *Client) sendUpdateMentalModel(ctx context.Context, request *UpdateMenta
 
 	stage = "DecodeResponse"
 	result, err := decodeUpdateMentalModelResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// UpdatePageNode invokes update_page_node operation.
+//
+// Rename a node (set `name`), move it under another folder (set `parent_id`, null for the root),
+// and/or update a page's options (`source_query`, `tags`, `max_tokens`, `trigger`). Changing
+// `source_query` schedules an async refresh so the page rebuilds against the new question. `trigger`
+// is applied as a patch: the fields you send are updated and the rest keep the page's current values.
+//
+// Deprecated: schema marks this operation as deprecated.
+//
+// PATCH /v1/default/banks/{bank_id}/pages/nodes/{node_id}
+func (c *Client) UpdatePageNode(ctx context.Context, request *UpdateNodeRequest, params UpdatePageNodeParams) (UpdatePageNodeRes, error) {
+	res, err := c.sendUpdatePageNode(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendUpdatePageNode(ctx context.Context, request *UpdateNodeRequest, params UpdatePageNodeParams) (res UpdatePageNodeRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("update_page_node"),
+		semconv.HTTPRequestMethodKey.String("PATCH"),
+		semconv.URLTemplateKey.String("/v1/default/banks/{bank_id}/pages/nodes/{node_id}"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, UpdatePageNodeOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/v1/default/banks/"
+	{
+		// Encode "bank_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "bank_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BankID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/pages/nodes/"
+	{
+		// Encode "node_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "node_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.NodeID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "PATCH", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdatePageNodeRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeUpdatePageNodeResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

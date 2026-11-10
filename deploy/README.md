@@ -72,7 +72,7 @@ The old all-in-one container can then own the same published ports again.
 
 ## Current Status
 
-All 99 OpenAPI operations have Go handlers. The semantic recall arm uses the
+All 109 OpenAPI operations have Go handlers. The semantic recall arm uses the
 TEI sidecar plus pgvector, and retain runs the LLM extractor, writes
 embeddings/entities/chunks, and creates temporal/semantic links.
 

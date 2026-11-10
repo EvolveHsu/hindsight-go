@@ -9,3 +9,4 @@ tools/out/
 .env.*
 !.env.example
 *.dump
+__pycache__/

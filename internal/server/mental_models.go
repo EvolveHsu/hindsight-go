@@ -50,6 +50,8 @@ func (e *Engine) CreateMentalModel(ctx context.Context, req *api.CreateMentalMod
 	id := req.ID.Value
 	if id == "" {
 		id = "mm-" + model.UnitID(params.BankID, "mental-model", req.Name+"\x00"+req.SourceQuery)[:12]
+	} else if err := validateURLID(id, "Mental model id", false); err != nil {
+		return nil, err
 	}
 	maxTokens := 0
 	if req.MaxTokens.Set {
@@ -264,6 +266,8 @@ func mentalModelResponse(m *model.MentalModel) api.MentalModelResponse {
 		MaxTokens:        optIntZero(m.MaxTokens),
 		LastRefreshedAt:  optString(m.LastRefreshed),
 		LastMemorySeenAt: optString(m.LastSeen),
+		IsKnowledgePage:  api.OptBool{Set: true, Value: m.IsPage},
+		IsPage:           api.OptBool{Set: true, Value: m.IsPage},
 		CreatedAt:        optString(m.CreatedAt),
 	}
 }

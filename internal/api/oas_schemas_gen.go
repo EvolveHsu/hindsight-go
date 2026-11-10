@@ -923,6 +923,11 @@ type BankStatsResponse struct {
 	FailedConsolidation OptInt `json:"failed_consolidation"`
 	// Total number of observations.
 	TotalObservations OptInt `json:"total_observations"`
+	// Number of mental models whose last refresh failed, so the automatic triggers
+	// (`refresh_after_consolidation`, `refresh_cron`, `full_refresh_cron`) skip them until an explicit
+	// refresh succeeds. Their content stops updating, so alert on this being above 0. Each model's
+	// `last_refresh_failed_at` says which ones, and its history says why.
+	PausedMentalModels int `json:"paused_mental_models"`
 }
 
 // GetBankID returns the value of BankID.
@@ -1005,6 +1010,11 @@ func (s *BankStatsResponse) GetTotalObservations() OptInt {
 	return s.TotalObservations
 }
 
+// GetPausedMentalModels returns the value of PausedMentalModels.
+func (s *BankStatsResponse) GetPausedMentalModels() int {
+	return s.PausedMentalModels
+}
+
 // SetBankID sets the value of BankID.
 func (s *BankStatsResponse) SetBankID(val string) {
 	s.BankID = val
@@ -1083,6 +1093,11 @@ func (s *BankStatsResponse) SetFailedConsolidation(val OptInt) {
 // SetTotalObservations sets the value of TotalObservations.
 func (s *BankStatsResponse) SetTotalObservations(val OptInt) {
 	s.TotalObservations = val
+}
+
+// SetPausedMentalModels sets the value of PausedMentalModels.
+func (s *BankStatsResponse) SetPausedMentalModels(val int) {
+	s.PausedMentalModels = val
 }
 
 func (*BankStatsResponse) getAgentStatsRes() {}
@@ -1233,8 +1248,9 @@ type BankTemplateConfig struct {
 	ConsolidationStrategies []ConsolidationStrategySpec `json:"consolidation_strategies"`
 	// Max tokens of source facts per reflect call.
 	ReflectSourceFactsMaxTokens OptInt `json:"reflect_source_facts_max_tokens"`
-	// Trigger fields merged over the built-in knowledge-page default when a page is created (e.g.
-	// {"refresh_cron": "0 * * * *"}). A trigger sent with the create request still wins.
+	// Deprecated alias of page_default_trigger. Remove in 2.x.
+	//
+	// Deprecated: schema marks this property as deprecated.
 	KnowledgePageDefaultTrigger OptBankTemplateConfigKnowledgePageDefaultTrigger `json:"knowledge_page_default_trigger"`
 	// Default reflect options for this bank (e.g. {"reflect_search_observations_max_tokens": 3000,
 	// "reflect_search_observations_include_entities": false}). Applied to every reflect in the bank --
@@ -1283,6 +1299,9 @@ type BankTemplateConfig struct {
 	RecallChunksMaxTokens OptInt `json:"recall_chunks_max_tokens"`
 	// Memory Defense policy for this bank (validated against the DefensePolicy schema on write).
 	MemoryDefense OptBankTemplateConfigMemoryDefense `json:"memory_defense"`
+	// Trigger fields merged over the built-in page default when a page is created (e.g. {"refresh_cron":
+	// "0 * * * *"}). A trigger sent with the create request still wins.
+	PageDefaultTrigger OptBankTemplateConfigPageDefaultTrigger `json:"page_default_trigger"`
 }
 
 // GetReflectMission returns the value of ReflectMission.
@@ -1540,6 +1559,11 @@ func (s *BankTemplateConfig) GetMemoryDefense() OptBankTemplateConfigMemoryDefen
 	return s.MemoryDefense
 }
 
+// GetPageDefaultTrigger returns the value of PageDefaultTrigger.
+func (s *BankTemplateConfig) GetPageDefaultTrigger() OptBankTemplateConfigPageDefaultTrigger {
+	return s.PageDefaultTrigger
+}
+
 // SetReflectMission sets the value of ReflectMission.
 func (s *BankTemplateConfig) SetReflectMission(val OptString) {
 	s.ReflectMission = val
@@ -1795,8 +1819,14 @@ func (s *BankTemplateConfig) SetMemoryDefense(val OptBankTemplateConfigMemoryDef
 	s.MemoryDefense = val
 }
 
-// Trigger fields merged over the built-in knowledge-page default when a page is created (e.g.
-// {"refresh_cron": "0 * * * *"}). A trigger sent with the create request still wins.
+// SetPageDefaultTrigger sets the value of PageDefaultTrigger.
+func (s *BankTemplateConfig) SetPageDefaultTrigger(val OptBankTemplateConfigPageDefaultTrigger) {
+	s.PageDefaultTrigger = val
+}
+
+// Deprecated alias of page_default_trigger. Remove in 2.x.
+//
+// Deprecated: schema marks this type as deprecated.
 type BankTemplateConfigKnowledgePageDefaultTrigger map[string]jx.Raw
 
 func (s *BankTemplateConfigKnowledgePageDefaultTrigger) init() BankTemplateConfigKnowledgePageDefaultTrigger {
@@ -1823,6 +1853,19 @@ func (s *BankTemplateConfigMemoryDefense) init() BankTemplateConfigMemoryDefense
 type BankTemplateConfigObservationScopeLimitsItem map[string]jx.Raw
 
 func (s *BankTemplateConfigObservationScopeLimitsItem) init() BankTemplateConfigObservationScopeLimitsItem {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+// Trigger fields merged over the built-in page default when a page is created (e.g. {"refresh_cron":
+// "0 * * * *"}). A trigger sent with the create request still wins.
+type BankTemplateConfigPageDefaultTrigger map[string]jx.Raw
+
+func (s *BankTemplateConfigPageDefaultTrigger) init() BankTemplateConfigPageDefaultTrigger {
 	m := *s
 	if m == nil {
 		m = map[string]jx.Raw{}
@@ -3662,6 +3705,46 @@ func (s *CreatePageRequest) SetTrigger(val OptMentalModelTriggerInput) {
 	s.Trigger = val
 }
 
+// Result of creating a page: the node id, its mental model, and the refresh op.
+// Ref: #/components/schemas/CreatePageResponse
+type CreatePageResponse struct {
+	PageID        string    `json:"page_id"`
+	MentalModelID string    `json:"mental_model_id"`
+	OperationID   OptString `json:"operation_id"`
+}
+
+// GetPageID returns the value of PageID.
+func (s *CreatePageResponse) GetPageID() string {
+	return s.PageID
+}
+
+// GetMentalModelID returns the value of MentalModelID.
+func (s *CreatePageResponse) GetMentalModelID() string {
+	return s.MentalModelID
+}
+
+// GetOperationID returns the value of OperationID.
+func (s *CreatePageResponse) GetOperationID() OptString {
+	return s.OperationID
+}
+
+// SetPageID sets the value of PageID.
+func (s *CreatePageResponse) SetPageID(val string) {
+	s.PageID = val
+}
+
+// SetMentalModelID sets the value of MentalModelID.
+func (s *CreatePageResponse) SetMentalModelID(val string) {
+	s.MentalModelID = val
+}
+
+// SetOperationID sets the value of OperationID.
+func (s *CreatePageResponse) SetOperationID(val OptString) {
+	s.OperationID = val
+}
+
+func (*CreatePageResponse) createPageRes() {}
+
 // Request model for registering a webhook.
 // Ref: #/components/schemas/CreateWebhookRequest
 type CreateWebhookRequest struct {
@@ -3868,6 +3951,10 @@ func (s *DeleteOperationResponse) SetOperationID(val string) {
 }
 
 func (*DeleteOperationResponse) deleteOperationRes() {}
+
+type DeletePageNodeOKApplicationJSON jx.Raw
+
+func (*DeletePageNodeOKApplicationJSON) deletePageNodeRes() {}
 
 // Response model for delete operations.
 // Ref: #/components/schemas/DeleteResponse
@@ -5642,6 +5729,11 @@ type ExportKnowledgeBaseNotFound struct{}
 
 func (*ExportKnowledgeBaseNotFound) exportKnowledgeBaseRes() {}
 
+// ExportPagesNotFound is response for ExportPages operation.
+type ExportPagesNotFound struct{}
+
+func (*ExportPagesNotFound) exportPagesRes() {}
+
 // A single candidate fact produced by dry-run extraction (no resolution/links/persistence).
 //
 // A deliberate subset of the persisted memory-unit shape — only the fields a fresh extraction
@@ -6415,6 +6507,75 @@ type GetObservationHistoryOKApplicationJSON jx.Raw
 
 func (*GetObservationHistoryOKApplicationJSON) getObservationHistoryRes() {}
 
+// GetPageTreeNotFound is response for GetPageTree operation.
+type GetPageTreeNotFound struct{}
+
+func (*GetPageTreeNotFound) getPageTreeRes() {}
+
+// How `tags` match a page's tags: any, all, any_strict, all_strict, exact. 'any'/'all' also return
+// untagged pages; the _strict modes and 'exact' do not.
+type GetPageTreeTagsMatch string
+
+const (
+	GetPageTreeTagsMatchAny       GetPageTreeTagsMatch = "any"
+	GetPageTreeTagsMatchAll       GetPageTreeTagsMatch = "all"
+	GetPageTreeTagsMatchAnyStrict GetPageTreeTagsMatch = "any_strict"
+	GetPageTreeTagsMatchAllStrict GetPageTreeTagsMatch = "all_strict"
+	GetPageTreeTagsMatchExact     GetPageTreeTagsMatch = "exact"
+)
+
+// AllValues returns all GetPageTreeTagsMatch values.
+func (GetPageTreeTagsMatch) AllValues() []GetPageTreeTagsMatch {
+	return []GetPageTreeTagsMatch{
+		GetPageTreeTagsMatchAny,
+		GetPageTreeTagsMatchAll,
+		GetPageTreeTagsMatchAnyStrict,
+		GetPageTreeTagsMatchAllStrict,
+		GetPageTreeTagsMatchExact,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s GetPageTreeTagsMatch) MarshalText() ([]byte, error) {
+	switch s {
+	case GetPageTreeTagsMatchAny:
+		return []byte(s), nil
+	case GetPageTreeTagsMatchAll:
+		return []byte(s), nil
+	case GetPageTreeTagsMatchAnyStrict:
+		return []byte(s), nil
+	case GetPageTreeTagsMatchAllStrict:
+		return []byte(s), nil
+	case GetPageTreeTagsMatchExact:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *GetPageTreeTagsMatch) UnmarshalText(data []byte) error {
+	switch GetPageTreeTagsMatch(data) {
+	case GetPageTreeTagsMatchAny:
+		*s = GetPageTreeTagsMatchAny
+		return nil
+	case GetPageTreeTagsMatchAll:
+		*s = GetPageTreeTagsMatchAll
+		return nil
+	case GetPageTreeTagsMatchAnyStrict:
+		*s = GetPageTreeTagsMatchAnyStrict
+		return nil
+	case GetPageTreeTagsMatchAllStrict:
+		*s = GetPageTreeTagsMatchAllStrict
+		return nil
+	case GetPageTreeTagsMatchExact:
+		*s = GetPageTreeTagsMatchExact
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Response model for graph data endpoint.
 // Ref: #/components/schemas/GraphDataResponse
 type GraphDataResponse struct {
@@ -6506,6 +6667,8 @@ func (*HTTPValidationError) createKnowledgeFolderRes()          {}
 func (*HTTPValidationError) createKnowledgePageRes()            {}
 func (*HTTPValidationError) createMentalModelRes()              {}
 func (*HTTPValidationError) createOrUpdateBankRes()             {}
+func (*HTTPValidationError) createPageFolderRes()               {}
+func (*HTTPValidationError) createPageRes()                     {}
 func (*HTTPValidationError) createWebhookRes()                  {}
 func (*HTTPValidationError) deleteBankAliasRes()                {}
 func (*HTTPValidationError) deleteBankRes()                     {}
@@ -6514,6 +6677,7 @@ func (*HTTPValidationError) deleteDocumentRes()                 {}
 func (*HTTPValidationError) deleteKnowledgeNodeRes()            {}
 func (*HTTPValidationError) deleteMentalModelRes()              {}
 func (*HTTPValidationError) deleteOperationRes()                {}
+func (*HTTPValidationError) deletePageNodeRes()                 {}
 func (*HTTPValidationError) deleteWebhookRes()                  {}
 func (*HTTPValidationError) downloadFileRes()                   {}
 func (*HTTPValidationError) dryRunExtractMemoriesRes()          {}
@@ -6523,6 +6687,7 @@ func (*HTTPValidationError) exportBankTransferRes()             {}
 func (*HTTPValidationError) exportDocumentsRes()                {}
 func (*HTTPValidationError) exportDocumentsSyncRemovedRes()     {}
 func (*HTTPValidationError) exportKnowledgeBaseRes()            {}
+func (*HTTPValidationError) exportPagesRes()                    {}
 func (*HTTPValidationError) fileRetainRes()                     {}
 func (*HTTPValidationError) getAgentStatsRes()                  {}
 func (*HTTPValidationError) getAuditLogRes()                    {}
@@ -6544,6 +6709,8 @@ func (*HTTPValidationError) getMentalModelHistoryRes()          {}
 func (*HTTPValidationError) getMentalModelRes()                 {}
 func (*HTTPValidationError) getObservationHistoryRes()          {}
 func (*HTTPValidationError) getOperationStatusRes()             {}
+func (*HTTPValidationError) getPageRes()                        {}
+func (*HTTPValidationError) getPageTreeRes()                    {}
 func (*HTTPValidationError) importBankTemplateRes()             {}
 func (*HTTPValidationError) importBankTransferRes()             {}
 func (*HTTPValidationError) importDocumentsRes()                {}
@@ -6575,6 +6742,7 @@ func (*HTTPValidationError) resetBankConfigRes()                {}
 func (*HTTPValidationError) retainMemoriesRes()                 {}
 func (*HTTPValidationError) retryOperationRes()                 {}
 func (*HTTPValidationError) searchKnowledgeBaseRes()            {}
+func (*HTTPValidationError) searchPagesRes()                    {}
 func (*HTTPValidationError) setBankAliasPrimaryRes()            {}
 func (*HTTPValidationError) testBankLlmRes()                    {}
 func (*HTTPValidationError) triggerConsolidationRes()           {}
@@ -6586,6 +6754,7 @@ func (*HTTPValidationError) updateDocumentRes()                 {}
 func (*HTTPValidationError) updateKnowledgeNodeRes()            {}
 func (*HTTPValidationError) updateMemoryRes()                   {}
 func (*HTTPValidationError) updateMentalModelRes()              {}
+func (*HTTPValidationError) updatePageNodeRes()                 {}
 func (*HTTPValidationError) updateWebhookRes()                  {}
 
 // An image within a multimodal item, in the position the caller wrote it.
@@ -11709,6 +11878,13 @@ type MentalModelResponse struct {
 	// the list. Deletions are not observed: removing an in-scope memory leaves no write behind, so it does
 	// not raise this flag.
 	IsStale OptBool `json:"is_stale"`
+	// Deprecated: use is_page.
+	//
+	// Deprecated: schema marks this property as deprecated.
+	IsKnowledgePage OptBool `json:"is_knowledge_page"`
+	// True when this model holds a page's content rather than being a standalone mental model. Set by the
+	// list and get endpoints.
+	IsPage OptBool `json:"is_page"`
 }
 
 // GetID returns the value of ID.
@@ -11781,6 +11957,16 @@ func (s *MentalModelResponse) GetIsStale() OptBool {
 	return s.IsStale
 }
 
+// GetIsKnowledgePage returns the value of IsKnowledgePage.
+func (s *MentalModelResponse) GetIsKnowledgePage() OptBool {
+	return s.IsKnowledgePage
+}
+
+// GetIsPage returns the value of IsPage.
+func (s *MentalModelResponse) GetIsPage() OptBool {
+	return s.IsPage
+}
+
 // SetID sets the value of ID.
 func (s *MentalModelResponse) SetID(val string) {
 	s.ID = val
@@ -11849,6 +12035,16 @@ func (s *MentalModelResponse) SetReflectResponse(val OptMentalModelResponseRefle
 // SetIsStale sets the value of IsStale.
 func (s *MentalModelResponse) SetIsStale(val OptBool) {
 	s.IsStale = val
+}
+
+// SetIsKnowledgePage sets the value of IsKnowledgePage.
+func (s *MentalModelResponse) SetIsKnowledgePage(val OptBool) {
+	s.IsKnowledgePage = val
+}
+
+// SetIsPage sets the value of IsPage.
+func (s *MentalModelResponse) SetIsPage(val OptBool) {
+	s.IsPage = val
 }
 
 func (*MentalModelResponse) clearMentalModelRes()  {}
@@ -13975,6 +14171,52 @@ func (o OptBankTemplateConfigMemoryDefense) Or(d BankTemplateConfigMemoryDefense
 	return d
 }
 
+// NewOptBankTemplateConfigPageDefaultTrigger returns new OptBankTemplateConfigPageDefaultTrigger with value set to v.
+func NewOptBankTemplateConfigPageDefaultTrigger(v BankTemplateConfigPageDefaultTrigger) OptBankTemplateConfigPageDefaultTrigger {
+	return OptBankTemplateConfigPageDefaultTrigger{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBankTemplateConfigPageDefaultTrigger is optional BankTemplateConfigPageDefaultTrigger.
+type OptBankTemplateConfigPageDefaultTrigger struct {
+	Value BankTemplateConfigPageDefaultTrigger
+	Set   bool
+}
+
+// IsSet returns true if OptBankTemplateConfigPageDefaultTrigger was set.
+func (o OptBankTemplateConfigPageDefaultTrigger) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBankTemplateConfigPageDefaultTrigger) Reset() {
+	var v BankTemplateConfigPageDefaultTrigger
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBankTemplateConfigPageDefaultTrigger) SetTo(v BankTemplateConfigPageDefaultTrigger) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBankTemplateConfigPageDefaultTrigger) Get() (v BankTemplateConfigPageDefaultTrigger, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBankTemplateConfigPageDefaultTrigger) Or(d BankTemplateConfigPageDefaultTrigger) BankTemplateConfigPageDefaultTrigger {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptBankTemplateConfigReflectDefaultOptions returns new OptBankTemplateConfigReflectDefaultOptions with value set to v.
 func NewOptBankTemplateConfigReflectDefaultOptions(v BankTemplateConfigReflectDefaultOptions) OptBankTemplateConfigReflectDefaultOptions {
 	return OptBankTemplateConfigReflectDefaultOptions{
@@ -14981,6 +15223,52 @@ func (o OptGetMentalModelDetail) Get() (v GetMentalModelDetail, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptGetMentalModelDetail) Or(d GetMentalModelDetail) GetMentalModelDetail {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptGetPageTreeTagsMatch returns new OptGetPageTreeTagsMatch with value set to v.
+func NewOptGetPageTreeTagsMatch(v GetPageTreeTagsMatch) OptGetPageTreeTagsMatch {
+	return OptGetPageTreeTagsMatch{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptGetPageTreeTagsMatch is optional GetPageTreeTagsMatch.
+type OptGetPageTreeTagsMatch struct {
+	Value GetPageTreeTagsMatch
+	Set   bool
+}
+
+// IsSet returns true if OptGetPageTreeTagsMatch was set.
+func (o OptGetPageTreeTagsMatch) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptGetPageTreeTagsMatch) Reset() {
+	var v GetPageTreeTagsMatch
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptGetPageTreeTagsMatch) SetTo(v GetPageTreeTagsMatch) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptGetPageTreeTagsMatch) Get() (v GetPageTreeTagsMatch, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptGetPageTreeTagsMatch) Or(d GetPageTreeTagsMatch) GetPageTreeTagsMatch {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -18297,6 +18585,52 @@ func (o OptSearchKnowledgeBaseTagsMatch) Or(d SearchKnowledgeBaseTagsMatch) Sear
 	return d
 }
 
+// NewOptSearchPagesTagsMatch returns new OptSearchPagesTagsMatch with value set to v.
+func NewOptSearchPagesTagsMatch(v SearchPagesTagsMatch) OptSearchPagesTagsMatch {
+	return OptSearchPagesTagsMatch{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptSearchPagesTagsMatch is optional SearchPagesTagsMatch.
+type OptSearchPagesTagsMatch struct {
+	Value SearchPagesTagsMatch
+	Set   bool
+}
+
+// IsSet returns true if OptSearchPagesTagsMatch was set.
+func (o OptSearchPagesTagsMatch) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptSearchPagesTagsMatch) Reset() {
+	var v SearchPagesTagsMatch
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptSearchPagesTagsMatch) SetTo(v SearchPagesTagsMatch) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptSearchPagesTagsMatch) Get() (v SearchPagesTagsMatch, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptSearchPagesTagsMatch) Or(d SearchPagesTagsMatch) SearchPagesTagsMatch {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptSourceFactsIncludeOptions returns new OptSourceFactsIncludeOptions with value set to v.
 func NewOptSourceFactsIncludeOptions(v SourceFactsIncludeOptions) OptSourceFactsIncludeOptions {
 	return OptSourceFactsIncludeOptions{
@@ -18664,6 +18998,505 @@ func (o OptWebhookHttpConfigParams) Or(d WebhookHttpConfigParams) WebhookHttpCon
 	}
 	return d
 }
+
+// One file in a portable markdown bundle.
+// Ref: #/components/schemas/PageBundleFile
+type PageBundleFile struct {
+	Path    string `json:"path"`
+	Content string `json:"content"`
+}
+
+// GetPath returns the value of Path.
+func (s *PageBundleFile) GetPath() string {
+	return s.Path
+}
+
+// GetContent returns the value of Content.
+func (s *PageBundleFile) GetContent() string {
+	return s.Content
+}
+
+// SetPath sets the value of Path.
+func (s *PageBundleFile) SetPath(val string) {
+	s.Path = val
+}
+
+// SetContent sets the value of Content.
+func (s *PageBundleFile) SetContent(val string) {
+	s.Content = val
+}
+
+// A portable markdown bundle — a flat set of markdown files (index + pages + logs).
+// Ref: #/components/schemas/PageBundleResponse
+type PageBundleResponse struct {
+	Files []PageBundleFile `json:"files"`
+}
+
+// GetFiles returns the value of Files.
+func (s *PageBundleResponse) GetFiles() []PageBundleFile {
+	return s.Files
+}
+
+// SetFiles sets the value of Files.
+func (s *PageBundleResponse) SetFiles(val []PageBundleFile) {
+	s.Files = val
+}
+
+func (*PageBundleResponse) exportPagesRes() {}
+
+// A node in the knowledge-base tree — a folder or a page.
+//
+// Pages carry `description`/`tags` from their backing mental model. The knowledge base is
+// client-managed (CRUD); `managed` lets a client tag a node as system-owned vs. hand-authored.
+// Ref: #/components/schemas/PageNode
+type PageNode struct {
+	ID       string       `json:"id"`
+	Kind     PageNodeKind `json:"kind"`
+	Name     string       `json:"name"`
+	ParentID OptString    `json:"parent_id"`
+	// Backing mental model id (pages only).
+	MentalModelID OptString `json:"mental_model_id"`
+	// Client-set flag: true = system-owned, false = hand-authored.
+	Managed OptBool `json:"managed"`
+	// Page source query (the page's `description`).
+	Description OptString `json:"description"`
+	Tags        []string  `json:"tags"`
+	// Last refresh (page) or last update (folder).
+	Timestamp OptString `json:"timestamp"`
+	// Pages only, populated by the tree endpoint. True when a memory in this page's scope — its tags and
+	// fact types — has been written since the page last read the memories. That is the same check a
+	// scheduled refresh runs before spending an LLM call, so a flagged page is one a refresh would
+	// actually rewrite. Deletions are not observed: removing an in-scope memory leaves no write behind, so
+	// it does not raise this flag.
+	IsStale OptBool `json:"is_stale"`
+	// Pages only: when this page's most recent refresh failed, in ISO format, or null when the last one
+	// succeeded. While it is set the page does not rebuild itself on its trigger — see the same field on
+	// the mental model. An explicit refresh still runs.
+	LastRefreshFailedAt OptString `json:"last_refresh_failed_at"`
+	// Pages only: the page's refresh settings — when it rebuilds itself (`refresh_after_consolidation`
+	// or `refresh_cron`), in which mode, and over which facts. This is the EFFECTIVE policy: a setting the
+	// page never stored is reported at its default, so compare the fields you care about rather than the
+	// whole object against a patch you sent. Absent on folders, which have no backing mental model, and on
+	// a page with no trigger stored.
+	Trigger  OptMentalModelTriggerOutput `json:"trigger"`
+	Children []PageNode                  `json:"children"`
+}
+
+// GetID returns the value of ID.
+func (s *PageNode) GetID() string {
+	return s.ID
+}
+
+// GetKind returns the value of Kind.
+func (s *PageNode) GetKind() PageNodeKind {
+	return s.Kind
+}
+
+// GetName returns the value of Name.
+func (s *PageNode) GetName() string {
+	return s.Name
+}
+
+// GetParentID returns the value of ParentID.
+func (s *PageNode) GetParentID() OptString {
+	return s.ParentID
+}
+
+// GetMentalModelID returns the value of MentalModelID.
+func (s *PageNode) GetMentalModelID() OptString {
+	return s.MentalModelID
+}
+
+// GetManaged returns the value of Managed.
+func (s *PageNode) GetManaged() OptBool {
+	return s.Managed
+}
+
+// GetDescription returns the value of Description.
+func (s *PageNode) GetDescription() OptString {
+	return s.Description
+}
+
+// GetTags returns the value of Tags.
+func (s *PageNode) GetTags() []string {
+	return s.Tags
+}
+
+// GetTimestamp returns the value of Timestamp.
+func (s *PageNode) GetTimestamp() OptString {
+	return s.Timestamp
+}
+
+// GetIsStale returns the value of IsStale.
+func (s *PageNode) GetIsStale() OptBool {
+	return s.IsStale
+}
+
+// GetLastRefreshFailedAt returns the value of LastRefreshFailedAt.
+func (s *PageNode) GetLastRefreshFailedAt() OptString {
+	return s.LastRefreshFailedAt
+}
+
+// GetTrigger returns the value of Trigger.
+func (s *PageNode) GetTrigger() OptMentalModelTriggerOutput {
+	return s.Trigger
+}
+
+// GetChildren returns the value of Children.
+func (s *PageNode) GetChildren() []PageNode {
+	return s.Children
+}
+
+// SetID sets the value of ID.
+func (s *PageNode) SetID(val string) {
+	s.ID = val
+}
+
+// SetKind sets the value of Kind.
+func (s *PageNode) SetKind(val PageNodeKind) {
+	s.Kind = val
+}
+
+// SetName sets the value of Name.
+func (s *PageNode) SetName(val string) {
+	s.Name = val
+}
+
+// SetParentID sets the value of ParentID.
+func (s *PageNode) SetParentID(val OptString) {
+	s.ParentID = val
+}
+
+// SetMentalModelID sets the value of MentalModelID.
+func (s *PageNode) SetMentalModelID(val OptString) {
+	s.MentalModelID = val
+}
+
+// SetManaged sets the value of Managed.
+func (s *PageNode) SetManaged(val OptBool) {
+	s.Managed = val
+}
+
+// SetDescription sets the value of Description.
+func (s *PageNode) SetDescription(val OptString) {
+	s.Description = val
+}
+
+// SetTags sets the value of Tags.
+func (s *PageNode) SetTags(val []string) {
+	s.Tags = val
+}
+
+// SetTimestamp sets the value of Timestamp.
+func (s *PageNode) SetTimestamp(val OptString) {
+	s.Timestamp = val
+}
+
+// SetIsStale sets the value of IsStale.
+func (s *PageNode) SetIsStale(val OptBool) {
+	s.IsStale = val
+}
+
+// SetLastRefreshFailedAt sets the value of LastRefreshFailedAt.
+func (s *PageNode) SetLastRefreshFailedAt(val OptString) {
+	s.LastRefreshFailedAt = val
+}
+
+// SetTrigger sets the value of Trigger.
+func (s *PageNode) SetTrigger(val OptMentalModelTriggerOutput) {
+	s.Trigger = val
+}
+
+// SetChildren sets the value of Children.
+func (s *PageNode) SetChildren(val []PageNode) {
+	s.Children = val
+}
+
+func (*PageNode) createPageFolderRes() {}
+func (*PageNode) updatePageNodeRes()   {}
+
+type PageNodeKind string
+
+const (
+	PageNodeKindFolder PageNodeKind = "folder"
+	PageNodeKindPage   PageNodeKind = "page"
+)
+
+// AllValues returns all PageNodeKind values.
+func (PageNodeKind) AllValues() []PageNodeKind {
+	return []PageNodeKind{
+		PageNodeKindFolder,
+		PageNodeKindPage,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s PageNodeKind) MarshalText() ([]byte, error) {
+	switch s {
+	case PageNodeKindFolder:
+		return []byte(s), nil
+	case PageNodeKindPage:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *PageNodeKind) UnmarshalText(data []byte) error {
+	switch PageNodeKind(data) {
+	case PageNodeKindFolder:
+		*s = PageNodeKindFolder
+		return nil
+	case PageNodeKindPage:
+		*s = PageNodeKindPage
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// A page rendered as a markdown document.
+// Ref: #/components/schemas/PageResponse
+type PageResponse struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	// Page type — from a `type:<x>` tag, else 'knowledge-page'.
+	Type string `json:"type"`
+	// The source query that rebuilds the page.
+	Description OptString `json:"description"`
+	Tags        []string  `json:"tags"`
+	// Last refresh time (falls back to creation).
+	Timestamp OptString `json:"timestamp"`
+	// The page's synthesized markdown body, exactly as stored. Empty until a refresh writes one — unlike
+	// `markdown`, which says so in words. Build a UI's own empty state off this field; read `markdown` to
+	// show the document itself.
+	Body OptString `json:"body"`
+	// The full markdown document: YAML frontmatter + markdown body. A page with no body yet renders 'No
+	// content yet.' as its body rather than frontmatter alone, which reads as a page that failed to
+	// render. The notice is added here on the way out; the stored body in `body` stays empty, and the
+	// export bundle keeps the bare document.
+	Markdown string `json:"markdown"`
+}
+
+// GetID returns the value of ID.
+func (s *PageResponse) GetID() string {
+	return s.ID
+}
+
+// GetName returns the value of Name.
+func (s *PageResponse) GetName() string {
+	return s.Name
+}
+
+// GetType returns the value of Type.
+func (s *PageResponse) GetType() string {
+	return s.Type
+}
+
+// GetDescription returns the value of Description.
+func (s *PageResponse) GetDescription() OptString {
+	return s.Description
+}
+
+// GetTags returns the value of Tags.
+func (s *PageResponse) GetTags() []string {
+	return s.Tags
+}
+
+// GetTimestamp returns the value of Timestamp.
+func (s *PageResponse) GetTimestamp() OptString {
+	return s.Timestamp
+}
+
+// GetBody returns the value of Body.
+func (s *PageResponse) GetBody() OptString {
+	return s.Body
+}
+
+// GetMarkdown returns the value of Markdown.
+func (s *PageResponse) GetMarkdown() string {
+	return s.Markdown
+}
+
+// SetID sets the value of ID.
+func (s *PageResponse) SetID(val string) {
+	s.ID = val
+}
+
+// SetName sets the value of Name.
+func (s *PageResponse) SetName(val string) {
+	s.Name = val
+}
+
+// SetType sets the value of Type.
+func (s *PageResponse) SetType(val string) {
+	s.Type = val
+}
+
+// SetDescription sets the value of Description.
+func (s *PageResponse) SetDescription(val OptString) {
+	s.Description = val
+}
+
+// SetTags sets the value of Tags.
+func (s *PageResponse) SetTags(val []string) {
+	s.Tags = val
+}
+
+// SetTimestamp sets the value of Timestamp.
+func (s *PageResponse) SetTimestamp(val OptString) {
+	s.Timestamp = val
+}
+
+// SetBody sets the value of Body.
+func (s *PageResponse) SetBody(val OptString) {
+	s.Body = val
+}
+
+// SetMarkdown sets the value of Markdown.
+func (s *PageResponse) SetMarkdown(val string) {
+	s.Markdown = val
+}
+
+func (*PageResponse) getPageRes() {}
+
+// Ranked knowledge-page search results (BM25 + vector, RRF-fused).
+// Ref: #/components/schemas/PageSearchResponse
+type PageSearchResponse struct {
+	Results []PageSearchResult `json:"results"`
+	Total   int                `json:"total"`
+}
+
+// GetResults returns the value of Results.
+func (s *PageSearchResponse) GetResults() []PageSearchResult {
+	return s.Results
+}
+
+// GetTotal returns the value of Total.
+func (s *PageSearchResponse) GetTotal() int {
+	return s.Total
+}
+
+// SetResults sets the value of Results.
+func (s *PageSearchResponse) SetResults(val []PageSearchResult) {
+	s.Results = val
+}
+
+// SetTotal sets the value of Total.
+func (s *PageSearchResponse) SetTotal(val int) {
+	s.Total = val
+}
+
+func (*PageSearchResponse) searchPagesRes() {}
+
+// One hybrid-search hit: a page and its fused relevance score.
+// Ref: #/components/schemas/PageSearchResult
+type PageSearchResult struct {
+	ID            string    `json:"id"`
+	Name          string    `json:"name"`
+	MentalModelID OptString `json:"mental_model_id"`
+	// The question the page answers.
+	SourceQuery OptString `json:"source_query"`
+	// The page's opening text. A page whose body is still empty says so in words — 'No content yet.' —
+	// rather than coming back blank, so a caller can tell an unwritten page from a page whose snippet
+	// simply did not render. The marker is produced on the way out; the stored body stays empty and out of
+	// the search index.
+	Snippet string `json:"snippet"`
+	// Rank-fusion score in 0..1, where 1.0 means every search arm placed this page first. It reflects
+	// where the page ranked for this query, not how well its text matched, so it is only comparable within
+	// one result set.
+	Score     float64   `json:"score"`
+	UpdatedAt OptString `json:"updated_at"`
+}
+
+// GetID returns the value of ID.
+func (s *PageSearchResult) GetID() string {
+	return s.ID
+}
+
+// GetName returns the value of Name.
+func (s *PageSearchResult) GetName() string {
+	return s.Name
+}
+
+// GetMentalModelID returns the value of MentalModelID.
+func (s *PageSearchResult) GetMentalModelID() OptString {
+	return s.MentalModelID
+}
+
+// GetSourceQuery returns the value of SourceQuery.
+func (s *PageSearchResult) GetSourceQuery() OptString {
+	return s.SourceQuery
+}
+
+// GetSnippet returns the value of Snippet.
+func (s *PageSearchResult) GetSnippet() string {
+	return s.Snippet
+}
+
+// GetScore returns the value of Score.
+func (s *PageSearchResult) GetScore() float64 {
+	return s.Score
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *PageSearchResult) GetUpdatedAt() OptString {
+	return s.UpdatedAt
+}
+
+// SetID sets the value of ID.
+func (s *PageSearchResult) SetID(val string) {
+	s.ID = val
+}
+
+// SetName sets the value of Name.
+func (s *PageSearchResult) SetName(val string) {
+	s.Name = val
+}
+
+// SetMentalModelID sets the value of MentalModelID.
+func (s *PageSearchResult) SetMentalModelID(val OptString) {
+	s.MentalModelID = val
+}
+
+// SetSourceQuery sets the value of SourceQuery.
+func (s *PageSearchResult) SetSourceQuery(val OptString) {
+	s.SourceQuery = val
+}
+
+// SetSnippet sets the value of Snippet.
+func (s *PageSearchResult) SetSnippet(val string) {
+	s.Snippet = val
+}
+
+// SetScore sets the value of Score.
+func (s *PageSearchResult) SetScore(val float64) {
+	s.Score = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *PageSearchResult) SetUpdatedAt(val OptString) {
+	s.UpdatedAt = val
+}
+
+// The knowledge base as a nested folder/page tree.
+// Ref: #/components/schemas/PageTreeResponse
+type PageTreeResponse struct {
+	Roots []PageNode `json:"roots"`
+}
+
+// GetRoots returns the value of Roots.
+func (s *PageTreeResponse) GetRoots() []PageNode {
+	return s.Roots
+}
+
+// SetRoots sets the value of Roots.
+func (s *PageTreeResponse) SetRoots(val []PageNode) {
+	s.Roots = val
+}
+
+func (*PageTreeResponse) getPageTreeRes() {}
 
 // PreviewConsolidationStrategiesNotFound is response for PreviewConsolidationStrategies operation.
 type PreviewConsolidationStrategiesNotFound struct{}
@@ -20758,6 +21591,7 @@ const (
 	RefreshMentalModelOperationDetailsFailureReasonDeltaOpsAllSkipped      RefreshMentalModelOperationDetailsFailureReason = "delta_ops_all_skipped"
 	RefreshMentalModelOperationDetailsFailureReasonDeltaNotApplied         RefreshMentalModelOperationDetailsFailureReason = "delta_not_applied"
 	RefreshMentalModelOperationDetailsFailureReasonStructuredOutputFailed  RefreshMentalModelOperationDetailsFailureReason = "structured_output_failed"
+	RefreshMentalModelOperationDetailsFailureReasonCandidateRejected       RefreshMentalModelOperationDetailsFailureReason = "candidate_rejected"
 	RefreshMentalModelOperationDetailsFailureReasonRetrievalFailed         RefreshMentalModelOperationDetailsFailureReason = "retrieval_failed"
 	RefreshMentalModelOperationDetailsFailureReasonNoAnswer                RefreshMentalModelOperationDetailsFailureReason = "no_answer"
 	RefreshMentalModelOperationDetailsFailureReasonUnexpectedError         RefreshMentalModelOperationDetailsFailureReason = "unexpected_error"
@@ -20772,6 +21606,7 @@ func (RefreshMentalModelOperationDetailsFailureReason) AllValues() []RefreshMent
 		RefreshMentalModelOperationDetailsFailureReasonDeltaOpsAllSkipped,
 		RefreshMentalModelOperationDetailsFailureReasonDeltaNotApplied,
 		RefreshMentalModelOperationDetailsFailureReasonStructuredOutputFailed,
+		RefreshMentalModelOperationDetailsFailureReasonCandidateRejected,
 		RefreshMentalModelOperationDetailsFailureReasonRetrievalFailed,
 		RefreshMentalModelOperationDetailsFailureReasonNoAnswer,
 		RefreshMentalModelOperationDetailsFailureReasonUnexpectedError,
@@ -20792,6 +21627,8 @@ func (s RefreshMentalModelOperationDetailsFailureReason) MarshalText() ([]byte, 
 	case RefreshMentalModelOperationDetailsFailureReasonDeltaNotApplied:
 		return []byte(s), nil
 	case RefreshMentalModelOperationDetailsFailureReasonStructuredOutputFailed:
+		return []byte(s), nil
+	case RefreshMentalModelOperationDetailsFailureReasonCandidateRejected:
 		return []byte(s), nil
 	case RefreshMentalModelOperationDetailsFailureReasonRetrievalFailed:
 		return []byte(s), nil
@@ -20825,6 +21662,9 @@ func (s *RefreshMentalModelOperationDetailsFailureReason) UnmarshalText(data []b
 	case RefreshMentalModelOperationDetailsFailureReasonStructuredOutputFailed:
 		*s = RefreshMentalModelOperationDetailsFailureReasonStructuredOutputFailed
 		return nil
+	case RefreshMentalModelOperationDetailsFailureReasonCandidateRejected:
+		*s = RefreshMentalModelOperationDetailsFailureReasonCandidateRejected
+		return nil
 	case RefreshMentalModelOperationDetailsFailureReasonRetrievalFailed:
 		*s = RefreshMentalModelOperationDetailsFailureReasonRetrievalFailed
 		return nil
@@ -20845,13 +21685,14 @@ func (s *RefreshMentalModelOperationDetailsFailureReason) UnmarshalText(data []b
 type RefreshMentalModelOperationDetailsOutcome string
 
 const (
-	RefreshMentalModelOperationDetailsOutcomeContentWritten                RefreshMentalModelOperationDetailsOutcome = "content_written"
-	RefreshMentalModelOperationDetailsOutcomeContentUnchanged              RefreshMentalModelOperationDetailsOutcome = "content_unchanged"
-	RefreshMentalModelOperationDetailsOutcomeContentPreservedNoNewFacts    RefreshMentalModelOperationDetailsOutcome = "content_preserved_no_new_facts"
-	RefreshMentalModelOperationDetailsOutcomeRefreshFailedEmptyCandidate   RefreshMentalModelOperationDetailsOutcome = "refresh_failed_empty_candidate"
-	RefreshMentalModelOperationDetailsOutcomeRefreshFailedDeltaNotApplied  RefreshMentalModelOperationDetailsOutcome = "refresh_failed_delta_not_applied"
-	RefreshMentalModelOperationDetailsOutcomeRefreshFailedStructuredOutput RefreshMentalModelOperationDetailsOutcome = "refresh_failed_structured_output"
-	RefreshMentalModelOperationDetailsOutcomeRefreshFailedError            RefreshMentalModelOperationDetailsOutcome = "refresh_failed_error"
+	RefreshMentalModelOperationDetailsOutcomeContentWritten                 RefreshMentalModelOperationDetailsOutcome = "content_written"
+	RefreshMentalModelOperationDetailsOutcomeContentUnchanged               RefreshMentalModelOperationDetailsOutcome = "content_unchanged"
+	RefreshMentalModelOperationDetailsOutcomeContentPreservedNoNewFacts     RefreshMentalModelOperationDetailsOutcome = "content_preserved_no_new_facts"
+	RefreshMentalModelOperationDetailsOutcomeRefreshFailedEmptyCandidate    RefreshMentalModelOperationDetailsOutcome = "refresh_failed_empty_candidate"
+	RefreshMentalModelOperationDetailsOutcomeRefreshFailedDeltaNotApplied   RefreshMentalModelOperationDetailsOutcome = "refresh_failed_delta_not_applied"
+	RefreshMentalModelOperationDetailsOutcomeRefreshFailedStructuredOutput  RefreshMentalModelOperationDetailsOutcome = "refresh_failed_structured_output"
+	RefreshMentalModelOperationDetailsOutcomeRefreshFailedCandidateRejected RefreshMentalModelOperationDetailsOutcome = "refresh_failed_candidate_rejected"
+	RefreshMentalModelOperationDetailsOutcomeRefreshFailedError             RefreshMentalModelOperationDetailsOutcome = "refresh_failed_error"
 )
 
 // AllValues returns all RefreshMentalModelOperationDetailsOutcome values.
@@ -20863,6 +21704,7 @@ func (RefreshMentalModelOperationDetailsOutcome) AllValues() []RefreshMentalMode
 		RefreshMentalModelOperationDetailsOutcomeRefreshFailedEmptyCandidate,
 		RefreshMentalModelOperationDetailsOutcomeRefreshFailedDeltaNotApplied,
 		RefreshMentalModelOperationDetailsOutcomeRefreshFailedStructuredOutput,
+		RefreshMentalModelOperationDetailsOutcomeRefreshFailedCandidateRejected,
 		RefreshMentalModelOperationDetailsOutcomeRefreshFailedError,
 	}
 }
@@ -20881,6 +21723,8 @@ func (s RefreshMentalModelOperationDetailsOutcome) MarshalText() ([]byte, error)
 	case RefreshMentalModelOperationDetailsOutcomeRefreshFailedDeltaNotApplied:
 		return []byte(s), nil
 	case RefreshMentalModelOperationDetailsOutcomeRefreshFailedStructuredOutput:
+		return []byte(s), nil
+	case RefreshMentalModelOperationDetailsOutcomeRefreshFailedCandidateRejected:
 		return []byte(s), nil
 	case RefreshMentalModelOperationDetailsOutcomeRefreshFailedError:
 		return []byte(s), nil
@@ -20909,6 +21753,9 @@ func (s *RefreshMentalModelOperationDetailsOutcome) UnmarshalText(data []byte) e
 		return nil
 	case RefreshMentalModelOperationDetailsOutcomeRefreshFailedStructuredOutput:
 		*s = RefreshMentalModelOperationDetailsOutcomeRefreshFailedStructuredOutput
+		return nil
+	case RefreshMentalModelOperationDetailsOutcomeRefreshFailedCandidateRejected:
+		*s = RefreshMentalModelOperationDetailsOutcomeRefreshFailedCandidateRejected
 		return nil
 	case RefreshMentalModelOperationDetailsOutcomeRefreshFailedError:
 		*s = RefreshMentalModelOperationDetailsOutcomeRefreshFailedError
@@ -21339,6 +22186,75 @@ func (s *SearchKnowledgeBaseTagsMatch) UnmarshalText(data []byte) error {
 		return nil
 	case SearchKnowledgeBaseTagsMatchExact:
 		*s = SearchKnowledgeBaseTagsMatchExact
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// SearchPagesNotFound is response for SearchPages operation.
+type SearchPagesNotFound struct{}
+
+func (*SearchPagesNotFound) searchPagesRes() {}
+
+// How `tags` match a page's tags: any, all, any_strict, all_strict, exact. 'any'/'all' also return
+// untagged pages; the _strict modes and 'exact' do not.
+type SearchPagesTagsMatch string
+
+const (
+	SearchPagesTagsMatchAny       SearchPagesTagsMatch = "any"
+	SearchPagesTagsMatchAll       SearchPagesTagsMatch = "all"
+	SearchPagesTagsMatchAnyStrict SearchPagesTagsMatch = "any_strict"
+	SearchPagesTagsMatchAllStrict SearchPagesTagsMatch = "all_strict"
+	SearchPagesTagsMatchExact     SearchPagesTagsMatch = "exact"
+)
+
+// AllValues returns all SearchPagesTagsMatch values.
+func (SearchPagesTagsMatch) AllValues() []SearchPagesTagsMatch {
+	return []SearchPagesTagsMatch{
+		SearchPagesTagsMatchAny,
+		SearchPagesTagsMatchAll,
+		SearchPagesTagsMatchAnyStrict,
+		SearchPagesTagsMatchAllStrict,
+		SearchPagesTagsMatchExact,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s SearchPagesTagsMatch) MarshalText() ([]byte, error) {
+	switch s {
+	case SearchPagesTagsMatchAny:
+		return []byte(s), nil
+	case SearchPagesTagsMatchAll:
+		return []byte(s), nil
+	case SearchPagesTagsMatchAnyStrict:
+		return []byte(s), nil
+	case SearchPagesTagsMatchAllStrict:
+		return []byte(s), nil
+	case SearchPagesTagsMatchExact:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *SearchPagesTagsMatch) UnmarshalText(data []byte) error {
+	switch SearchPagesTagsMatch(data) {
+	case SearchPagesTagsMatchAny:
+		*s = SearchPagesTagsMatchAny
+		return nil
+	case SearchPagesTagsMatchAll:
+		*s = SearchPagesTagsMatchAll
+		return nil
+	case SearchPagesTagsMatchAnyStrict:
+		*s = SearchPagesTagsMatchAnyStrict
+		return nil
+	case SearchPagesTagsMatchAllStrict:
+		*s = SearchPagesTagsMatchAllStrict
+		return nil
+	case SearchPagesTagsMatchExact:
+		*s = SearchPagesTagsMatchExact
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
@@ -21796,8 +22712,14 @@ func (s *UpdateDispositionRequest) SetDisposition(val DispositionTraits) {
 type UpdateDocumentRequest struct {
 	// The complete new set of tags for the document and its memory units — this REPLACES the existing
 	// tags rather than adding to them, so omitting a tag drops it and `[]` clears them all. Triggers
-	// observation invalidation and re-consolidation.
+	// observation invalidation and re-consolidation. To change only some tags, use `add_tags` /
+	// `remove_tags` instead.
 	Tags []string `json:"tags"`
+	// Tags to add to the document, keeping the ones it has. Cannot be combined with `tags`.
+	AddTags []string `json:"add_tags"`
+	// Tags to remove from the document, keeping the rest (applied before `add_tags`). Cannot be combined
+	// with `tags`. Tags a memory carries from an entity label group with `tag: true` stay on that memory.
+	RemoveTags []string `json:"remove_tags"`
 }
 
 // GetTags returns the value of Tags.
@@ -21805,9 +22727,29 @@ func (s *UpdateDocumentRequest) GetTags() []string {
 	return s.Tags
 }
 
+// GetAddTags returns the value of AddTags.
+func (s *UpdateDocumentRequest) GetAddTags() []string {
+	return s.AddTags
+}
+
+// GetRemoveTags returns the value of RemoveTags.
+func (s *UpdateDocumentRequest) GetRemoveTags() []string {
+	return s.RemoveTags
+}
+
 // SetTags sets the value of Tags.
 func (s *UpdateDocumentRequest) SetTags(val []string) {
 	s.Tags = val
+}
+
+// SetAddTags sets the value of AddTags.
+func (s *UpdateDocumentRequest) SetAddTags(val []string) {
+	s.AddTags = val
+}
+
+// SetRemoveTags sets the value of RemoveTags.
+func (s *UpdateDocumentRequest) SetRemoveTags(val []string) {
+	s.RemoveTags = val
 }
 
 // Response model for update document endpoint.

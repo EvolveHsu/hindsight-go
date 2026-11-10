@@ -17,6 +17,7 @@ var (
 	envDSN  string
 	envErr  error
 	envStop func()
+	envTemp string
 )
 
 func startEmbedded(t *testing.T) string {
@@ -29,7 +30,12 @@ func startEmbedded(t *testing.T) string {
 			envErr = fmt.Errorf("find free port: %w", err)
 			return
 		}
-		dataDir := filepath.Join(`C:\`, "hindsight-go-pgtest", fmt.Sprintf("run-%d", os.Getpid()))
+		dataDir, err := os.MkdirTemp("", "hindsight-go-pgtest-")
+		if err != nil {
+			envErr = fmt.Errorf("create embedded postgres temp dir: %w", err)
+			return
+		}
+		envTemp = dataDir
 		pg := embeddedpostgres.NewDatabase(
 			embeddedpostgres.DefaultConfig().
 				Version(embeddedpostgres.V16).
@@ -75,6 +81,9 @@ func TestMain(m *testing.M) {
 	code := m.Run()
 	if envStop != nil {
 		envStop()
+	}
+	if envTemp != "" {
+		_ = os.RemoveAll(envTemp)
 	}
 	os.Exit(code)
 }

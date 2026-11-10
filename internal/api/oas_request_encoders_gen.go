@@ -113,6 +113,34 @@ func encodeCreateOrUpdateBankRequest(
 	return nil
 }
 
+func encodeCreatePageRequest(
+	req *CreatePageRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeCreatePageFolderRequest(
+	req *CreateFolderRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeCreateWebhookRequest(
 	req *CreateWebhookRequest,
 	r *http.Request,
@@ -462,6 +490,20 @@ func encodeUpdateMemoryRequest(
 
 func encodeUpdateMentalModelRequest(
 	req *UpdateMentalModelRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeUpdatePageNodeRequest(
+	req *UpdateNodeRequest,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
