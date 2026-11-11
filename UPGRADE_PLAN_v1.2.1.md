@@ -54,3 +54,8 @@ OCR/Office/audio parsing, or the full graph-maintenance implementation.
 NAS backup before deployment:
 
 `/vol1/1000/docker/hindsight-go-backup-v1.2.1-20261110`
+
+On 2026-11-11, after explicit user approval, the old Hindsight containers,
+obsolete tagged images, and Hindsight-specific build-cache records were
+removed. The backup and the current v1.2.1 images were retained. Shared build
+cache owned by other applications was not pruned.

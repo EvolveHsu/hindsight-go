@@ -51,10 +51,11 @@ content = (
     "109/109覆盖、Linux amd64静态构建、NAS候选及生产Pages/MCP验证。"
     "更新前备份 /vol1/1000/docker/hindsight-go-backup-v1.2.1-20261110，"
     "含项目归档、PostgreSQL dump、data-files归档、容器快照和SHA256SUMS；"
-    "回滚容器 hindsight-go-rollback-v121-20261110（1.2.0），新源码目录 "
+    "2026-11-11用户确认后已清理旧容器、旧镜像及Hindsight专属构建缓存，备份保留。"
+    "新源码目录 "
     "/vol1/1000/docker/hindsight-go/source-v1.2.1-20261110。"
     "既有数据库签名未变化。Compose更新时曾连带重建Go容器，已用部署快照恢复，"
-    "最终配置按原始环境、挂载和网络核对一致。未清理旧镜像或构建缓存，清理需另行确认。"
+    "最终配置按原始环境、挂载和网络核对一致。共享构建缓存中的其他应用记录未删除。"
     "仍为Go Lite实现，不宣称与官方Python worker、decision-model和扩展栈完全等价。"
 )
 
