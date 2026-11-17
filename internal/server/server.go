@@ -23,7 +23,7 @@ import (
 )
 
 // Version is the semantic version of this Go implementation.
-const Version = "0.1.4"
+const Version = "0.1.5"
 
 // UpstreamAPIVersion mirrors the upstream OpenAPI info.version the generated
 // types were frozen from.

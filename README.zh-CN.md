@@ -164,11 +164,15 @@ deprecated 别名提供，预计到上游 2.x 才移除。
 |---|---|
 | `HINDSIGHT_GO_RETAIN_MAX_TOKENS` | 初始输出预算（含推理 token），默认 8192。 |
 | `HINDSIGHT_GO_RETAIN_MAX_TOKENS_LIMIT` | 扩容上限，默认 32768，最多 131072，不能小于初始预算。 |
+| `HINDSIGHT_GO_LLM_CONTEXT_TOKENS` | 大模型上下文窗口，用于切分超长 retain 输入；默认及 NAS 配置为 1000000。 |
 
 截断时翻倍预算重试，最多调用模型 3 次，且不超过上限；不保存部分事实。
 非法配置启动失败。只接受完整 JSON 数组（可整体包在代码块中），其他格式错误不盲目重试。
 日志只含次数、预算、结束原因类别及用量，不记录记忆原文或模型响应。
 这些设置不改变 reflect 或 consolidation。
+
+`strategy` 为 `exact`、`verbatim` 或 `chunks` 的 retain 请求会绕过 LLM
+抽取器，按原文直接写入。
 
 ### Embeddings
 

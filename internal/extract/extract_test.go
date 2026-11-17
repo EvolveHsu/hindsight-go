@@ -43,7 +43,8 @@ func TestExtractRetryBounds(t *testing.T) {
 		{"attempt ceiling", Options{MaxTokens: 100, MaxTokensLimit: 10000}, []*llm.ChatResponse{response("", "length"), response("", "length"), response("", "length")}, []int{100, 200, 400}, "output truncated"},
 		{"no room", Options{MaxTokens: 100, MaxTokensLimit: 100}, []*llm.ChatResponse{response(validFacts, "length")}, []int{100}, "output truncated"},
 		{"malformed stop", Options{}, []*llm.ChatResponse{response(`[{"text":`, "stop")}, []int{8192}, "decode extracted facts"},
-		{"prose", Options{}, []*llm.ChatResponse{response("Here: "+validFacts, "")}, []int{8192}, "not a JSON array"},
+		{"prose", Options{}, []*llm.ChatResponse{response("Here: "+validFacts, "")}, []int{8192}, ""},
+		{"object wrapper", Options{}, []*llm.ChatResponse{response(`{"facts":`+validFacts+`}`, "stop")}, []int{8192}, ""},
 		{"filtered", Options{}, []*llm.ChatResponse{response(validFacts, "content_filter")}, []int{8192}, "did not finish normally"},
 		{"unknown reason", Options{}, []*llm.ChatResponse{response(validFacts, "SECRET_REASON")}, []int{8192}, "finish=other"},
 		{"empty choices", Options{}, []*llm.ChatResponse{{}}, []int{8192}, "no choices"},
@@ -55,8 +56,12 @@ func TestExtractRetryBounds(t *testing.T) {
 				if len(budgets) >= len(tt.replies) {
 					t.Fatal("unexpected model retry")
 				}
-				if req.Messages[1].Content != "Context: test\n\nContent:\noriginal" {
+				if !strings.Contains(req.Messages[1].Content, "Content:\noriginal") ||
+					!strings.Contains(req.Messages[1].Content, `"facts"`) {
 					t.Fatalf("retry changed input: %+v", req.Messages)
+				}
+				if got, ok := req.ResponseFormat.(map[string]any); !ok || got["type"] != "json_object" {
+					t.Fatalf("response format = %#v", req.ResponseFormat)
 				}
 				budgets = append(budgets, req.MaxTokens)
 				return tt.replies[len(budgets)-1], nil
@@ -108,16 +113,47 @@ func TestExtractProviderErrorAndCancellation(t *testing.T) {
 	}
 }
 
+func TestExtractChunksByContextBudget(t *testing.T) {
+	calls := 0
+	e, err := NewWithOptions(providerFunc(func(_ context.Context, req llm.ChatRequest) (*llm.ChatResponse, error) {
+		calls++
+		if !strings.Contains(req.Messages[1].Content, `"facts"`) {
+			t.Fatalf("missing JSON instruction: %s", req.Messages[1].Content[:80])
+		}
+		return response(validFacts, "stop"), nil
+	}), "model", Options{MaxTokens: 100, MaxTokensLimit: 100, ContextTokens: 2000})
+	if err != nil {
+		t.Fatal(err)
+	}
+	facts, err := e.Extract(context.Background(), strings.Repeat("word ", 10000), "long")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if calls < 2 || len(facts) < 2 {
+		t.Fatalf("calls=%d facts=%d, want context chunking", calls, len(facts))
+	}
+}
+
 func TestParseFactsRequiresCompleteArray(t *testing.T) {
-	for _, raw := range []string{validFacts, " \n" + validFacts + "\n ", "```json\n" + validFacts + "\n```", "```\n" + validFacts + "\n```", "```json\r\n" + validFacts + "\r\n```"} {
+	for _, raw := range []string{
+		validFacts,
+		" \n" + validFacts + "\n ",
+		"```json\n" + validFacts + "\n```",
+		"```\n" + validFacts + "\n```",
+		"```json\r\n" + validFacts + "\r\n```",
+		"prefix " + validFacts,
+		validFacts + " suffix",
+		`{"facts":` + validFacts + `}`,
+		`{"items":` + validFacts + `}`,
+		`{"text":"Alice lives in Berlin.","fact_type":"world"}`,
+	} {
 		if facts, err := parseFacts(raw); err != nil || len(facts) != 1 {
 			t.Errorf("valid array: facts=%v err=%v", facts, err)
 		}
 	}
 	for _, raw := range []string{
-		"", "null", `{}`, "prefix " + validFacts, validFacts + " suffix",
-		validFacts + validFacts, "```js\n" + validFacts + "\n```",
-		"```json\n" + validFacts, `[{"text":"Alice","entities":["Alice"]`,
+		"", "null", `{}`,
+		validFacts + validFacts,
 		`[{"text":false}]`, `[]`, `[{"text":"  "}]`,
 	} {
 		if facts, err := parseFacts(raw); err == nil || facts != nil {

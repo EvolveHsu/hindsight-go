@@ -14,6 +14,10 @@ Target Go contract: `1.2.1`, 109 operations.
 
 Go service version: `0.1.4`.
 
+2026-11-17 hotfix: `0.1.5` fixes the retain extractor response parser,
+adds `exact`/`verbatim`/`chunks` bypass, and configures the model context
+window to `1000000` tokens. See `RELEASE_NOTES_v0.1.5.md`.
+
 ## API
 
 - Added the eight canonical `/pages/...` operations.

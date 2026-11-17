@@ -144,6 +144,7 @@ func (e *Engine) RetainMemories(ctx context.Context, req *api.RetainRequest, par
 			DocumentID: it.DocumentID.Value,
 			Context:    it.Context.Value,
 			Tags:       it.Tags,
+			Strategy:   strings.ToLower(strings.TrimSpace(it.Strategy.Value)),
 			FactType:   model.FactExperience, // lite default for conversation content
 		}
 		if it.Timestamp.Set {
@@ -156,6 +157,10 @@ func (e *Engine) RetainMemories(ctx context.Context, req *api.RetainRequest, par
 		extracted := make([]model.RetainItem, 0, len(items))
 		for _, ri := range items {
 			// Explicit verbatim strategies opt out of the extractor, matching upstream's strategy seam.
+			if isVerbatimStrategy(ri.Strategy) {
+				extracted = append(extracted, ri)
+				continue
+			}
 			facts, xerr := e.extractor.Extract(ctx, ri.Content, ri.Context)
 			if xerr != nil {
 				return nil, internal(fmt.Errorf("retain extraction failed: %w", xerr))
@@ -211,6 +216,15 @@ func (e *Engine) RetainMemories(ctx context.Context, req *api.RetainRequest, par
 		ItemsCount: res.ItemsCount,
 		Async:      false,
 	}, nil
+}
+
+func isVerbatimStrategy(strategy string) bool {
+	switch strategy {
+	case "exact", "verbatim", "chunks":
+		return true
+	default:
+		return false
+	}
 }
 
 // RecallMemories implements recall_memories (POST /banks/{bank_id}/memories/recall).

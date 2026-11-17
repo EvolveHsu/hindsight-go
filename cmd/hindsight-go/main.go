@@ -109,7 +109,8 @@ func main() {
 		engine.SetExtractor(extractor)
 		engine.SetConsolidationProvider(client)
 		log.Printf("LLM provider: %s (model %q)", base, os.Getenv("HINDSIGHT_GO_LLM_MODEL"))
-		log.Printf("retain extraction: initial_tokens=%d limit_tokens=%d", extractOptions.MaxTokens, extractOptions.MaxTokensLimit)
+		log.Printf("retain extraction: initial_tokens=%d limit_tokens=%d context_tokens=%d",
+			extractOptions.MaxTokens, extractOptions.MaxTokensLimit, extractOptions.ContextTokens)
 	}
 
 	httpHandler, err := server.AsHTTPHandler(engine)

@@ -165,6 +165,7 @@ upstream 2.x cleanup.
 |---|---|
 | `HINDSIGHT_GO_RETAIN_MAX_TOKENS` | Initial output budget, including reasoning tokens. Default: 8192. |
 | `HINDSIGHT_GO_RETAIN_MAX_TOKENS_LIMIT` | Expansion ceiling. Default: 32768; maximum: 131072. Must be at least the initial budget. |
+| `HINDSIGHT_GO_LLM_CONTEXT_TOKENS` | Model context window used to chunk oversized retain input. Default and NAS value: 1000000. |
 
 Truncated extractions retry with a doubled budget, up to the ceiling and at
 most three model calls. Partial facts are never stored. Invalid configuration
@@ -172,6 +173,9 @@ fails startup. Complete JSON arrays (optionally fenced) are required; malformed
 non-truncated responses are not retried. Logs contain only attempt counts,
 budgets, finish categories and usage, never memory or model response text.
 These settings do not change reflect or consolidation.
+
+Retain requests with `strategy` set to `exact`, `verbatim`, or `chunks` bypass
+the LLM extractor and store the supplied content verbatim.
 
 ### Embeddings
 

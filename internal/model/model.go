@@ -109,6 +109,7 @@ type RetainItem struct {
 	Context       string
 	MentionedAt   string
 	FactType      FactType
+	Strategy      string
 	SourceContent string
 	OccurredStart string
 	OccurredEnd   string
