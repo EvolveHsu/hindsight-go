@@ -63,6 +63,7 @@ const (
 	GetMentalModelOperation                 OperationName = "GetMentalModel"
 	GetMentalModelHistoryOperation          OperationName = "GetMentalModelHistory"
 	GetObservationHistoryOperation          OperationName = "GetObservationHistory"
+	GetObservationTreeOperation             OperationName = "GetObservationTree"
 	GetOperationStatusOperation             OperationName = "GetOperationStatus"
 	GetPageOperation                        OperationName = "GetPage"
 	GetPageTreeOperation                    OperationName = "GetPageTree"

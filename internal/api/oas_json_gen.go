@@ -3712,9 +3712,35 @@ func (s *BankTemplateConfig) encodeFields(e *jx.Encoder) {
 			s.PageDefaultTrigger.Encode(e)
 		}
 	}
+	{
+		if s.KnowledgeBanks != nil {
+			e.FieldStart("knowledge_banks")
+			e.ArrStart()
+			for _, elem := range s.KnowledgeBanks {
+				e.Str(elem)
+			}
+			e.ArrEnd()
+		}
+	}
+	{
+		if s.ReflectKBSearchApplyTags.Set {
+			e.FieldStart("reflect_kb_search_apply_tags")
+			s.ReflectKBSearchApplyTags.Encode(e)
+		}
+	}
+	{
+		if s.ReflectKBSearchMediaTypes != nil {
+			e.FieldStart("reflect_kb_search_media_types")
+			e.ArrStart()
+			for _, elem := range s.ReflectKBSearchMediaTypes {
+				elem.Encode(e)
+			}
+			e.ArrEnd()
+		}
+	}
 }
 
-var jsonFieldsNameOfBankTemplateConfig = [52]string{
+var jsonFieldsNameOfBankTemplateConfig = [55]string{
 	0:  "reflect_mission",
 	1:  "retain_mission",
 	2:  "retain_extraction_mode",
@@ -3767,6 +3793,9 @@ var jsonFieldsNameOfBankTemplateConfig = [52]string{
 	49: "recall_chunks_max_tokens",
 	50: "memory_defense",
 	51: "page_default_trigger",
+	52: "knowledge_banks",
+	53: "reflect_kb_search_apply_tags",
+	54: "reflect_kb_search_media_types",
 }
 
 // Decode decodes BankTemplateConfig from json.
@@ -4336,6 +4365,52 @@ func (s *BankTemplateConfig) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"page_default_trigger\"")
 			}
+		case "knowledge_banks":
+			if err := func() error {
+				s.KnowledgeBanks = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.KnowledgeBanks = append(s.KnowledgeBanks, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"knowledge_banks\"")
+			}
+		case "reflect_kb_search_apply_tags":
+			if err := func() error {
+				s.ReflectKBSearchApplyTags.Reset()
+				if err := s.ReflectKBSearchApplyTags.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"reflect_kb_search_apply_tags\"")
+			}
+		case "reflect_kb_search_media_types":
+			if err := func() error {
+				s.ReflectKBSearchMediaTypes = make([]BankTemplateConfigReflectKBSearchMediaTypesItem, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem BankTemplateConfigReflectKBSearchMediaTypesItem
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.ReflectKBSearchMediaTypes = append(s.ReflectKBSearchMediaTypes, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"reflect_kb_search_media_types\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -4646,6 +4721,52 @@ func (s BankTemplateConfigReflectDefaultOptions) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *BankTemplateConfigReflectDefaultOptions) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes BankTemplateConfigReflectKBSearchMediaTypesItem as json.
+func (s BankTemplateConfigReflectKBSearchMediaTypesItem) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes BankTemplateConfigReflectKBSearchMediaTypesItem from json.
+func (s *BankTemplateConfigReflectKBSearchMediaTypesItem) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode BankTemplateConfigReflectKBSearchMediaTypesItem to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch BankTemplateConfigReflectKBSearchMediaTypesItem(v) {
+	case BankTemplateConfigReflectKBSearchMediaTypesItemDocument:
+		*s = BankTemplateConfigReflectKBSearchMediaTypesItemDocument
+	case BankTemplateConfigReflectKBSearchMediaTypesItemImage:
+		*s = BankTemplateConfigReflectKBSearchMediaTypesItemImage
+	case BankTemplateConfigReflectKBSearchMediaTypesItemAudio:
+		*s = BankTemplateConfigReflectKBSearchMediaTypesItemAudio
+	case BankTemplateConfigReflectKBSearchMediaTypesItemVideo:
+		*s = BankTemplateConfigReflectKBSearchMediaTypesItemVideo
+	case BankTemplateConfigReflectKBSearchMediaTypesItemText:
+		*s = BankTemplateConfigReflectKBSearchMediaTypesItemText
+	default:
+		*s = BankTemplateConfigReflectKBSearchMediaTypesItem(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s BankTemplateConfigReflectKBSearchMediaTypesItem) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *BankTemplateConfigReflectKBSearchMediaTypesItem) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -15234,9 +15355,15 @@ func (s *FeaturesInfo) encodeFields(e *jx.Encoder) {
 		e.FieldStart("store_document_text")
 		e.Bool(s.StoreDocumentText)
 	}
+	{
+		if s.KnowledgeBanks.Set {
+			e.FieldStart("knowledge_banks")
+			s.KnowledgeBanks.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfFeaturesInfo = [11]string{
+var jsonFieldsNameOfFeaturesInfo = [12]string{
 	0:  "observations",
 	1:  "mcp",
 	2:  "worker",
@@ -15248,6 +15375,7 @@ var jsonFieldsNameOfFeaturesInfo = [11]string{
 	8:  "audit_log",
 	9:  "llm_trace",
 	10: "store_document_text",
+	11: "knowledge_banks",
 }
 
 // Decode decodes FeaturesInfo from json.
@@ -15256,6 +15384,7 @@ func (s *FeaturesInfo) Decode(d *jx.Decoder) error {
 		return errors.New("invalid: unable to decode FeaturesInfo to nil")
 	}
 	var requiredBitSet [2]uint8
+	s.setDefaults()
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -15390,6 +15519,16 @@ func (s *FeaturesInfo) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"store_document_text\"")
+			}
+		case "knowledge_banks":
+			if err := func() error {
+				s.KnowledgeBanks.Reset()
+				if err := s.KnowledgeBanks.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"knowledge_banks\"")
 			}
 		default:
 			return d.Skip()
@@ -17542,11 +17681,18 @@ func (s *LLMCallTrace) encodeFields(e *jx.Encoder) {
 		e.FieldStart("duration_ms")
 		e.Int(s.DurationMs)
 	}
+	{
+		if s.StartedAtMs.Set {
+			e.FieldStart("started_at_ms")
+			s.StartedAtMs.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfLLMCallTrace = [2]string{
+var jsonFieldsNameOfLLMCallTrace = [3]string{
 	0: "scope",
 	1: "duration_ms",
+	2: "started_at_ms",
 }
 
 // Decode decodes LLMCallTrace from json.
@@ -17555,6 +17701,7 @@ func (s *LLMCallTrace) Decode(d *jx.Decoder) error {
 		return errors.New("invalid: unable to decode LLMCallTrace to nil")
 	}
 	var requiredBitSet [1]uint8
+	s.setDefaults()
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -17581,6 +17728,16 @@ func (s *LLMCallTrace) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"duration_ms\"")
+			}
+		case "started_at_ms":
+			if err := func() error {
+				s.StartedAtMs.Reset()
+				if err := s.StartedAtMs.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"started_at_ms\"")
 			}
 		default:
 			return d.Skip()
@@ -26357,9 +26514,15 @@ func (s *MentalModelTraceToolCall) encodeFields(e *jx.Encoder) {
 			s.Iteration.Encode(e)
 		}
 	}
+	{
+		if s.StartedAtMs.Set {
+			e.FieldStart("started_at_ms")
+			s.StartedAtMs.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfMentalModelTraceToolCall = [8]string{
+var jsonFieldsNameOfMentalModelTraceToolCall = [9]string{
 	0: "tool",
 	1: "reason",
 	2: "input",
@@ -26368,6 +26531,7 @@ var jsonFieldsNameOfMentalModelTraceToolCall = [8]string{
 	5: "result_count",
 	6: "duration_ms",
 	7: "iteration",
+	8: "started_at_ms",
 }
 
 // Decode decodes MentalModelTraceToolCall from json.
@@ -26375,7 +26539,7 @@ func (s *MentalModelTraceToolCall) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode MentalModelTraceToolCall to nil")
 	}
-	var requiredBitSet [1]uint8
+	var requiredBitSet [2]uint8
 	s.setDefaults()
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
@@ -26464,6 +26628,16 @@ func (s *MentalModelTraceToolCall) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"iteration\"")
 			}
+		case "started_at_ms":
+			if err := func() error {
+				s.StartedAtMs.Reset()
+				if err := s.StartedAtMs.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"started_at_ms\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -26473,8 +26647,9 @@ func (s *MentalModelTraceToolCall) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
+	for i, mask := range [2]uint8{
 		0b01000001,
+		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -28352,6 +28527,739 @@ func (s *ObservationScopesResponse) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *ObservationScopesResponse) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *ObservationTreeFile) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *ObservationTreeFile) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("path")
+		e.Str(s.Path)
+	}
+	{
+		e.FieldStart("name")
+		e.Str(s.Name)
+	}
+	{
+		e.FieldStart("kind")
+		s.Kind.Encode(e)
+	}
+	{
+		e.FieldStart("title")
+		e.Str(s.Title)
+	}
+	{
+		e.FieldStart("observation_count")
+		e.Int(s.ObservationCount)
+	}
+	{
+		e.FieldStart("about")
+		e.ArrStart()
+		for _, elem := range s.About {
+			e.Str(elem)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("related")
+		e.ArrStart()
+		for _, elem := range s.Related {
+			e.Str(elem)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("observations")
+		e.ArrStart()
+		for _, elem := range s.Observations {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("content")
+		e.Str(s.Content)
+	}
+}
+
+var jsonFieldsNameOfObservationTreeFile = [9]string{
+	0: "path",
+	1: "name",
+	2: "kind",
+	3: "title",
+	4: "observation_count",
+	5: "about",
+	6: "related",
+	7: "observations",
+	8: "content",
+}
+
+// Decode decodes ObservationTreeFile from json.
+func (s *ObservationTreeFile) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ObservationTreeFile to nil")
+	}
+	var requiredBitSet [2]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "path":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Path = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"path\"")
+			}
+		case "name":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.Name = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "kind":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				if err := s.Kind.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"kind\"")
+			}
+		case "title":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Str()
+				s.Title = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"title\"")
+			}
+		case "observation_count":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				v, err := d.Int()
+				s.ObservationCount = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"observation_count\"")
+			}
+		case "about":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				s.About = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.About = append(s.About, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"about\"")
+			}
+		case "related":
+			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				s.Related = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.Related = append(s.Related, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"related\"")
+			}
+		case "observations":
+			requiredBitSet[0] |= 1 << 7
+			if err := func() error {
+				s.Observations = make([]ObservationTreeObservation, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem ObservationTreeObservation
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Observations = append(s.Observations, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"observations\"")
+			}
+		case "content":
+			requiredBitSet[1] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Content = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"content\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode ObservationTreeFile")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [2]uint8{
+		0b11111111,
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfObservationTreeFile) {
+					name = jsonFieldsNameOfObservationTreeFile[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *ObservationTreeFile) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ObservationTreeFile) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes ObservationTreeFileKind as json.
+func (s ObservationTreeFileKind) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes ObservationTreeFileKind from json.
+func (s *ObservationTreeFileKind) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ObservationTreeFileKind to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch ObservationTreeFileKind(v) {
+	case ObservationTreeFileKindIndex:
+		*s = ObservationTreeFileKindIndex
+	case ObservationTreeFileKindTopic:
+		*s = ObservationTreeFileKindTopic
+	default:
+		*s = ObservationTreeFileKind(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s ObservationTreeFileKind) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ObservationTreeFileKind) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *ObservationTreeFolder) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *ObservationTreeFolder) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("path")
+		e.Str(s.Path)
+	}
+	{
+		e.FieldStart("name")
+		e.Str(s.Name)
+	}
+	{
+		e.FieldStart("title")
+		e.Str(s.Title)
+	}
+	{
+		e.FieldStart("observation_count")
+		e.Int(s.ObservationCount)
+	}
+	{
+		e.FieldStart("folders")
+		e.ArrStart()
+		for _, elem := range s.Folders {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("files")
+		e.ArrStart()
+		for _, elem := range s.Files {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+}
+
+var jsonFieldsNameOfObservationTreeFolder = [6]string{
+	0: "path",
+	1: "name",
+	2: "title",
+	3: "observation_count",
+	4: "folders",
+	5: "files",
+}
+
+// Decode decodes ObservationTreeFolder from json.
+func (s *ObservationTreeFolder) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ObservationTreeFolder to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "path":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Path = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"path\"")
+			}
+		case "name":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.Name = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "title":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Str()
+				s.Title = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"title\"")
+			}
+		case "observation_count":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Int()
+				s.ObservationCount = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"observation_count\"")
+			}
+		case "folders":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				s.Folders = make([]ObservationTreeFolder, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem ObservationTreeFolder
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Folders = append(s.Folders, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"folders\"")
+			}
+		case "files":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				s.Files = make([]ObservationTreeFile, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem ObservationTreeFile
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Files = append(s.Files, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"files\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode ObservationTreeFolder")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00111111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfObservationTreeFolder) {
+					name = jsonFieldsNameOfObservationTreeFolder[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *ObservationTreeFolder) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ObservationTreeFolder) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *ObservationTreeObservation) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *ObservationTreeObservation) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("id")
+		e.Str(s.ID)
+	}
+	{
+		e.FieldStart("text")
+		e.Str(s.Text)
+	}
+	{
+		e.FieldStart("proof_count")
+		e.Int(s.ProofCount)
+	}
+	{
+		if s.OccurredStart.Set {
+			e.FieldStart("occurred_start")
+			s.OccurredStart.Encode(e, json.EncodeDateTime)
+		}
+	}
+	{
+		if s.OccurredEnd.Set {
+			e.FieldStart("occurred_end")
+			s.OccurredEnd.Encode(e, json.EncodeDateTime)
+		}
+	}
+	{
+		if s.MentionedAt.Set {
+			e.FieldStart("mentioned_at")
+			s.MentionedAt.Encode(e, json.EncodeDateTime)
+		}
+	}
+	{
+		if s.UpdatedAt.Set {
+			e.FieldStart("updated_at")
+			s.UpdatedAt.Encode(e, json.EncodeDateTime)
+		}
+	}
+	{
+		e.FieldStart("tags")
+		e.ArrStart()
+		for _, elem := range s.Tags {
+			e.Str(elem)
+		}
+		e.ArrEnd()
+	}
+}
+
+var jsonFieldsNameOfObservationTreeObservation = [8]string{
+	0: "id",
+	1: "text",
+	2: "proof_count",
+	3: "occurred_start",
+	4: "occurred_end",
+	5: "mentioned_at",
+	6: "updated_at",
+	7: "tags",
+}
+
+// Decode decodes ObservationTreeObservation from json.
+func (s *ObservationTreeObservation) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ObservationTreeObservation to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "id":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.ID = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"id\"")
+			}
+		case "text":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.Text = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"text\"")
+			}
+		case "proof_count":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Int()
+				s.ProofCount = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"proof_count\"")
+			}
+		case "occurred_start":
+			if err := func() error {
+				s.OccurredStart.Reset()
+				if err := s.OccurredStart.Decode(d, json.DecodeDateTime); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"occurred_start\"")
+			}
+		case "occurred_end":
+			if err := func() error {
+				s.OccurredEnd.Reset()
+				if err := s.OccurredEnd.Decode(d, json.DecodeDateTime); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"occurred_end\"")
+			}
+		case "mentioned_at":
+			if err := func() error {
+				s.MentionedAt.Reset()
+				if err := s.MentionedAt.Decode(d, json.DecodeDateTime); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"mentioned_at\"")
+			}
+		case "updated_at":
+			if err := func() error {
+				s.UpdatedAt.Reset()
+				if err := s.UpdatedAt.Decode(d, json.DecodeDateTime); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"updated_at\"")
+			}
+		case "tags":
+			requiredBitSet[0] |= 1 << 7
+			if err := func() error {
+				s.Tags = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.Tags = append(s.Tags, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"tags\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode ObservationTreeObservation")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b10000111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfObservationTreeObservation) {
+					name = jsonFieldsNameOfObservationTreeObservation[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *ObservationTreeObservation) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ObservationTreeObservation) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -30454,6 +31362,41 @@ func (s OptInt) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptInt) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes int64 as json.
+func (o OptInt64) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.Int64(int64(o.Value))
+}
+
+// Decode decodes int64 from json.
+func (o *OptInt64) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptInt64 to nil")
+	}
+	o.Set = true
+	v, err := d.Int64()
+	if err != nil {
+		return err
+	}
+	o.Value = int64(v)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptInt64) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptInt64) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -37006,11 +37949,18 @@ func (s *ReflectLLMCall) encodeFields(e *jx.Encoder) {
 		e.FieldStart("duration_ms")
 		e.Int(s.DurationMs)
 	}
+	{
+		if s.StartedAtMs.Set {
+			e.FieldStart("started_at_ms")
+			s.StartedAtMs.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfReflectLLMCall = [2]string{
+var jsonFieldsNameOfReflectLLMCall = [3]string{
 	0: "scope",
 	1: "duration_ms",
+	2: "started_at_ms",
 }
 
 // Decode decodes ReflectLLMCall from json.
@@ -37019,6 +37969,7 @@ func (s *ReflectLLMCall) Decode(d *jx.Decoder) error {
 		return errors.New("invalid: unable to decode ReflectLLMCall to nil")
 	}
 	var requiredBitSet [1]uint8
+	s.setDefaults()
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -37045,6 +37996,16 @@ func (s *ReflectLLMCall) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"duration_ms\"")
+			}
+		case "started_at_ms":
+			if err := func() error {
+				s.StartedAtMs.Reset()
+				if err := s.StartedAtMs.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"started_at_ms\"")
 			}
 		default:
 			return d.Skip()
@@ -38092,14 +39053,21 @@ func (s *ReflectToolCall) encodeFields(e *jx.Encoder) {
 			s.Iteration.Encode(e)
 		}
 	}
+	{
+		if s.StartedAtMs.Set {
+			e.FieldStart("started_at_ms")
+			s.StartedAtMs.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfReflectToolCall = [5]string{
+var jsonFieldsNameOfReflectToolCall = [6]string{
 	0: "tool",
 	1: "input",
 	2: "output",
 	3: "duration_ms",
 	4: "iteration",
+	5: "started_at_ms",
 }
 
 // Decode decodes ReflectToolCall from json.
@@ -38165,6 +39133,16 @@ func (s *ReflectToolCall) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"iteration\"")
+			}
+		case "started_at_ms":
+			if err := func() error {
+				s.StartedAtMs.Reset()
+				if err := s.StartedAtMs.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"started_at_ms\"")
 			}
 		default:
 			return d.Skip()

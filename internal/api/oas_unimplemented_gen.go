@@ -706,6 +706,20 @@ func (UnimplementedHandler) GetObservationHistory(ctx context.Context, params Ge
 	return r, ht.ErrNotImplemented
 }
 
+// GetObservationTree implements get_observation_tree operation.
+//
+// The bank's observations, everything it has learned, as a bundle of markdown files an agent can list,
+// read and grep like any folder, or that can be exported and mounted. Observations are grouped by the
+// entities they are about into a bounded tree of topics: each topic is one file listing every
+// observation in it, and each folder has an `index.md` with its topics and best-supported
+// observations. The bundle follows the Open Knowledge Format (https://okf.md/spec/). Built on request,
+// deterministically, so a file keeps its path as the bank changes. Experimental.
+//
+// GET /v1/default/banks/{bank_id}/observations/tree
+func (UnimplementedHandler) GetObservationTree(ctx context.Context, params GetObservationTreeParams) (r GetObservationTreeRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetOperationStatus implements get_operation_status operation.
 //
 // Get the status of a specific async operation. Returns 'pending', 'processing', 'completed',

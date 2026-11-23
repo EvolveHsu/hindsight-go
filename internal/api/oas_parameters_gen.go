@@ -7100,6 +7100,253 @@ func decodeGetObservationHistoryParams(args [2]string, argsEscaped bool, r *http
 	return params, nil
 }
 
+// GetObservationTreeParams is parameters of get_observation_tree operation.
+type GetObservationTreeParams struct {
+	BankID string
+	// Only group observations carrying these tags (the scope), as in recall.
+	Tags []string `json:",omitempty"`
+	// How `tags` match (same modes as recall).
+	TagsMatch OptGetObservationTreeTagsMatch `json:",omitempty,omitzero"`
+	// Compound tag filter as a JSON-encoded list of tag groups — the same shape `tag_groups` takes in a
+	// recall body (leaves {tags, match, resolve} and {and: [...]}, {or: [...]}, {not: ...}; groups are
+	// AND-ed). Mutually exclusive with `tags`.
+	TagGroups OptString `json:",omitempty,omitzero"`
+}
+
+func unpackGetObservationTreeParams(packed middleware.Parameters) (params GetObservationTreeParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "bank_id",
+			In:   "path",
+		}
+		params.BankID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "tags",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Tags = v.([]string)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "tags_match",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.TagsMatch = v.(OptGetObservationTreeTagsMatch)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "tag_groups",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.TagGroups = v.(OptString)
+		}
+	}
+	return params
+}
+
+func decodeGetObservationTreeParams(args [1]string, argsEscaped bool, r *http.Request) (params GetObservationTreeParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode path: bank_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "bank_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.BankID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "bank_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode query: tags.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "tags",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				params.Tags = nil
+				return d.DecodeArray(func(d uri.Decoder) error {
+					var paramsDotTagsVal string
+					if err := func() error {
+						val, err := d.DecodeValue()
+						if err != nil {
+							return err
+						}
+
+						c, err := conv.ToString(val)
+						if err != nil {
+							return err
+						}
+
+						paramsDotTagsVal = c
+						return nil
+					}(); err != nil {
+						return err
+					}
+					params.Tags = append(params.Tags, paramsDotTagsVal)
+					return nil
+				})
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "tags",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: tags_match.
+	{
+		val := GetObservationTreeTagsMatch("any")
+		params.TagsMatch.SetTo(val)
+	}
+	// Decode query: tags_match.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "tags_match",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotTagsMatchVal GetObservationTreeTagsMatch
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotTagsMatchVal = GetObservationTreeTagsMatch(c)
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.TagsMatch.SetTo(paramsDotTagsMatchVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.TagsMatch.Get(); ok {
+					if err := func() error {
+						if err := value.Validate(); err != nil {
+							return err
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "tags_match",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: tag_groups.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "tag_groups",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotTagGroupsVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotTagGroupsVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.TagGroups.SetTo(paramsDotTagGroupsVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "tag_groups",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // GetOperationStatusParams is parameters of get_operation_status operation.
 type GetOperationStatusParams struct {
 	BankID      string

@@ -1302,6 +1302,12 @@ type BankTemplateConfig struct {
 	// Trigger fields merged over the built-in page default when a page is created (e.g. {"refresh_cron":
 	// "0 * * * *"}). A trigger sent with the create request still wins.
 	PageDefaultTrigger OptBankTemplateConfigPageDefaultTrigger `json:"page_default_trigger"`
+	// Knowledge banks whose passages this bank's reflect reads.
+	KnowledgeBanks []string `json:"knowledge_banks"`
+	// Filter the knowledge-bank search by the reflect's tags, as its memories are.
+	ReflectKBSearchApplyTags OptBool `json:"reflect_kb_search_apply_tags"`
+	// Media types reflect's knowledge-bank search may return (None = all).
+	ReflectKBSearchMediaTypes []BankTemplateConfigReflectKBSearchMediaTypesItem `json:"reflect_kb_search_media_types"`
 }
 
 // GetReflectMission returns the value of ReflectMission.
@@ -1564,6 +1570,21 @@ func (s *BankTemplateConfig) GetPageDefaultTrigger() OptBankTemplateConfigPageDe
 	return s.PageDefaultTrigger
 }
 
+// GetKnowledgeBanks returns the value of KnowledgeBanks.
+func (s *BankTemplateConfig) GetKnowledgeBanks() []string {
+	return s.KnowledgeBanks
+}
+
+// GetReflectKBSearchApplyTags returns the value of ReflectKBSearchApplyTags.
+func (s *BankTemplateConfig) GetReflectKBSearchApplyTags() OptBool {
+	return s.ReflectKBSearchApplyTags
+}
+
+// GetReflectKBSearchMediaTypes returns the value of ReflectKBSearchMediaTypes.
+func (s *BankTemplateConfig) GetReflectKBSearchMediaTypes() []BankTemplateConfigReflectKBSearchMediaTypesItem {
+	return s.ReflectKBSearchMediaTypes
+}
+
 // SetReflectMission sets the value of ReflectMission.
 func (s *BankTemplateConfig) SetReflectMission(val OptString) {
 	s.ReflectMission = val
@@ -1824,6 +1845,21 @@ func (s *BankTemplateConfig) SetPageDefaultTrigger(val OptBankTemplateConfigPage
 	s.PageDefaultTrigger = val
 }
 
+// SetKnowledgeBanks sets the value of KnowledgeBanks.
+func (s *BankTemplateConfig) SetKnowledgeBanks(val []string) {
+	s.KnowledgeBanks = val
+}
+
+// SetReflectKBSearchApplyTags sets the value of ReflectKBSearchApplyTags.
+func (s *BankTemplateConfig) SetReflectKBSearchApplyTags(val OptBool) {
+	s.ReflectKBSearchApplyTags = val
+}
+
+// SetReflectKBSearchMediaTypes sets the value of ReflectKBSearchMediaTypes.
+func (s *BankTemplateConfig) SetReflectKBSearchMediaTypes(val []BankTemplateConfigReflectKBSearchMediaTypesItem) {
+	s.ReflectKBSearchMediaTypes = val
+}
+
 // Deprecated alias of page_default_trigger. Remove in 2.x.
 //
 // Deprecated: schema marks this type as deprecated.
@@ -1887,6 +1923,68 @@ func (s *BankTemplateConfigReflectDefaultOptions) init() BankTemplateConfigRefle
 		*s = m
 	}
 	return m
+}
+
+type BankTemplateConfigReflectKBSearchMediaTypesItem string
+
+const (
+	BankTemplateConfigReflectKBSearchMediaTypesItemDocument BankTemplateConfigReflectKBSearchMediaTypesItem = "document"
+	BankTemplateConfigReflectKBSearchMediaTypesItemImage    BankTemplateConfigReflectKBSearchMediaTypesItem = "image"
+	BankTemplateConfigReflectKBSearchMediaTypesItemAudio    BankTemplateConfigReflectKBSearchMediaTypesItem = "audio"
+	BankTemplateConfigReflectKBSearchMediaTypesItemVideo    BankTemplateConfigReflectKBSearchMediaTypesItem = "video"
+	BankTemplateConfigReflectKBSearchMediaTypesItemText     BankTemplateConfigReflectKBSearchMediaTypesItem = "text"
+)
+
+// AllValues returns all BankTemplateConfigReflectKBSearchMediaTypesItem values.
+func (BankTemplateConfigReflectKBSearchMediaTypesItem) AllValues() []BankTemplateConfigReflectKBSearchMediaTypesItem {
+	return []BankTemplateConfigReflectKBSearchMediaTypesItem{
+		BankTemplateConfigReflectKBSearchMediaTypesItemDocument,
+		BankTemplateConfigReflectKBSearchMediaTypesItemImage,
+		BankTemplateConfigReflectKBSearchMediaTypesItemAudio,
+		BankTemplateConfigReflectKBSearchMediaTypesItemVideo,
+		BankTemplateConfigReflectKBSearchMediaTypesItemText,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s BankTemplateConfigReflectKBSearchMediaTypesItem) MarshalText() ([]byte, error) {
+	switch s {
+	case BankTemplateConfigReflectKBSearchMediaTypesItemDocument:
+		return []byte(s), nil
+	case BankTemplateConfigReflectKBSearchMediaTypesItemImage:
+		return []byte(s), nil
+	case BankTemplateConfigReflectKBSearchMediaTypesItemAudio:
+		return []byte(s), nil
+	case BankTemplateConfigReflectKBSearchMediaTypesItemVideo:
+		return []byte(s), nil
+	case BankTemplateConfigReflectKBSearchMediaTypesItemText:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *BankTemplateConfigReflectKBSearchMediaTypesItem) UnmarshalText(data []byte) error {
+	switch BankTemplateConfigReflectKBSearchMediaTypesItem(data) {
+	case BankTemplateConfigReflectKBSearchMediaTypesItemDocument:
+		*s = BankTemplateConfigReflectKBSearchMediaTypesItemDocument
+		return nil
+	case BankTemplateConfigReflectKBSearchMediaTypesItemImage:
+		*s = BankTemplateConfigReflectKBSearchMediaTypesItemImage
+		return nil
+	case BankTemplateConfigReflectKBSearchMediaTypesItemAudio:
+		*s = BankTemplateConfigReflectKBSearchMediaTypesItemAudio
+		return nil
+	case BankTemplateConfigReflectKBSearchMediaTypesItemVideo:
+		*s = BankTemplateConfigReflectKBSearchMediaTypesItemVideo
+		return nil
+	case BankTemplateConfigReflectKBSearchMediaTypesItemText:
+		*s = BankTemplateConfigReflectKBSearchMediaTypesItemText
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Map of retain strategy name to per-strategy config dict.
@@ -3753,7 +3851,7 @@ type CreateWebhookRequest struct {
 	// HMAC-SHA256 signing secret (optional).
 	Secret OptString `json:"secret"`
 	// List of event types to deliver. Supported: 'retain.completed', 'consolidation.completed',
-	// 'memory_defense.triggered'.
+	// 'memory_defense.triggered', 'mental_model.refreshed'.
 	EventTypes []string `json:"event_types"`
 	// Whether this webhook is active.
 	Enabled OptBool `json:"enabled"`
@@ -5968,6 +6066,8 @@ type FeaturesInfo struct {
 	LlmTrace bool `json:"llm_trace"`
 	// Whether raw source text is persisted. When false, document/chunk source text is not stored.
 	StoreDocumentText bool `json:"store_document_text"`
+	// Whether knowledge banks are enabled.
+	KnowledgeBanks OptBool `json:"knowledge_banks"`
 }
 
 // GetObservations returns the value of Observations.
@@ -6025,6 +6125,11 @@ func (s *FeaturesInfo) GetStoreDocumentText() bool {
 	return s.StoreDocumentText
 }
 
+// GetKnowledgeBanks returns the value of KnowledgeBanks.
+func (s *FeaturesInfo) GetKnowledgeBanks() OptBool {
+	return s.KnowledgeBanks
+}
+
 // SetObservations sets the value of Observations.
 func (s *FeaturesInfo) SetObservations(val bool) {
 	s.Observations = val
@@ -6078,6 +6183,11 @@ func (s *FeaturesInfo) SetLlmTrace(val bool) {
 // SetStoreDocumentText sets the value of StoreDocumentText.
 func (s *FeaturesInfo) SetStoreDocumentText(val bool) {
 	s.StoreDocumentText = val
+}
+
+// SetKnowledgeBanks sets the value of KnowledgeBanks.
+func (s *FeaturesInfo) SetKnowledgeBanks(val OptBool) {
+	s.KnowledgeBanks = val
 }
 
 // A non-image attachment — a PDF, a spreadsheet — in its input position.
@@ -6507,6 +6617,74 @@ type GetObservationHistoryOKApplicationJSON jx.Raw
 
 func (*GetObservationHistoryOKApplicationJSON) getObservationHistoryRes() {}
 
+// GetObservationTreeNotFound is response for GetObservationTree operation.
+type GetObservationTreeNotFound struct{}
+
+func (*GetObservationTreeNotFound) getObservationTreeRes() {}
+
+// How `tags` match (same modes as recall).
+type GetObservationTreeTagsMatch string
+
+const (
+	GetObservationTreeTagsMatchAny       GetObservationTreeTagsMatch = "any"
+	GetObservationTreeTagsMatchAll       GetObservationTreeTagsMatch = "all"
+	GetObservationTreeTagsMatchAnyStrict GetObservationTreeTagsMatch = "any_strict"
+	GetObservationTreeTagsMatchAllStrict GetObservationTreeTagsMatch = "all_strict"
+	GetObservationTreeTagsMatchExact     GetObservationTreeTagsMatch = "exact"
+)
+
+// AllValues returns all GetObservationTreeTagsMatch values.
+func (GetObservationTreeTagsMatch) AllValues() []GetObservationTreeTagsMatch {
+	return []GetObservationTreeTagsMatch{
+		GetObservationTreeTagsMatchAny,
+		GetObservationTreeTagsMatchAll,
+		GetObservationTreeTagsMatchAnyStrict,
+		GetObservationTreeTagsMatchAllStrict,
+		GetObservationTreeTagsMatchExact,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s GetObservationTreeTagsMatch) MarshalText() ([]byte, error) {
+	switch s {
+	case GetObservationTreeTagsMatchAny:
+		return []byte(s), nil
+	case GetObservationTreeTagsMatchAll:
+		return []byte(s), nil
+	case GetObservationTreeTagsMatchAnyStrict:
+		return []byte(s), nil
+	case GetObservationTreeTagsMatchAllStrict:
+		return []byte(s), nil
+	case GetObservationTreeTagsMatchExact:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *GetObservationTreeTagsMatch) UnmarshalText(data []byte) error {
+	switch GetObservationTreeTagsMatch(data) {
+	case GetObservationTreeTagsMatchAny:
+		*s = GetObservationTreeTagsMatchAny
+		return nil
+	case GetObservationTreeTagsMatchAll:
+		*s = GetObservationTreeTagsMatchAll
+		return nil
+	case GetObservationTreeTagsMatchAnyStrict:
+		*s = GetObservationTreeTagsMatchAnyStrict
+		return nil
+	case GetObservationTreeTagsMatchAllStrict:
+		*s = GetObservationTreeTagsMatchAllStrict
+		return nil
+	case GetObservationTreeTagsMatchExact:
+		*s = GetObservationTreeTagsMatchExact
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // GetPageTreeNotFound is response for GetPageTree operation.
 type GetPageTreeNotFound struct{}
 
@@ -6708,6 +6886,7 @@ func (*HTTPValidationError) getMemoryRes()                      {}
 func (*HTTPValidationError) getMentalModelHistoryRes()          {}
 func (*HTTPValidationError) getMentalModelRes()                 {}
 func (*HTTPValidationError) getObservationHistoryRes()          {}
+func (*HTTPValidationError) getObservationTreeRes()             {}
 func (*HTTPValidationError) getOperationStatusRes()             {}
 func (*HTTPValidationError) getPageRes()                        {}
 func (*HTTPValidationError) getPageTreeRes()                    {}
@@ -7332,6 +7511,8 @@ type LLMCallTrace struct {
 	Scope string `json:"scope"`
 	// Execution time in milliseconds.
 	DurationMs int `json:"duration_ms"`
+	// When the call started, in Unix epoch milliseconds.
+	StartedAtMs OptInt64 `json:"started_at_ms"`
 }
 
 // GetScope returns the value of Scope.
@@ -7344,6 +7525,11 @@ func (s *LLMCallTrace) GetDurationMs() int {
 	return s.DurationMs
 }
 
+// GetStartedAtMs returns the value of StartedAtMs.
+func (s *LLMCallTrace) GetStartedAtMs() OptInt64 {
+	return s.StartedAtMs
+}
+
 // SetScope sets the value of Scope.
 func (s *LLMCallTrace) SetScope(val string) {
 	s.Scope = val
@@ -7352,6 +7538,11 @@ func (s *LLMCallTrace) SetScope(val string) {
 // SetDurationMs sets the value of DurationMs.
 func (s *LLMCallTrace) SetDurationMs(val int) {
 	s.DurationMs = val
+}
+
+// SetStartedAtMs sets the value of StartedAtMs.
+func (s *LLMCallTrace) SetStartedAtMs(val OptInt64) {
+	s.StartedAtMs = val
 }
 
 // A single LLM request trace row, as returned by the read API.
@@ -12152,6 +12343,8 @@ type MentalModelTraceToolCall struct {
 	DurationMs int `json:"duration_ms"`
 	// Agent loop iteration (1-based) this call belongs to.
 	Iteration OptInt `json:"iteration"`
+	// When the call started, in Unix epoch milliseconds.
+	StartedAtMs OptInt64 `json:"started_at_ms"`
 }
 
 // GetTool returns the value of Tool.
@@ -12194,6 +12387,11 @@ func (s *MentalModelTraceToolCall) GetIteration() OptInt {
 	return s.Iteration
 }
 
+// GetStartedAtMs returns the value of StartedAtMs.
+func (s *MentalModelTraceToolCall) GetStartedAtMs() OptInt64 {
+	return s.StartedAtMs
+}
+
 // SetTool sets the value of Tool.
 func (s *MentalModelTraceToolCall) SetTool(val string) {
 	s.Tool = val
@@ -12232,6 +12430,11 @@ func (s *MentalModelTraceToolCall) SetDurationMs(val int) {
 // SetIteration sets the value of Iteration.
 func (s *MentalModelTraceToolCall) SetIteration(val OptInt) {
 	s.Iteration = val
+}
+
+// SetStartedAtMs sets the value of StartedAtMs.
+func (s *MentalModelTraceToolCall) SetStartedAtMs(val OptInt64) {
+	s.StartedAtMs = val
 }
 
 // Tool input parameters.
@@ -13337,6 +13540,332 @@ func (s *ObservationScopesResponse) SetOffset(val int) {
 }
 
 func (*ObservationScopesResponse) listObservationScopesRes() {}
+
+// A markdown file in the observation tree: a folder's index.md or one topic (an OKF concept).
+// Ref: #/components/schemas/ObservationTreeFile
+type ObservationTreeFile struct {
+	// Path from the tree root, e.g. `gemma/vllm.md` or `gemma/index.md`.
+	Path string `json:"path"`
+	Name string `json:"name"`
+	// `index`: a folder's overview (OKF's reserved `index.md`) and best-supported observations. `topic`:
+	// every observation in one topic.
+	Kind  ObservationTreeFileKind `json:"kind"`
+	Title string                  `json:"title"`
+	// Observations in the topic, or in the whole folder for an index.
+	ObservationCount int `json:"observation_count"`
+	// The entities that set this topic apart from its siblings.
+	About []string `json:"about"`
+	// Paths of related topic files elsewhere in the tree.
+	Related []string `json:"related"`
+	// What the file lists, best-supported first.
+	Observations []ObservationTreeObservation `json:"observations"`
+	// The same file as markdown, with dates and source counts on every line.
+	Content string `json:"content"`
+}
+
+// GetPath returns the value of Path.
+func (s *ObservationTreeFile) GetPath() string {
+	return s.Path
+}
+
+// GetName returns the value of Name.
+func (s *ObservationTreeFile) GetName() string {
+	return s.Name
+}
+
+// GetKind returns the value of Kind.
+func (s *ObservationTreeFile) GetKind() ObservationTreeFileKind {
+	return s.Kind
+}
+
+// GetTitle returns the value of Title.
+func (s *ObservationTreeFile) GetTitle() string {
+	return s.Title
+}
+
+// GetObservationCount returns the value of ObservationCount.
+func (s *ObservationTreeFile) GetObservationCount() int {
+	return s.ObservationCount
+}
+
+// GetAbout returns the value of About.
+func (s *ObservationTreeFile) GetAbout() []string {
+	return s.About
+}
+
+// GetRelated returns the value of Related.
+func (s *ObservationTreeFile) GetRelated() []string {
+	return s.Related
+}
+
+// GetObservations returns the value of Observations.
+func (s *ObservationTreeFile) GetObservations() []ObservationTreeObservation {
+	return s.Observations
+}
+
+// GetContent returns the value of Content.
+func (s *ObservationTreeFile) GetContent() string {
+	return s.Content
+}
+
+// SetPath sets the value of Path.
+func (s *ObservationTreeFile) SetPath(val string) {
+	s.Path = val
+}
+
+// SetName sets the value of Name.
+func (s *ObservationTreeFile) SetName(val string) {
+	s.Name = val
+}
+
+// SetKind sets the value of Kind.
+func (s *ObservationTreeFile) SetKind(val ObservationTreeFileKind) {
+	s.Kind = val
+}
+
+// SetTitle sets the value of Title.
+func (s *ObservationTreeFile) SetTitle(val string) {
+	s.Title = val
+}
+
+// SetObservationCount sets the value of ObservationCount.
+func (s *ObservationTreeFile) SetObservationCount(val int) {
+	s.ObservationCount = val
+}
+
+// SetAbout sets the value of About.
+func (s *ObservationTreeFile) SetAbout(val []string) {
+	s.About = val
+}
+
+// SetRelated sets the value of Related.
+func (s *ObservationTreeFile) SetRelated(val []string) {
+	s.Related = val
+}
+
+// SetObservations sets the value of Observations.
+func (s *ObservationTreeFile) SetObservations(val []ObservationTreeObservation) {
+	s.Observations = val
+}
+
+// SetContent sets the value of Content.
+func (s *ObservationTreeFile) SetContent(val string) {
+	s.Content = val
+}
+
+// What a observation-tree file is. A named enum, not a Literal: inline enums are named after their
+// field by the generated Rust client, and `kind` already names the page node enum there (an inline
+// `kind` here took the name and broke the CLI's `Kind::Folder`).
+// Ref: #/components/schemas/ObservationTreeFileKind
+type ObservationTreeFileKind string
+
+const (
+	ObservationTreeFileKindIndex ObservationTreeFileKind = "index"
+	ObservationTreeFileKindTopic ObservationTreeFileKind = "topic"
+)
+
+// AllValues returns all ObservationTreeFileKind values.
+func (ObservationTreeFileKind) AllValues() []ObservationTreeFileKind {
+	return []ObservationTreeFileKind{
+		ObservationTreeFileKindIndex,
+		ObservationTreeFileKindTopic,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ObservationTreeFileKind) MarshalText() ([]byte, error) {
+	switch s {
+	case ObservationTreeFileKindIndex:
+		return []byte(s), nil
+	case ObservationTreeFileKindTopic:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ObservationTreeFileKind) UnmarshalText(data []byte) error {
+	switch ObservationTreeFileKind(data) {
+	case ObservationTreeFileKindIndex:
+		*s = ObservationTreeFileKindIndex
+		return nil
+	case ObservationTreeFileKindTopic:
+		*s = ObservationTreeFileKindTopic
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// A topic folder in the observation tree.
+// Ref: #/components/schemas/ObservationTreeFolder
+type ObservationTreeFolder struct {
+	// Path from the tree root; empty for the root.
+	Path string `json:"path"`
+	Name string `json:"name"`
+	// Human-readable topic name.
+	Title            string                  `json:"title"`
+	ObservationCount int                     `json:"observation_count"`
+	Folders          []ObservationTreeFolder `json:"folders"`
+	Files            []ObservationTreeFile   `json:"files"`
+}
+
+// GetPath returns the value of Path.
+func (s *ObservationTreeFolder) GetPath() string {
+	return s.Path
+}
+
+// GetName returns the value of Name.
+func (s *ObservationTreeFolder) GetName() string {
+	return s.Name
+}
+
+// GetTitle returns the value of Title.
+func (s *ObservationTreeFolder) GetTitle() string {
+	return s.Title
+}
+
+// GetObservationCount returns the value of ObservationCount.
+func (s *ObservationTreeFolder) GetObservationCount() int {
+	return s.ObservationCount
+}
+
+// GetFolders returns the value of Folders.
+func (s *ObservationTreeFolder) GetFolders() []ObservationTreeFolder {
+	return s.Folders
+}
+
+// GetFiles returns the value of Files.
+func (s *ObservationTreeFolder) GetFiles() []ObservationTreeFile {
+	return s.Files
+}
+
+// SetPath sets the value of Path.
+func (s *ObservationTreeFolder) SetPath(val string) {
+	s.Path = val
+}
+
+// SetName sets the value of Name.
+func (s *ObservationTreeFolder) SetName(val string) {
+	s.Name = val
+}
+
+// SetTitle sets the value of Title.
+func (s *ObservationTreeFolder) SetTitle(val string) {
+	s.Title = val
+}
+
+// SetObservationCount sets the value of ObservationCount.
+func (s *ObservationTreeFolder) SetObservationCount(val int) {
+	s.ObservationCount = val
+}
+
+// SetFolders sets the value of Folders.
+func (s *ObservationTreeFolder) SetFolders(val []ObservationTreeFolder) {
+	s.Folders = val
+}
+
+// SetFiles sets the value of Files.
+func (s *ObservationTreeFolder) SetFiles(val []ObservationTreeFile) {
+	s.Files = val
+}
+
+func (*ObservationTreeFolder) getObservationTreeRes() {}
+
+// An observation as the observation tree lists it.
+// Ref: #/components/schemas/ObservationTreeObservation
+type ObservationTreeObservation struct {
+	ID   string `json:"id"`
+	Text string `json:"text"`
+	// How many source memories back it.
+	ProofCount    int         `json:"proof_count"`
+	OccurredStart OptDateTime `json:"occurred_start"`
+	OccurredEnd   OptDateTime `json:"occurred_end"`
+	MentionedAt   OptDateTime `json:"mentioned_at"`
+	UpdatedAt     OptDateTime `json:"updated_at"`
+	Tags          []string    `json:"tags"`
+}
+
+// GetID returns the value of ID.
+func (s *ObservationTreeObservation) GetID() string {
+	return s.ID
+}
+
+// GetText returns the value of Text.
+func (s *ObservationTreeObservation) GetText() string {
+	return s.Text
+}
+
+// GetProofCount returns the value of ProofCount.
+func (s *ObservationTreeObservation) GetProofCount() int {
+	return s.ProofCount
+}
+
+// GetOccurredStart returns the value of OccurredStart.
+func (s *ObservationTreeObservation) GetOccurredStart() OptDateTime {
+	return s.OccurredStart
+}
+
+// GetOccurredEnd returns the value of OccurredEnd.
+func (s *ObservationTreeObservation) GetOccurredEnd() OptDateTime {
+	return s.OccurredEnd
+}
+
+// GetMentionedAt returns the value of MentionedAt.
+func (s *ObservationTreeObservation) GetMentionedAt() OptDateTime {
+	return s.MentionedAt
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *ObservationTreeObservation) GetUpdatedAt() OptDateTime {
+	return s.UpdatedAt
+}
+
+// GetTags returns the value of Tags.
+func (s *ObservationTreeObservation) GetTags() []string {
+	return s.Tags
+}
+
+// SetID sets the value of ID.
+func (s *ObservationTreeObservation) SetID(val string) {
+	s.ID = val
+}
+
+// SetText sets the value of Text.
+func (s *ObservationTreeObservation) SetText(val string) {
+	s.Text = val
+}
+
+// SetProofCount sets the value of ProofCount.
+func (s *ObservationTreeObservation) SetProofCount(val int) {
+	s.ProofCount = val
+}
+
+// SetOccurredStart sets the value of OccurredStart.
+func (s *ObservationTreeObservation) SetOccurredStart(val OptDateTime) {
+	s.OccurredStart = val
+}
+
+// SetOccurredEnd sets the value of OccurredEnd.
+func (s *ObservationTreeObservation) SetOccurredEnd(val OptDateTime) {
+	s.OccurredEnd = val
+}
+
+// SetMentionedAt sets the value of MentionedAt.
+func (s *ObservationTreeObservation) SetMentionedAt(val OptDateTime) {
+	s.MentionedAt = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *ObservationTreeObservation) SetUpdatedAt(val OptDateTime) {
+	s.UpdatedAt = val
+}
+
+// SetTags sets the value of Tags.
+func (s *ObservationTreeObservation) SetTags(val []string) {
+	s.Tags = val
+}
 
 // Last-known progress snapshot for a long-running async operation.
 //
@@ -15229,6 +15758,52 @@ func (o OptGetMentalModelDetail) Or(d GetMentalModelDetail) GetMentalModelDetail
 	return d
 }
 
+// NewOptGetObservationTreeTagsMatch returns new OptGetObservationTreeTagsMatch with value set to v.
+func NewOptGetObservationTreeTagsMatch(v GetObservationTreeTagsMatch) OptGetObservationTreeTagsMatch {
+	return OptGetObservationTreeTagsMatch{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptGetObservationTreeTagsMatch is optional GetObservationTreeTagsMatch.
+type OptGetObservationTreeTagsMatch struct {
+	Value GetObservationTreeTagsMatch
+	Set   bool
+}
+
+// IsSet returns true if OptGetObservationTreeTagsMatch was set.
+func (o OptGetObservationTreeTagsMatch) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptGetObservationTreeTagsMatch) Reset() {
+	var v GetObservationTreeTagsMatch
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptGetObservationTreeTagsMatch) SetTo(v GetObservationTreeTagsMatch) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptGetObservationTreeTagsMatch) Get() (v GetObservationTreeTagsMatch, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptGetObservationTreeTagsMatch) Or(d GetObservationTreeTagsMatch) GetObservationTreeTagsMatch {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptGetPageTreeTagsMatch returns new OptGetPageTreeTagsMatch with value set to v.
 func NewOptGetPageTreeTagsMatch(v GetPageTreeTagsMatch) OptGetPageTreeTagsMatch {
 	return OptGetPageTreeTagsMatch{
@@ -15361,6 +15936,52 @@ func (o OptInt) Get() (v int, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptInt) Or(d int) int {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptInt64 returns new OptInt64 with value set to v.
+func NewOptInt64(v int64) OptInt64 {
+	return OptInt64{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptInt64 is optional int64.
+type OptInt64 struct {
+	Value int64
+	Set   bool
+}
+
+// IsSet returns true if OptInt64 was set.
+func (o OptInt64) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptInt64) Reset() {
+	var v int64
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptInt64) SetTo(v int64) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptInt64) Get() (v int64, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptInt64) Or(d int64) int64 {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -20911,6 +21532,8 @@ type ReflectLLMCall struct {
 	Scope string `json:"scope"`
 	// Execution time in milliseconds.
 	DurationMs int `json:"duration_ms"`
+	// When the call started, in Unix epoch milliseconds.
+	StartedAtMs OptInt64 `json:"started_at_ms"`
 }
 
 // GetScope returns the value of Scope.
@@ -20923,6 +21546,11 @@ func (s *ReflectLLMCall) GetDurationMs() int {
 	return s.DurationMs
 }
 
+// GetStartedAtMs returns the value of StartedAtMs.
+func (s *ReflectLLMCall) GetStartedAtMs() OptInt64 {
+	return s.StartedAtMs
+}
+
 // SetScope sets the value of Scope.
 func (s *ReflectLLMCall) SetScope(val string) {
 	s.Scope = val
@@ -20931,6 +21559,11 @@ func (s *ReflectLLMCall) SetScope(val string) {
 // SetDurationMs sets the value of DurationMs.
 func (s *ReflectLLMCall) SetDurationMs(val int) {
 	s.DurationMs = val
+}
+
+// SetStartedAtMs sets the value of StartedAtMs.
+func (s *ReflectLLMCall) SetStartedAtMs(val OptInt64) {
+	s.StartedAtMs = val
 }
 
 // A mental model used during reflect.
@@ -21421,6 +22054,8 @@ type ReflectToolCall struct {
 	DurationMs int `json:"duration_ms"`
 	// Iteration number (1-based) when this tool was called.
 	Iteration OptInt `json:"iteration"`
+	// When the call started, in Unix epoch milliseconds.
+	StartedAtMs OptInt64 `json:"started_at_ms"`
 }
 
 // GetTool returns the value of Tool.
@@ -21448,6 +22083,11 @@ func (s *ReflectToolCall) GetIteration() OptInt {
 	return s.Iteration
 }
 
+// GetStartedAtMs returns the value of StartedAtMs.
+func (s *ReflectToolCall) GetStartedAtMs() OptInt64 {
+	return s.StartedAtMs
+}
+
 // SetTool sets the value of Tool.
 func (s *ReflectToolCall) SetTool(val string) {
 	s.Tool = val
@@ -21471,6 +22111,11 @@ func (s *ReflectToolCall) SetDurationMs(val int) {
 // SetIteration sets the value of Iteration.
 func (s *ReflectToolCall) SetIteration(val OptInt) {
 	s.Iteration = val
+}
+
+// SetStartedAtMs sets the value of StartedAtMs.
+func (s *ReflectToolCall) SetStartedAtMs(val OptInt64) {
+	s.StartedAtMs = val
 }
 
 // Tool input parameters.

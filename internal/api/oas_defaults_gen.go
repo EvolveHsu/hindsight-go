@@ -326,6 +326,14 @@ func (s *EntityIncludeOptions) setDefaults() {
 }
 
 // setDefaults set default value of fields.
+func (s *FeaturesInfo) setDefaults() {
+	{
+		val := bool(false)
+		s.KnowledgeBanks.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
 func (s *KnowledgeNode) setDefaults() {
 	{
 		val := bool(false)
@@ -346,6 +354,14 @@ func (s *KnowledgePageResponse) setDefaults() {
 	{
 		var defaultVal0 []string
 		s.Tags = defaultVal0
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *LLMCallTrace) setDefaults() {
+	{
+		val := int64(0)
+		s.StartedAtMs.SetTo(val)
 	}
 }
 
@@ -595,6 +611,10 @@ func (s *MentalModelTraceToolCall) setDefaults() {
 		val := int(0)
 		s.Iteration.SetTo(val)
 	}
+	{
+		val := int64(0)
+		s.StartedAtMs.SetTo(val)
+	}
 }
 
 // setDefaults set default value of fields.
@@ -750,6 +770,14 @@ func (s *ReflectBasedOn) setDefaults() {
 }
 
 // setDefaults set default value of fields.
+func (s *ReflectLLMCall) setDefaults() {
+	{
+		val := int64(0)
+		s.StartedAtMs.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
 func (s *ReflectRequest) setDefaults() {
 	{
 		val := Budget("low")
@@ -778,6 +806,10 @@ func (s *ReflectToolCall) setDefaults() {
 	{
 		val := int(0)
 		s.Iteration.SetTo(val)
+	}
+	{
+		val := int64(0)
+		s.StartedAtMs.SetTo(val)
 	}
 }
 

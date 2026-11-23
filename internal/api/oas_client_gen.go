@@ -550,6 +550,17 @@ type Invoker interface {
 	//
 	// GET /v1/default/banks/{bank_id}/memories/{memory_id}/history
 	GetObservationHistory(ctx context.Context, params GetObservationHistoryParams) (GetObservationHistoryRes, error)
+	// GetObservationTree invokes get_observation_tree operation.
+	//
+	// The bank's observations, everything it has learned, as a bundle of markdown files an agent can list,
+	// read and grep like any folder, or that can be exported and mounted. Observations are grouped by the
+	// entities they are about into a bounded tree of topics: each topic is one file listing every
+	// observation in it, and each folder has an `index.md` with its topics and best-supported
+	// observations. The bundle follows the Open Knowledge Format (https://okf.md/spec/). Built on request,
+	// deterministically, so a file keeps its path as the bank changes. Experimental.
+	//
+	// GET /v1/default/banks/{bank_id}/observations/tree
+	GetObservationTree(ctx context.Context, params GetObservationTreeParams) (GetObservationTreeRes, error)
 	// GetOperationStatus invokes get_operation_status operation.
 	//
 	// Get the status of a specific async operation. Returns 'pending', 'processing', 'completed',
@@ -8053,6 +8064,174 @@ func (c *Client) sendGetObservationHistory(ctx context.Context, params GetObserv
 
 	stage = "DecodeResponse"
 	result, err := decodeGetObservationHistoryResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetObservationTree invokes get_observation_tree operation.
+//
+// The bank's observations, everything it has learned, as a bundle of markdown files an agent can list,
+// read and grep like any folder, or that can be exported and mounted. Observations are grouped by the
+// entities they are about into a bounded tree of topics: each topic is one file listing every
+// observation in it, and each folder has an `index.md` with its topics and best-supported
+// observations. The bundle follows the Open Knowledge Format (https://okf.md/spec/). Built on request,
+// deterministically, so a file keeps its path as the bank changes. Experimental.
+//
+// GET /v1/default/banks/{bank_id}/observations/tree
+func (c *Client) GetObservationTree(ctx context.Context, params GetObservationTreeParams) (GetObservationTreeRes, error) {
+	res, err := c.sendGetObservationTree(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetObservationTree(ctx context.Context, params GetObservationTreeParams) (res GetObservationTreeRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("get_observation_tree"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/default/banks/{bank_id}/observations/tree"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, GetObservationTreeOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v1/default/banks/"
+	{
+		// Encode "bank_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "bank_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BankID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/observations/tree"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "tags" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "tags",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if params.Tags != nil {
+				return e.EncodeArray(func(e uri.Encoder) error {
+					for i, item := range params.Tags {
+						if err := func() error {
+							return e.EncodeValue(conv.StringToString(item))
+						}(); err != nil {
+							return errors.Wrapf(err, "[%d]", i)
+						}
+					}
+					return nil
+				})
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "tags_match" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "tags_match",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.TagsMatch.Get(); ok {
+				return e.EncodeValue(conv.StringToString(string(val)))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "tag_groups" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "tag_groups",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.TagGroups.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetObservationTreeResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

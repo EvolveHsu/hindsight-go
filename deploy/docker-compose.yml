@@ -45,7 +45,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.runtime
-    image: hindsight-go:extractor-fix-20261117
+    image: hindsight-go:v1.2.2-20261123
     container_name: hindsight-go
     restart: unless-stopped
     ports:

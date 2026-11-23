@@ -221,6 +221,10 @@ type GetObservationHistoryRes interface {
 	getObservationHistoryRes()
 }
 
+type GetObservationTreeRes interface {
+	getObservationTreeRes()
+}
+
 type GetOperationStatusRes interface {
 	getOperationStatusRes()
 }
